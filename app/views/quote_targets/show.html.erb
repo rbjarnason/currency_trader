@@ -1,0 +1,42 @@
+<% if params[:id]=="all"%>
+<% for quote_target in @quote_targets %>
+ <% for rss_item in quote_target.rss_items %>
+ <b>Symbol: <%=quote_target.symbol %></b><br>
+   <b>Title: <%=rss_item.title%></b><br>
+   From: <%=rss_item.rss_target.title if rss_item.rss_target %><br>
+   Guid: <%=rss_item.guid%><br>
+   PubDate: <%=rss_item.pubDate%><br>
+   <br>
+<% if params[:include_description]%>
+   Description:<br>
+   <%=rss_item.description%><br>
+<% end %>
+   <hr>
+   <br>
+ <% end%>
+<% end %>
+<% else %>
+<p>
+  <b>Symbol:</b>
+  <%=h @quote_target.symbol %>
+</p>
+
+<p>
+  <b>Search string:</b>
+  <%=h @quote_target.search_strings %>
+</p>
+
+<p>
+  <b>Interval:</b>
+  <%=h @quote_target.processing_time_interval %>
+</p>
+
+<p>
+  <b>Active:</b>
+  <%=h @quote_target.active %>
+</p>
+
+
+<%= link_to 'Edit', edit_quote_target_path(@quote_target) %> |
+<%= link_to 'Back', quote_targets_path %>
+<% end %>

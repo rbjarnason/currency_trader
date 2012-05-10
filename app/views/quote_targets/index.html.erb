@@ -1,0 +1,26 @@
+<h1>Listing quote_targets</h1>
+
+<table>
+  <tr>
+    <th>Symbol</th>
+    <th>Search string</th>
+    <th>Interval</th>
+    <th>Active</th>
+  </tr>
+
+<% for quote_target in @quote_targets %>
+  <tr>
+    <td><%=h quote_target.symbol %></td>
+    <td><%=h quote_target.search_strings %></td>
+    <td><%=h quote_target.processing_time_interval %></td>
+    <td><%=h quote_target.active %></td>
+    <td><%= link_to 'Show', quote_target %></td>
+    <td><%= link_to 'Edit', edit_quote_target_path(quote_target) %></td>
+    <td><%= link_to 'Destroy', quote_target, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New quote_target', new_quote_target_path %>

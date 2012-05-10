@@ -1,0 +1,58 @@
+<p>
+  <b>Quote target:</b>
+  <%=h @quote_value.quote_target_id %>
+</p>
+
+<p>
+  <b>Data time:</b>
+  <%=h @quote_value.data_time %>
+</p>
+
+<p>
+  <b>Price:</b>
+  <%=h @quote_value.price %>
+</p>
+
+<p>
+  <b>Change:</b>
+  <%=h @quote_value.change %>
+</p>
+
+<p>
+  <b>Volume:</b>
+  <%=h @quote_value.volume %>
+</p>
+
+<p>
+  <b>Today open:</b>
+  <%=h @quote_value.today_open %>
+</p>
+
+<p>
+  <b>Previous close:</b>
+  <%=h @quote_value.previous_close %>
+</p>
+
+<p>
+  <b>Intraday high:</b>
+  <%=h @quote_value.intraday_high %>
+</p>
+
+<p>
+  <b>Intraday low:</b>
+  <%=h @quote_value.intraday_low %>
+</p>
+
+<p>
+  <b>52 week high:</b>
+  <%=h @quote_value.52_week_high %>
+</p>
+
+<p>
+  <b>52 week low:</b>
+  <%=h @quote_value.52_week_low %>
+</p>
+
+
+<%= link_to 'Edit', edit_quote_value_path(@quote_value) %> |
+<%= link_to 'Back', quote_values_path %>

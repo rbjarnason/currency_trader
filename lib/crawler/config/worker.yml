@@ -1,0 +1,4 @@
+rails_env: development
+crawler_server_id: 1
+max_load_average: 7.0
+load_factor: 1

@@ -1,0 +1,32 @@
+<h1>Editing quote_target</h1>
+
+<%= error_messages_for :quote_target %>
+
+<% form_for(@quote_target) do |f| %>
+  <p>
+    <b>Symbol</b><br />
+    <%= f.text_field :symbol %>
+  </p>
+
+  <p>
+    <b>Search string</b><br />
+    <%= f.text_field :search_strings %>
+  </p>
+
+  <p>
+    <b>Interval</b><br />
+    <%= f.text_field :processing_time_interval %>
+  </p>
+
+  <p>
+    <b>Active</b><br />
+    <%= f.check_box :active %>
+  </p>
+
+  <p>
+    <%= f.submit "Update" %>
+  </p>
+<% end %>
+
+<%= link_to 'Show', @quote_target %> |
+<%= link_to 'Back', quote_targets_path %>

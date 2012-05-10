@@ -1,0 +1,28 @@
+<h1>Listing quote_values</h1>
+
+<table>
+  <tr>
+    <th>Quote target</th>
+    <th>Data time</th>
+    <th>Price</th>
+    <th>Change</th>
+    <th>Volume</th>
+  </tr>
+
+<% for quote_value in @quote_values %>
+  <tr>
+    <td><%=h quote_value.quote_target_id %></td>
+    <td><%=h quote_value.data_time %></td>
+    <td><%=h quote_value.last_trade %></td>
+    <td><%=h quote_value.change %></td>
+    <td><%=h quote_value.volume %></td>
+    <td><%= link_to 'Show', quote_value %></td>
+    <td><%= link_to 'Edit', edit_quote_value_path(quote_value) %></td>
+    <td><%= link_to 'Destroy', quote_value, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New quote_value', new_quote_value_path %>

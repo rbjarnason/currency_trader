@@ -1,0 +1,66 @@
+<h1>New quote_value</h1>
+
+<%= error_messages_for :quote_value %>
+
+<% form_for(@quote_value) do |f| %>
+  <p>
+    <b>Quote target</b><br />
+    <%= f.text_field :quote_target_id %>
+  </p>
+
+  <p>
+    <b>Data time</b><br />
+    <%= f.datetime_select :data_time %>
+  </p>
+
+  <p>
+    <b>Price</b><br />
+    <%= f.text_field :price %>
+  </p>
+
+  <p>
+    <b>Change</b><br />
+    <%= f.text_field :change %>
+  </p>
+
+  <p>
+    <b>Volume</b><br />
+    <%= f.text_field :volume %>
+  </p>
+
+  <p>
+    <b>Today open</b><br />
+    <%= f.text_field :today_open %>
+  </p>
+
+  <p>
+    <b>Previous close</b><br />
+    <%= f.text_field :previous_close %>
+  </p>
+
+  <p>
+    <b>Intraday high</b><br />
+    <%= f.text_field :intraday_high %>
+  </p>
+
+  <p>
+    <b>Intraday low</b><br />
+    <%= f.text_field :intraday_low %>
+  </p>
+
+  <p>
+    <b>52 week high</b><br />
+    <%= f.text_field :52_week_high %>
+  </p>
+
+  <p>
+    <b>52 week low</b><br />
+    <%= f.text_field :52_week_low %>
+  </p>
+
+  <p>
+    <%= f.submit "Create" %>
+  </p>
+<% end %>
+
+<%= link_to 'Back', quote_values_path %>
