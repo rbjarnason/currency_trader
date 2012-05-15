@@ -1,0 +1,21 @@
+<h1>Listing trading_time_frames</h1>
+
+<table>
+  <tr>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @trading_time_frames.each do |trading_time_frame| %>
+  <tr>
+    <td><%= link_to 'Show', trading_time_frame %></td>
+    <td><%= link_to 'Edit', edit_trading_time_frame_path(trading_time_frame) %></td>
+    <td><%= link_to 'Destroy', trading_time_frame, confirm: 'Are you sure?', method: :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Trading time frame', new_trading_time_frame_path %>

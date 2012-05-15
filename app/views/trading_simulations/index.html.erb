@@ -1,0 +1,21 @@
+<h1>Listing trading_simulations</h1>
+
+<table>
+  <tr>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @trading_simulations.each do |trading_simulation| %>
+  <tr>
+    <td><%= link_to 'Show', trading_simulation %></td>
+    <td><%= link_to 'Edit', edit_trading_simulation_path(trading_simulation) %></td>
+    <td><%= link_to 'Destroy', trading_simulation, confirm: 'Are you sure?', method: :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Trading simulation', new_trading_simulation_path %>

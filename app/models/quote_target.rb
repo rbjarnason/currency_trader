@@ -1,7 +1,6 @@
 # encoding: UTF-8
 
 class QuoteTarget < ActiveRecord::Base
-  belongs_to :exchanges
   has_many :classified_paragraphs
   has_and_belongs_to_many :rss_items, :order => "rss_items.pubDate ASC" do
     def only_active

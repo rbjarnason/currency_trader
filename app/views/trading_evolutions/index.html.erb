@@ -1,0 +1,21 @@
+<h1>Listing trading_evolutions</h1>
+
+<table>
+  <tr>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @trading_evolutions.each do |trading_evolution| %>
+  <tr>
+    <td><%= link_to 'Show', trading_evolution %></td>
+    <td><%= link_to 'Edit', edit_trading_evolution_path(trading_evolution) %></td>
+    <td><%= link_to 'Destroy', trading_evolution, confirm: 'Are you sure?', method: :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Trading evolution', new_trading_evolution_path %>

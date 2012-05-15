@@ -1,4 +1,20 @@
 CurrencyTrader::Application.routes.draw do
+  ActiveAdmin.routes(self)
+
+  devise_for :admin_users, ActiveAdmin::Devise.config
+
+  resources :trading_time_frames
+
+  resources :trading_simulations
+
+  resources :trading_evolutions
+
+  resources :trading_accounts
+
+  resources :trading_strategies
+
+  resources :trading_strategy_sets
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
