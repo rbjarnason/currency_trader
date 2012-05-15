@@ -46,30 +46,34 @@ ActiveRecord::Schema.define(:version => 20120515012044) do
   add_index "admin_users", ["email"], :name => "index_admin_users_on_email", :unique => true
   add_index "admin_users", ["reset_password_token"], :name => "index_admin_users_on_reset_password_token", :unique => true
 
-  create_table "quote_targets", :force => true do |t|
-    t.string   "symbol"
-    t.integer  "processing_time_interval"
-    t.boolean  "active"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.datetime "last_processing_time"
-    t.integer  "exchange_id"
-    t.boolean  "yahoo_quote_enabled"
-    t.datetime "last_yahoo_processing_time"
-  end
-
-  create_table "quote_values", :force => true do |t|
-    t.integer  "quote_target_id"
-    t.datetime "data_time"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.float    "ask"
-  end
-
   create_table "trading_accounts", :force => true do |t|
     t.string   "name"
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
+  end
+
+  create_table "trading_operations", :force => true do |t|
+    t.integer  "quote_target_id",        :null => false
+    t.integer  "trading_account_id",     :null => false
+    t.float    "initial_capital_amount", :null => false
+    t.float    "current_capital_amount", :null => false
+    t.datetime "created_at",             :null => false
+    t.datetime "updated_at",             :null => false
+  end
+
+  create_table "trading_signals", :force => true do |t|
+    t.integer  "trading_strategy_id", :null => false
+    t.float    "signal",              :null => false
+    t.datetime "created_at",          :null => false
+    t.datetime "updated_at",          :null => false
+  end
+
+  create_table "trading_strategies", :force => true do |t|
+    t.integer  "trading_strategy_template_id", :null => false
+    t.integer  "trading_strategy_set_id",      :null => false
+    t.text     "parameters"
+    t.datetime "created_at",                   :null => false
+    t.datetime "updated_at",                   :null => false
   end
 
   create_table "trading_strategy_populations", :force => true do |t|
@@ -78,38 +82,20 @@ ActiveRecord::Schema.define(:version => 20120515012044) do
     t.datetime "updated_at",      :null => false
   end
 
-  create_table "trading_evolutions_trading_strategies_sets", :id => false, :force => true do |t|
-    t.integer "trading_evolution_id"
-    t.integer "trading_strategy_set_id"
-  end
-
-  create_table "trading_operations", :force => true do |t|
-    t.integer  "quote_target_id"
-    t.integer  "trading_account_id"
-    t.datetime "created_at",         :null => false
-    t.datetime "updated_at",         :null => false
-  end
-
-  create_table "trading_strategies", :force => true do |t|
-    t.string   "name"
-    t.text     "strategy"
-    t.integer  "how_many_days_back"
-    t.datetime "created_at",         :null => false
-    t.datetime "updated_at",         :null => false
-  end
-
-  create_table "trading_strategies_trading_strategies_sets", :id => false, :force => true do |t|
-    t.integer "trading_strategy_id"
-    t.integer "trading_strategy_set_id"
-  end
-
   create_table "trading_strategy_sets", :force => true do |t|
-    t.string   "name"
-    t.integer  "how_many_strategies"
-    t.integer  "trading_time_frame_id"
+    t.integer  "trading_strategy_population_id", :null => false
+    t.integer  "trading_time_frame_id",          :null => false
+    t.text     "parameters"
     t.float    "fitness_score"
-    t.datetime "created_at",            :null => false
-    t.datetime "updated_at",            :null => false
+    t.datetime "created_at",                     :null => false
+    t.datetime "updated_at",                     :null => false
+  end
+
+  create_table "trading_strategy_templates", :force => true do |t|
+    t.string   "name",       :null => false
+    t.text     "code",       :null => false
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
   end
 
   create_table "trading_time_frames", :force => true do |t|

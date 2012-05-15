@@ -1,4 +1,6 @@
 CurrencyTrader::Application.routes.draw do
+  resources :trading_signals
+
   resources :trading_strategy_populations
 
   resources :trading_operations

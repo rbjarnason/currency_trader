@@ -1,4 +1,4 @@
-class CreateTradingStrategiesPopulations < ActiveRecord::Migration
+class CreateTradingStrategyPopulations < ActiveRecord::Migration
   def change
     create_table :trading_strategy_populations do |t|
       t.integer "quote_target_id"

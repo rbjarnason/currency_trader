@@ -8,7 +8,7 @@ class CreateTradingStrategySets < ActiveRecord::Migration
       t.timestamps
     end
 
-    create_table :trading_strategy_signals do |t|
+    create_table :trading_signals do |t|
       t.integer  "trading_strategy_id", :null=>false
       t.float     "signal", :null=>false
       t.timestamps

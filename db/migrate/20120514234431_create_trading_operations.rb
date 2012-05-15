@@ -1,4 +1,4 @@
-class CreateTradingSimulations < ActiveRecord::Migration
+class CreateTradingOperations < ActiveRecord::Migration
   def change
     create_table :trading_operations do |t|
       t.integer "quote_target_id", :null=>false

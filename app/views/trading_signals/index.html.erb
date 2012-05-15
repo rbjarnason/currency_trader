@@ -1,0 +1,21 @@
+<h1>Listing trading_signals</h1>
+
+<table>
+  <tr>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @trading_signals.each do |trading_signal| %>
+  <tr>
+    <td><%= link_to 'Show', trading_signal %></td>
+    <td><%= link_to 'Edit', edit_trading_signal_path(trading_signal) %></td>
+    <td><%= link_to 'Destroy', trading_signal, confirm: 'Are you sure?', method: :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Trading signal', new_trading_signal_path %>

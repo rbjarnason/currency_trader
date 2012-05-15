@@ -1,6 +1,8 @@
 # encoding: UTF-8
 
 class QuoteValue < ActiveRecord::Base
+  belongs_to :quote_target
+
   def normalize_float(number,position=nil)
     if number
       number = number.abs #normalize to 0..1
