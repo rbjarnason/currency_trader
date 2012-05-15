@@ -72,7 +72,7 @@ ActiveRecord::Schema.define(:version => 20120515012044) do
     t.datetime "updated_at", :null => false
   end
 
-  create_table "trading_evolutions", :force => true do |t|
+  create_table "trading_strategy_populations", :force => true do |t|
     t.integer  "quote_target_id"
     t.datetime "created_at",      :null => false
     t.datetime "updated_at",      :null => false
@@ -83,7 +83,7 @@ ActiveRecord::Schema.define(:version => 20120515012044) do
     t.integer "trading_strategy_set_id"
   end
 
-  create_table "trading_simulations", :force => true do |t|
+  create_table "trading_operations", :force => true do |t|
     t.integer  "quote_target_id"
     t.integer  "trading_account_id"
     t.datetime "created_at",         :null => false

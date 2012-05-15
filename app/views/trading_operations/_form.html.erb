@@ -1,0 +1,17 @@
+<%= form_for(@trading_operation) do |f| %>
+  <% if @trading_operation.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@trading_operation.errors.count, "error") %> prohibited this trading_operation from being saved:</h2>
+
+      <ul>
+      <% @trading_operation.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

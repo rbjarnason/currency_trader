@@ -1,13 +1,17 @@
 CurrencyTrader::Application.routes.draw do
+  resources :trading_strategy_populations
+
+  resources :trading_operations
+
   ActiveAdmin.routes(self)
 
   devise_for :admin_users, ActiveAdmin::Devise.config
 
   resources :trading_time_frames
 
-  resources :trading_simulations
+  resources :TradingStrategyOperationsController
 
-  resources :trading_evolutions
+  resources :TradingStrategyPopulationsController
 
   resources :trading_accounts
 
