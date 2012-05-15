@@ -7,7 +7,18 @@ class TradingStrategy < ActiveRecord::Base
   # 0: Time to look back in ms (10000)
   # 1: Magnitude of change since time in percent (0.01)
   # 2: Type of trading signal (Buy or Sell)
-  serialize :parameters, Array(10)
+  serialize :switch_parameters, Array(10)
+  serialize :float_parameters, Array(10)
+  serialize :integer_parameters, Array(10)
+
+  def import_parameters(parameters)
+    switch_parameters = parameters[:switch]
+    float_parameters = parameters[:float]
+    integer_parameters = parameters[:integer]
+    @strategy_buy_short = @switch_parameters[0]
+    @how_far_back_days = @integer_parameters[0]
+
+  end
 
   def evaluate_trade
     quote_value_change = current_quote_value-quote_value_in_the_past(parameters[0])

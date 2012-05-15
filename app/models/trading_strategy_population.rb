@@ -1,16 +1,22 @@
 # Setup for evolution
+MAX_NUMBER_OF_TRADING_STRATEGIES = 5
 
-class StrategySwitches < BitStringGenotype(10)
+class StrategySwitches < BitStringGenotype(MAX_NUMBER_OF_TRADING_STRATEGIES+1*10)
    use Elitism(TruncationSelection(0.3),1), UniformCrossover, ListMutator(:probability[ p=0.15],:flip)
  end
 
-class StrategyParameters <  FloatListGenotype(100)
+class StrategyFloatParameters <  FloatListGenotype(MAX_NUMBER_OF_TRADING_STRATEGIES+1*20)
+ use Elitism(TruncationSelection(0.3),1), UniformCrossover, ListMutator(:probability[ p=0.10 ],:uniform[ max_size=10])
+end
+
+class StrategyIntegerParameters <  IntegerListGenotype(MAX_NUMBER_OF_TRADING_STRATEGIES+1*20)
  use Elitism(TruncationSelection(0.3),1), UniformCrossover, ListMutator(:probability[ p=0.10 ],:uniform[ max_size=10])
 end
 
 genotypes = []
 genotypes << [StrategySwitches,nil]
-genotypes << [StrategyParameters,(-100.0..100.0)]
+genotypes << [StrategyFloatParameters,(-100.0..100.0)]
+genotypes << [StrategyIntegerParameters,(-100..100.0)]
 
 class TradingStrategySetParameters < ComboGenotype(genotypes)
  attr_reader :trading_strategy_set_id
@@ -31,7 +37,6 @@ class TradingStrategySetParameters < ComboGenotype(genotypes)
 end
 
 class TradingStrategyPopulation < ActiveRecord::Base
-  # attr_accessible :title, :body
   has_many :trading_strategy_sets, :dependent => :destroy do
      def count_not_complete
        count :all, :conditions=>["complete = ?",0]
@@ -80,7 +85,7 @@ class TradingStrategyPopulation < ActiveRecord::Base
       Rails.logger.info("import_population_fitness")
       for strategy in @population
         trading_strategy_set = TradingStrategySet.find(strategy.trading_strategy_set_id)
-        strategy.fitness=trading_strategy_set.fitness
+        strategy.fitness = trading_strategy_set.fitness
         self.best_fitness = -1000000.0 unless self.best_fitness
         if strategy.fitness > self.best_fitness
           self.best_fitness = strategy.fitness
