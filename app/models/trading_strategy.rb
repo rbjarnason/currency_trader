@@ -16,8 +16,8 @@ class TradingStrategy < ActiveRecord::Base
     float_parameters = parameters[:float]
     integer_parameters = parameters[:integer]
     @strategy_buy_short = @switch_parameters[0]
-    @how_far_back_days = @integer_parameters[0]
-
+    @how_far_back_milliseconds = @integer_parameters[0]
+    @change_magnitude_signal_trigger  = @float_parameters[0]
   end
 
   def evaluate_trade
