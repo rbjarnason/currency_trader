@@ -1,0 +1,9 @@
+%h2
+  = "Population generation #{@population.current_generation} Set count #{@population.trading_strategy_sets.count}"
+%h3
+  = "Best set"
+= render :partial=>"set", :locals=>{:set=>TradingStrategySet.find(@population.best_trading_strategy_set_id)}
+%h3
+  = "All sets"
+- @population.trading_strategy_sets.each do |set|
+  = render :partial=>"set", :locals=>{:set=>set}

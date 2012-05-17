@@ -5,14 +5,18 @@ class TradingStrategySet < ActiveRecord::Base
   belongs_to :trading_strategy_population
   belongs_to :trading_time_frame
 
-  def fitness
-    accumulated_fitness = 0.0
+  def calculate_fitness
+    self.accumulated_fitness = 0.0
     trading_strategies.each do |strategy|
       Rails.logger.debug("Get fitness for strategy #{strategy.id}")
-      accumulated_fitness+=strategy.fitness(QuoteTarget.last, (Date.today - 7),Date.today,1,2000000)
-      Rails.logger.debug(accumulated_fitness)
+      self.accumulated_fitness+=strategy.fitness(QuoteTarget.last, (Date.today - 7),Date.today,10,2000000)
+      Rails.logger.debug(self.accumulated_fitness)
     end
-    accumulated_fitness
+    self.accumulated_fitness
+  end
+
+  def fitness
+    self.accumulated_fitness
   end
 
   def import_binary_parameters(binary_parameters)
@@ -35,13 +39,15 @@ class TradingStrategySet < ActiveRecord::Base
     all_trading_strategies = trading_strategies.all
     setting.get_genotypes.each do |genotype|
       if genotype.instance_of?(StrategyBinaryParameters)
-        split_attributes = genotype.genes.slice(MAX_NUMBER_OF_TRADING_STRATEGIES+1)
-        set_binary_parameters(split_attributes[0])
+        split_attributes = genotype.genes.each_slice(10).to_a
+        Rails.logger.debug("SPLIT binary parameters #{split_attributes}")
+        import_binary_parameters(split_attributes[0])
         (0..MAX_NUMBER_OF_TRADING_STRATEGIES-1).each do |i|
           all_trading_strategies[i].import_binary_parameters(split_attributes[i+1])
         end
       elsif genotype.instance_of?(StrategyFloatParameters)
-        split_attributes = genotype.genes.slice(MAX_NUMBER_OF_TRADING_STRATEGIES+1)
+        split_attributes = genotype.genes.each_slice(40).to_a
+        Rails.logger.debug("SPLIT float parameters #{split_attributes}")
         import_float_parameters(split_attributes[0])
         (0..MAX_NUMBER_OF_TRADING_STRATEGIES-1).each do |i|
           all_trading_strategies[i].import_float_parameters(split_attributes[i+1])

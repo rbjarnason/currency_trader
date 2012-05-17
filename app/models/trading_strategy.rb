@@ -31,8 +31,8 @@ class TradingStrategy < ActiveRecord::Base
     if self.binary_parameters and self.binary_parameters.length>0 and self.float_parameters and self.float_parameters.length>2
       @strategy_buy_short = self.binary_parameters[0]
       @how_far_back_milliseconds = (self.float_parameters[0]*(1000*60)).abs
-      @open_magnitude_signal_trigger  = self.float_parameters[1]/10000
-      @close_magnitude_signal_trigger  = self.float_parameters[2]/10000
+      @open_magnitude_signal_trigger  = self.float_parameters[1]/10000.0
+      @close_magnitude_signal_trigger  = self.float_parameters[2]/10000.0
     end
   end
 
@@ -162,11 +162,11 @@ class TradingStrategy < ActiveRecord::Base
 
   def out_of_range_attributes?
     if @how_far_back_milliseconds < 1000.0 or
-       @how_far_back_milliseconds > 1000.0*60*60*24 or
-       @open_magnitude_signal_trigger < -100.0 or
-       @open_magnitude_signal_trigger > 100.0 or
-       @close_magnitude_signal_trigger < -100.0 or
-       @close_magnitude_signal_trigger > 100.0
+       @how_far_back_milliseconds > 1000.0*60*15 or
+       @open_magnitude_signal_trigger < -1000.0 or
+       @open_magnitude_signal_trigger > 1000.0 or
+       @close_magnitude_signal_trigger < -1000.0 or
+       @close_magnitude_signal_trigger > 1000.0
       true
     else
       false
@@ -189,7 +189,7 @@ class TradingStrategy < ActiveRecord::Base
       (start_date.to_date..end_date.to_date).each do |day|
         (@from_hour..@to_hour).each do |hour|
           (0..59).each do |minute|
-            last_minute = false # (hour==@to_hour and minute==59)
+            last_minute = (hour==@to_hour and minute==59)
             evaluate(quote_target, DateTime.parse("#{day} #{hour}:#{minute}:00"), last_minute)
             break if last_minute
           end

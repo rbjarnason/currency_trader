@@ -5,10 +5,6 @@ CurrencyTrader::Application.routes.draw do
 
   resources :trading_operations
 
-  ActiveAdmin.routes(self)
-
-  devise_for :admin_users, ActiveAdmin::Devise.config
-
   resources :trading_time_frames
 
   resources :TradingStrategyOperationsController
@@ -20,6 +16,12 @@ CurrencyTrader::Application.routes.draw do
   resources :trading_strategies
 
   resources :trading_strategy_sets
+
+  ActiveAdmin.routes(self)
+
+  devise_for :admin_users, ActiveAdmin::Devise.config
+
+  match 'trading_strategy_populations/show_all_for/:id' => 'trading_strategy_populations#show_all_for'
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

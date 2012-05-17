@@ -1,0 +1,30 @@
+%h2
+  = "Trading Strategy Set #{set.id} Fitness #{set.fitness}"
+%table
+  %tr
+    %th
+      = "Id"
+    %th
+      = "Short/Buy"
+    %th
+      = "How far back in sec"
+    %th
+      = "How far back in min"
+    %th
+      = "Open Magnitude Signal"
+    %th
+      = "Close Magnitude Signal"
+  - set.trading_strategies.each do |strategy|
+    %tr
+      %td
+        = strategy.id
+      %td
+        = strategy.strategy_buy_short
+      %td
+        = (strategy.how_far_back_milliseconds/1000).to_i
+      %td
+        = (strategy.how_far_back_milliseconds/1000/60).to_i
+      %td
+        = strategy.open_magnitude_signal_trigger
+      %td
+        = strategy.close_magnitude_signal_trigger

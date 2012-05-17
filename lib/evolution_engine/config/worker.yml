@@ -1,0 +1,4 @@
+rails_env: development
+evolution_engine_server_id: 1
+max_load_average: 18.0
+load_factor: 1
