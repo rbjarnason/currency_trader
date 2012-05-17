@@ -1,5 +1,5 @@
 class TradingStrategySet < ActiveRecord::Base
-  MAX_NUMBER_OF_TRADING_STRATEGIES = 5
+  MAX_NUMBER_OF_TRADING_STRATEGIES = 1
 
   has_many :trading_strategies, :dependent => :destroy
   belongs_to :trading_strategy_population
@@ -8,7 +8,9 @@ class TradingStrategySet < ActiveRecord::Base
   def fitness
     accumulated_fitness = 0.0
     trading_strategies.each do |strategy|
+      Rails.logger.debug("Get fitness for strategy #{strategy.id}")
       accumulated_fitness+=strategy.fitness(QuoteTarget.last, (Date.today - 7),Date.today,1,2000000)
+      Rails.logger.debug(accumulated_fitness)
     end
     accumulated_fitness
   end
@@ -19,7 +21,17 @@ class TradingStrategySet < ActiveRecord::Base
   def import_float_parameters(float_parameters)
   end
 
+  def setup_trading_strategies
+    (1..MAX_NUMBER_OF_TRADING_STRATEGIES).each do |nr|
+      strategy=TradingStrategy.new
+      strategy.trading_strategy_template=TradingStrategyTemplate.last
+      strategy.trading_strategy_set=self
+      strategy.save
+    end
+  end
+
   def import_settings_from_population(population,setting)
+    setup_trading_strategies if trading_strategies.empty?
     all_trading_strategies = trading_strategies.all
     setting.get_genotypes.each do |genotype|
       if genotype.instance_of?(StrategyBinaryParameters)

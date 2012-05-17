@@ -19,17 +19,20 @@ class TradingStrategy < ActiveRecord::Base
   after_initialize :setup_parameters
   after_save :setup_parameters
 
-  def import_parameters(parameters)
-    self.binary_parameters = parameters[:binary]
-    self.float_parameters = parameters[:float]
+  def import_binary_parameters(parameters)
+    self.binary_parameters = parameters
+  end
+
+  def import_float_parameters(parameters)
+    self.float_parameters = parameters
   end
 
   def setup_parameters
     if self.binary_parameters and self.binary_parameters.length>0 and self.float_parameters and self.float_parameters.length>2
       @strategy_buy_short = self.binary_parameters[0]
-      @how_far_back_milliseconds = self.float_parameters[0]*(1000*60*60)
-      @open_magnitude_signal_trigger  = self.float_parameters[1]/1000
-      @close_magnitude_signal_trigger  = self.float_parameters[2]/1000
+      @how_far_back_milliseconds = (self.float_parameters[0]*(1000*60)).abs
+      @open_magnitude_signal_trigger  = self.float_parameters[1]/10000
+      @close_magnitude_signal_trigger  = self.float_parameters[2]/10000
     end
   end
 

@@ -1,18 +1,15 @@
 # Setup for evolution
-
-
 class StrategyBinaryParameters < BitStringGenotype(TradingStrategySet::MAX_NUMBER_OF_TRADING_STRATEGIES+1*10)
-   use Elitism(TruncationSelection(0.3),1), UniformCrossover, ListMutator(:probability[ p=0.15],:flip)
- end
+  use Elitism(TruncationSelection(0.3),1), UniformCrossover, ListMutator(:probability[ p=0.15],:flip)
+end
 
 class StrategyFloatParameters <  FloatListGenotype(TradingStrategySet::MAX_NUMBER_OF_TRADING_STRATEGIES+1*40)
  use Elitism(TruncationSelection(0.3),1), UniformCrossover, ListMutator(:probability[ p=0.10 ],:uniform[ max_size=10])
 end
 
-
 genotypes = []
 genotypes << [StrategyBinaryParameters,nil]
-genotypes << [StrategyFloatParameters,(-1.0..1.0)]
+genotypes << [StrategyFloatParameters,(-2.0..2.0)]
 
 class TradingStrategySetParameters < ComboGenotype(genotypes)
  attr_reader :trading_strategy_set_id
@@ -20,11 +17,11 @@ class TradingStrategySetParameters < ComboGenotype(genotypes)
 
  def fitness=(f)
    @ifitness=f
-#    Rails.logger.info("set fitness for #{self.object_id} to #{f}")
+    Rails.logger.info("set fitness for #{self.object_id} to #{f}")
  end
 
  def fitness
-#    Rails.logger.info("get fitness for #{self.object_id} from #{@ifitness}")
+    Rails.logger.info("get fitness for #{self.object_id} from #{@ifitness}")
    @ifitness
  end
 
@@ -114,6 +111,8 @@ class TradingStrategyPopulation < ActiveRecord::Base
       Rails.logger.info("create_trading_strategy_sets")
       for setting in settings
         trading_strategy_set = TradingStrategySet.new
+        trading_strategy_set.save
+        trading_strategy_set.setup_trading_strategies
         trading_strategy_set.import_settings_from_population(self,setting)
         trading_strategy_set.trading_strategy_population_id = self.id
         trading_strategy_set.active = true
