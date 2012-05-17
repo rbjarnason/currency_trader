@@ -2,10 +2,14 @@ class AddToPopulation < ActiveRecord::Migration
   def up
     add_column :trading_strategies, :initial_simulation_capital, :float
     add_column :trading_strategies, :current_simulation_capital, :float
+    add_column :trading_strategies, :number_of_evolution_trading_signals, :integer, :default=>0
+
     remove_column :trading_strategies, :parameters
-    add_column :trading_strategies, :switch_parameters, :text
+    add_column :trading_strategies, :binary_parameters, :text
     add_column :trading_strategies, :float_parameters, :text
-    add_column :trading_strategies, :integer_parameters, :text
+
+    add_column :trading_time_frames, :from_hour, :integer
+    add_column :trading_time_frames, :to_hour, :integer
 
     add_column :trading_strategy_sets, :complete, :boolean, :default=>false
     add_column :trading_strategy_sets, :error_flag, :boolean, :default=>false
