@@ -226,14 +226,15 @@ class TradingStrategy < ActiveRecord::Base
         end
         break if last_minute
       end
-      self.save
       Rails.logger.debug("Number of trading signals: #{self.number_of_evolution_trading_signals}")
       if self.number_of_evolution_trading_signals<trading_signals_min or
          self.number_of_evolution_trading_signals>trading_signals_max
-        FAILED_FITNESS_VALUE
+        self.simulated_fitness = FAILED_FITNESS_VALUE
       else
-        @current_capital_position-@start_capital_position
+        self.simulated_fitness  = @current_capital_position-@start_capital_position
       end
+      self.save
+      self.simulated_fitness
     end
   end
 

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120518020629) do
+ActiveRecord::Schema.define(:version => 20120518021317) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.string   "resource_id",   :null => false
@@ -98,7 +98,7 @@ ActiveRecord::Schema.define(:version => 20120518020629) do
     t.integer  "number_of_evolution_trading_signals", :default => 0
     t.text     "binary_parameters"
     t.text     "float_parameters"
-    t.float    "fitness"
+    t.float    "simulated_fitness"
   end
 
   create_table "trading_strategy_populations", :force => true do |t|

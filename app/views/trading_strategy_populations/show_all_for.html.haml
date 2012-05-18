@@ -46,9 +46,9 @@
         = TradingStrategySet::FORCE_RELEASE_POSITION ? "Yes" : "No"
   - if @population.best_trading_strategy_set_id
     %h2
-      = "Best trading strategy set"
+      = "Best Trading Strategy Set"
     = render :partial=>"set", :locals=>{:set=>TradingStrategySet.find(@population.best_trading_strategy_set_id)}
     %h2
-      = "All sets"
+      = "All Trading Strategy Sets"
     - @population.trading_strategy_sets.order("accumulated_fitness DESC").limit(200).each do |set|
       = render :partial=>"set", :locals=>{:set=>set}
