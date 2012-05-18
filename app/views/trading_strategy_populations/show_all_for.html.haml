@@ -1,10 +1,54 @@
 %div.population_show_all
+  %h1
+    = "Currency Trader - Version 0.1"
+  %hr
+  %br
   %h2
-    = "Population generation #{@population.current_generation} Set count #{@population.trading_strategy_sets.count}"
-  %h3
-    = "Best set"
-  = render :partial=>"set", :locals=>{:set=>TradingStrategySet.find(@population.best_trading_strategy_set_id)}
-  %h3
-    = "All sets"
-  - @population.trading_strategy_sets.limit(200).order("created_at").each do |set|
-    = render :partial=>"set", :locals=>{:set=>set}
+    = "Evolving Population"
+  %table
+    %tr
+      %th
+        = "Population size"
+      %th
+        = "Units to short/buy on each trade"
+      %th
+        = "Maximum minutes to look back for change"
+      %th
+        = "Current generation"
+      %th
+        = "Number of trading strategy sets"
+      %th
+        = "Simulated days back"
+      %th
+        = "Minimum trading signals"
+      %th
+        = "Maximum trading signals"
+      %th
+        = "Release position EOD"
+    %tr
+      %td
+        = @population.population_size
+      %td
+        = TradingStrategy::DEFAULT_POSITION_UNITS
+      %td
+        = TradingStrategy::MAXIMUM_MINUTES_BACK
+      %td
+        = @population.current_generation
+      %td
+        = @population.trading_strategy_sets.count
+      %td
+        = TradingStrategySet::SIMULATE_DAYS_BACK
+      %td
+        = TradingStrategySet::MIN_TRADING_SIGNALS
+      %td
+        = TradingStrategySet::MAX_TRADING_SIGNALS
+      %td
+        = TradingStrategySet::FORCE_RELEASE_POSITION ? "Yes" : "No"
+  - if @population.best_trading_strategy_set_id
+    %h2
+      = "Best trading strategy set"
+    = render :partial=>"set", :locals=>{:set=>TradingStrategySet.find(@population.best_trading_strategy_set_id)}
+    %h2
+      = "All sets"
+    - @population.trading_strategy_sets.order("accumulated_fitness DESC").limit(200).each do |set|
+      = render :partial=>"set", :locals=>{:set=>set}

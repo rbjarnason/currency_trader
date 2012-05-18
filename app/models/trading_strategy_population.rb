@@ -1,10 +1,13 @@
 # Setup for evolution
-class StrategyBinaryParameters < BitStringGenotype((TradingStrategySet::MAX_NUMBER_OF_TRADING_STRATEGIES+1)*10)
-  use Elitism(TruncationSelection(0.3),1), UniformCrossover, ListMutator(:probability[ p=0.15],:flip)
+NUMBER_OF_BINARY_EVOLUTION_PARAMETERS = 5
+NUMBER_OF_FLOAT_EVOLUTION_PARAMETERS = 5
+
+class StrategyBinaryParameters < BitStringGenotype((TradingStrategySet::MAX_NUMBER_OF_TRADING_STRATEGIES+1)*NUMBER_OF_BINARY_EVOLUTION_PARAMETERS)
+  use Elitism(TruncationSelection(0.2),1), UniformCrossover, ListMutator(:probability[ p=0.15],:flip)
 end
 
-class StrategyFloatParameters <  FloatListGenotype((TradingStrategySet::MAX_NUMBER_OF_TRADING_STRATEGIES+1)*40)
- use Elitism(TruncationSelection(0.3),1), UniformCrossover, ListMutator(:probability[ p=0.10 ],:uniform[ max_size=10])
+class StrategyFloatParameters <  FloatListGenotype((TradingStrategySet::MAX_NUMBER_OF_TRADING_STRATEGIES+1)*NUMBER_OF_FLOAT_EVOLUTION_PARAMETERS)
+ use Elitism(TruncationSelection(0.2),1), UniformCrossover, ListMutator(:probability[ p=0.20 ],:uniform[ max_size=20])
 end
 
 genotypes = []

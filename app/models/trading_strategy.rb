@@ -4,6 +4,7 @@ class TradingStrategy < ActiveRecord::Base
   DEFAULT_START_CAPITAL = 100000000.0
   DEFAULT_POSITION_UNITS = 50000.0
   FAILED_FITNESS_VALUE = -999999.0
+  MAXIMUM_MINUTES_BACK = 15
 
   belongs_to :trading_strategy_template
   belongs_to :trading_strategy_set
@@ -32,7 +33,7 @@ class TradingStrategy < ActiveRecord::Base
   def setup_parameters
     if self.binary_parameters and self.binary_parameters.length>0 and self.float_parameters and self.float_parameters.length>2
       @strategy_buy_short = self.binary_parameters[0]
-      @how_far_back_milliseconds = (self.float_parameters[0]*(1000*60)).abs
+      @how_far_back_milliseconds = (self.float_parameters[0]*(1000*60*MAXIMUM_MINUTES_BACK)).abs
       @open_magnitude_signal_trigger  = self.float_parameters[1]/100000.0
       @close_magnitude_signal_trigger  = self.float_parameters[2]/100000.0
     end
@@ -217,7 +218,7 @@ class TradingStrategy < ActiveRecord::Base
       (start_date.to_date..end_date.to_date).each do |day|
         (@from_hour..@to_hour).each do |hour|
           (0..59).each do |minute|
-            last_minute = (hour==@to_hour and minute==59)
+            last_minute = (hour==@to_hour and minute==59) and TradingStrategySet::FORCE_RELEASE_POSITION
             evaluate(quote_target, DateTime.parse("#{day} #{hour}:#{minute}:00"), last_minute)
             break if last_minute
           end

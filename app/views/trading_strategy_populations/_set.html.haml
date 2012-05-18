@@ -1,9 +1,11 @@
-%h2
+%h3
   = "Trading Strategy Set #{set.id} Fitness #{set.fitness}"
 %table
   %tr
     %th
       = "Id"
+    %th
+      = "Trading time frame"
     %th
       = "Short/Buy"
     %th
@@ -21,16 +23,16 @@
       %td
         = strategy.id
       %td
-        = strategy.strategy_buy_short
+        = "#{strategy.trading_strategy_set.trading_time_frame.from_hour}:00 - #{strategy.trading_strategy_set.trading_time_frame.to_hour}:00"
+      %td
+        = strategy.strategy_buy_short.to_i
       %td
         = (strategy.how_far_back_milliseconds/1000).to_i
       %td
         = (strategy.how_far_back_milliseconds/1000/60).to_i
       %td
-        = strategy.open_magnitude_signal_trigger
+        = number_with_precision strategy.open_magnitude_signal_trigger.abs, :precision => 7
       %td
-        = strategy.close_magnitude_signal_trigger
+        = number_with_precision strategy.close_magnitude_signal_trigger.abs, :precision => 7
       %td
         = strategy.number_of_evolution_trading_signals
-
-number_of_evolution_trading_signals

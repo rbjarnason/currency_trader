@@ -37,8 +37,8 @@ if false
   pop.save
   pop.active = true
   pop.in_process = true
-  pop.max_generations = 50
-  pop.population_size = 100
+  pop.max_generations = 5000000
+  pop.population_size = 200
   pop.initialize_population
   pop.save
 end
