@@ -1,6 +1,8 @@
 class TradingStrategy < ActiveRecord::Base
-  DEFAULT_START_CAPITAL = 10000000.0
-  DEFAULT_POSITION_UNITS = 10000.0
+  include ActionView::Helpers::NumberHelper
+
+  DEFAULT_START_CAPITAL = 100000000.0
+  DEFAULT_POSITION_UNITS = 50000.0
   FAILED_FITNESS_VALUE = -999999.0
 
   belongs_to :trading_strategy_template
@@ -31,8 +33,8 @@ class TradingStrategy < ActiveRecord::Base
     if self.binary_parameters and self.binary_parameters.length>0 and self.float_parameters and self.float_parameters.length>2
       @strategy_buy_short = self.binary_parameters[0]
       @how_far_back_milliseconds = (self.float_parameters[0]*(1000*60)).abs
-      @open_magnitude_signal_trigger  = self.float_parameters[1]/10000.0
-      @close_magnitude_signal_trigger  = self.float_parameters[2]/10000.0
+      @open_magnitude_signal_trigger  = self.float_parameters[1]/100000.0
+      @close_magnitude_signal_trigger  = self.float_parameters[2]/100000.0
     end
   end
 
@@ -40,7 +42,7 @@ class TradingStrategy < ActiveRecord::Base
     @current_date_time = date_time
     if current_quote_value = @quote_target.quote_values.get_one_by_time(@current_date_time)
       @current_quote_value = current_quote_value.ask
-      if @strategy_buy_short==1
+      if true or @strategy_buy_short==1
         Rails.logger.debug("Short mode")
         if not @current_position_units
           Rails.logger.debug("Not holding position")
@@ -67,6 +69,72 @@ class TradingStrategy < ActiveRecord::Base
     Rails.logger.debug("")
   end
 
+  def match_short_open_conditions
+    @quote_value_then = @quote_target.quote_values.get_one_by_time(@current_date_time-(@how_far_back_milliseconds/1000.0).seconds).ask
+    Rails.logger.debug("Testing short change: #{@quote_value_then} current: #{@current_quote_value} back in minutes: #{@how_far_back_milliseconds/1000/60}")
+    quote_value_change = @current_quote_value-@quote_value_then
+    if quote_value_change==0.0
+      return false
+    elsif quote_value_change>=0.0
+      Rails.logger.debug("Testing short change: #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@open_magnitude_signal_trigger)}")
+      magnitude = quote_value_change.abs/@current_quote_value
+    else
+      Rails.logger.debug("Testing short change: Has gone down")
+      return false
+      Rails.logger.debug("Testing short change: #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@open_magnitude_signal_trigger)}")
+      magnitude = -(quote_value_change.abs/@current_quote_value)
+    end
+    magnitude>@open_magnitude_signal_trigger.abs
+  end
+
+  def trigger_short_open_signal
+    capital_investment = DEFAULT_POSITION_UNITS*@current_quote_value
+    Rails.logger.debug("--> Trigger short OPEN investment")
+    if @evolution_mode
+      if @current_capital_position-capital_investment>0
+        @current_position_units = DEFAULT_POSITION_UNITS
+        @last_opened_position_value = @current_quote_value
+        @current_capital_position-=capital_investment
+        self.number_of_evolution_trading_signals+=1
+        Rails.logger.debug("    I shorted #{@current_position_units} units for #{capital_investment} leaving #{@current_capital_position}")
+      else
+        Rails.warn("Out of cash: #{self.inspect}")
+      end
+    else
+      # Generate Trading Signal Since
+    end
+  end
+
+  def match_short_close_conditions
+     difference = @current_quote_value-@last_opened_position_value
+     Rails.logger.debug("close_conditions:  current #{@current_quote_value} - last_opened #{@last_opened_position_value} = #{difference}")
+     if difference==0.0
+       return false
+     elsif difference>=0.0
+       Rails.logger.debug("close_conditions: Has gone up")
+       return false
+       Rails.logger.debug("close_conditions: (#{with_precision(@current_quote_value/difference)})>#{with_precision(@close_magnitude_signal_trigger)}=#{(@current_quote_value/difference.abs)>@close_magnitude_signal_trigger}")
+       (@current_quote_value/difference.abs)>@close_magnitude_signal_trigger
+     else
+       Rails.logger.debug("close_conditions: testing #{with_precision(difference.abs/@current_quote_value)}>#{with_precision(@close_magnitude_signal_trigger)}=#{(difference.abs/@current_quote_value).abs>@close_magnitude_signal_trigger}")
+       (difference.abs/@current_quote_value).abs>@close_magnitude_signal_trigger.abs
+     end
+   end
+
+   def trigger_short_close_signal
+     if @evolution_mode
+       Rails.logger.debug("--> Trigger short CLOSE investment")
+       shorted_at = @last_opened_position_value * @current_position_units
+       currently_at = @current_quote_value * @current_position_units
+       difference = shorted_at-currently_at
+       @current_capital_position+=shorted_at+difference
+       Rails.logger.debug("    Shorted_at #{shorted_at} currently_at #{currently_at} difference #{difference} current #{@current_capital_position}")
+       @current_position_units = nil
+     else
+       # Generate Trading Signal Since
+     end
+   end
+
   def match_long_open_conditions
     magnitude_of_change_since(@how_far_back_milliseconds)>@open_magnitude_signal_trigger
   end
@@ -87,6 +155,8 @@ class TradingStrategy < ActiveRecord::Base
     end
   end
 
+
+
   def match_long_close_conditions
     match_short_close_conditions
   end
@@ -95,52 +165,6 @@ class TradingStrategy < ActiveRecord::Base
     if @evolution_mode
       @current_capital_position+=@current_position_units*@current_quote_value
       Rails.logger.debug("long_close: #{@current_capital_position}+=#{@current_position_units}*#{@current_quote_value}")
-      @current_position_units = nil
-    else
-      # Generate Trading Signal Since
-    end
-  end
-
-  def match_short_open_conditions
-    magnitude_of_change_since(@how_far_back_milliseconds)>@open_magnitude_signal_trigger
-  end
-
-  def trigger_short_open_signal
-    capital_investment = DEFAULT_POSITION_UNITS*@current_quote_value
-    Rails.logger.debug("trigger_short_open_signal: investment: #{capital_investment} current: #{@current_capital_position}")
-    if @evolution_mode
-      if @current_capital_position-capital_investment>0
-        @current_position_units = DEFAULT_POSITION_UNITS
-        @last_opened_position_value = @current_quote_value
-        @current_capital_position-=capital_investment
-        self.number_of_evolution_trading_signals+=1
-      else
-        Rails.warn("Out of cash: #{self.inspect}")
-      end
-    else
-      # Generate Trading Signal Since
-    end
-  end
-
-  def match_short_close_conditions
-    difference = @current_quote_value-@last_opened_position_value
-    Rails.logger.debug("close_conditions: #{@current_quote_value}-#{@last_opened_position_value} = #{difference}")
-    if difference>=0.0
-      (@current_quote_value/difference.abs)>@close_magnitude_signal_trigger
-      Rails.logger.debug("close_conditions: (#{@current_quote_value/difference.abs})>#{@close_magnitude_signal_trigger}=#{(@current_quote_value/difference.abs)>@close_magnitude_signal_trigger}")
-    else
-      -(@current_quote_value/difference.abs)>@close_magnitude_signal_trigger
-      Rails.logger.debug("close_conditions: -(#{@current_quote_value/difference.abs})>#{@close_magnitude_signal_trigger}=#{-(@current_quote_value/difference.abs)>@close_magnitude_signal_trigger}")
-    end
-  end
-
-  def trigger_short_close_signal
-    if @evolution_mode
-      shorted_at = @last_opened_position_value * @current_position_units
-      currently_at = @current_quote_value * @current_position_units
-      difference = shorted_at-currently_at
-      @current_capital_position+=shorted_at+difference
-      Rails.logger.debug("trigger_short_close_signal: shorted_at: #{shorted_at} currently_at: #{currently_at} difference: #{difference} current: #{@current_capital_position}")
       @current_position_units = nil
     else
       # Generate Trading Signal Since
@@ -160,9 +184,13 @@ class TradingStrategy < ActiveRecord::Base
     end
   end
 
+  def with_precision(number)
+    number_with_precision number, :precision => 6
+  end
+
   def out_of_range_attributes?
-    if @how_far_back_milliseconds < 1000.0 or
-       @how_far_back_milliseconds > 1000.0*60*15 or
+    if @how_far_back_milliseconds < 120000.0 or
+       @how_far_back_milliseconds > 1000.0*60*30 or
        @open_magnitude_signal_trigger < -1000.0 or
        @open_magnitude_signal_trigger > 1000.0 or
        @close_magnitude_signal_trigger < -1000.0 or
@@ -197,6 +225,8 @@ class TradingStrategy < ActiveRecord::Base
         end
         break if last_minute
       end
+      self.save
+      Rails.logger.debug("Number of trading signals: #{self.number_of_evolution_trading_signals}")
       if self.number_of_evolution_trading_signals<trading_signals_min or
          self.number_of_evolution_trading_signals>trading_signals_max
         FAILED_FITNESS_VALUE

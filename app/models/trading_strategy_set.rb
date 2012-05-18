@@ -9,7 +9,7 @@ class TradingStrategySet < ActiveRecord::Base
     self.accumulated_fitness = 0.0
     trading_strategies.each do |strategy|
       Rails.logger.debug("Get fitness for strategy #{strategy.id}")
-      self.accumulated_fitness+=strategy.fitness(QuoteTarget.last, (Date.today - 7),Date.today,10,2000000)
+      self.accumulated_fitness+=strategy.fitness(QuoteTarget.last, (Date.today - 4),Date.today,4,2000000)
       Rails.logger.debug(self.accumulated_fitness)
     end
     self.accumulated_fitness

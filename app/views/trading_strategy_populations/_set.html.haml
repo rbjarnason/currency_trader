@@ -14,6 +14,8 @@
       = "Open Magnitude Signal"
     %th
       = "Close Magnitude Signal"
+    %th
+      = "Number of trading signals"
   - set.trading_strategies.each do |strategy|
     %tr
       %td
@@ -28,3 +30,7 @@
         = strategy.open_magnitude_signal_trigger
       %td
         = strategy.close_magnitude_signal_trigger
+      %td
+        = strategy.number_of_evolution_trading_signals
+
+number_of_evolution_trading_signals
