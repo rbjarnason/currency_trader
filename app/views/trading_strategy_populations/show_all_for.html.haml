@@ -20,9 +20,9 @@
       %th
         = "Simulated days back"
       %th
-        = "Minimum trading signals"
+        = "Minimum trading signals per day"
       %th
-        = "Maximum trading signals"
+        = "Maximum trading signals per day"
       %th
         = "Release position EOD"
     %tr
@@ -39,9 +39,9 @@
       %td
         = TradingStrategySet::SIMULATE_DAYS_BACK
       %td
-        = TradingStrategySet::MIN_TRADING_SIGNALS
+        = TradingStrategySet::MIN_TRADING_SIGNALS/TradingStrategySet::SIMULATE_DAYS_BACK
       %td
-        = TradingStrategySet::MAX_TRADING_SIGNALS
+        = TradingStrategySet::MAX_TRADING_SIGNALS/TradingStrategySet::SIMULATE_DAYS_BACK
       %td
         = TradingStrategySet::FORCE_RELEASE_POSITION ? "Yes" : "No"
   - if @population.best_trading_strategy_set_id

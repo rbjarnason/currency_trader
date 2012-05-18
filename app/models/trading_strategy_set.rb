@@ -1,8 +1,8 @@
 class TradingStrategySet < ActiveRecord::Base
-  MAX_NUMBER_OF_TRADING_STRATEGIES = 2
+  MAX_NUMBER_OF_TRADING_STRATEGIES = 3
   SIMULATE_DAYS_BACK = 4
-  MIN_TRADING_SIGNALS = 4
-  MAX_TRADING_SIGNALS = 200
+  MIN_TRADING_SIGNALS = 2*SIMULATE_DAYS_BACK
+  MAX_TRADING_SIGNALS = 10*SIMULATE_DAYS_BACK
   FORCE_RELEASE_POSITION = true
 
   has_many :trading_strategies, :dependent => :destroy
@@ -13,7 +13,8 @@ class TradingStrategySet < ActiveRecord::Base
     self.accumulated_fitness = 0.0
     trading_strategies.each do |strategy|
       Rails.logger.debug("Get fitness for strategy #{strategy.id}")
-      self.accumulated_fitness+=strategy.fitness(QuoteTarget.last, (Date.today - SIMULATE_DAYS_BACK),Date.today,MIN_TRADING_SIGNALS,MAX_TRADING_SIGNALS)
+      strategy_fitness = strategy.fitness(QuoteTarget.last, (Date.today - SIMULATE_DAYS_BACK),Date.today,MIN_TRADING_SIGNALS,MAX_TRADING_SIGNALS)
+      self.accumulated_fitness+=strategy_fitness if strategy_fitness
       Rails.logger.debug(self.accumulated_fitness)
     end
     self.accumulated_fitness

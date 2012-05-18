@@ -4,7 +4,7 @@ class TradingStrategy < ActiveRecord::Base
   DEFAULT_START_CAPITAL = 100000000.0
   DEFAULT_POSITION_UNITS = 50000.0
   FAILED_FITNESS_VALUE = -999999.0
-  MAXIMUM_MINUTES_BACK = 15
+  MAXIMUM_MINUTES_BACK = 60
 
   belongs_to :trading_strategy_template
   belongs_to :trading_strategy_set
@@ -191,7 +191,7 @@ class TradingStrategy < ActiveRecord::Base
 
   def out_of_range_attributes?
     if @how_far_back_milliseconds < 120000.0 or
-       @how_far_back_milliseconds > 1000.0*60*30 or
+       @how_far_back_milliseconds > (1000*60*MAXIMUM_MINUTES_BACK).to_f or
        @open_magnitude_signal_trigger < -1000.0 or
        @open_magnitude_signal_trigger > 1000.0 or
        @close_magnitude_signal_trigger < -1000.0 or
@@ -204,6 +204,7 @@ class TradingStrategy < ActiveRecord::Base
 
   def fitness(quote_target, start_date,end_date,trading_signals_min,trading_signals_max)
     @quote_target = quote_target
+    setup_parameters
     if out_of_range_attributes?
       FAILED_FITNESS_VALUE
     else
