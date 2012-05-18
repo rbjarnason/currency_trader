@@ -30,15 +30,15 @@ t.import_parameters({:float=>[20000.0,0.04,0.05], :binary=>[1,0]})
 t.save
 
 if false
-  TradingStrategyPopulation.destroy_all
-  TradingStrategySet.destroy_all
-  TradingStrategy.destroy_all
+  TradingStrategyPopulation.delete_all
+  TradingStrategySet.delete_all
+  TradingStrategy.delete_all
   pop=TradingStrategyPopulation.new
   pop.save
   pop.active = true
   pop.in_process = true
   pop.max_generations = 5000000
-  pop.population_size = 200
+  pop.population_size = 250 
   pop.initialize_population
   pop.save
 end

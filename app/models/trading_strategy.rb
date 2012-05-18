@@ -33,7 +33,7 @@ class TradingStrategy < ActiveRecord::Base
   def setup_parameters
     if self.binary_parameters and self.binary_parameters.length>0 and self.float_parameters and self.float_parameters.length>2
       @strategy_buy_short = self.binary_parameters[0]
-      @how_far_back_milliseconds = (self.float_parameters[0]*(1000*60*MAXIMUM_MINUTES_BACK)).abs
+      @how_far_back_milliseconds = (self.float_parameters[0]*(1000*60*MAXIMUM_MINUTES_BACK)/10).abs
       @open_magnitude_signal_trigger  = self.float_parameters[1]/100000.0
       @close_magnitude_signal_trigger  = self.float_parameters[2]/100000.0
     end
