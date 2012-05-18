@@ -14,7 +14,7 @@ class TradingStrategySet < ActiveRecord::Base
     trading_strategies.each do |strategy|
       Rails.logger.debug("Get fitness for strategy #{strategy.id}")
       strategy_fitness = strategy.fitness(QuoteTarget.last, (Date.today - SIMULATE_DAYS_BACK),Date.today,MIN_TRADING_SIGNALS,MAX_TRADING_SIGNALS)
-      self.accumulated_fitness+=strategy_fitness if strategy_fitness
+      self.accumulated_fitness+=strategy_fitness if strategy_fitness>0.0
       Rails.logger.debug(self.accumulated_fitness)
     end
     self.accumulated_fitness

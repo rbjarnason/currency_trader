@@ -17,7 +17,7 @@
     %th
       = "Close Magnitude Signal"
     %th
-      = "Trading signals"
+      = "Ave. Trading signals per day"
     %th
       = "Fitness"
   - set.trading_strategies.each do |strategy|
@@ -37,6 +37,6 @@
       %td
         = number_with_precision strategy.close_magnitude_signal_trigger.abs, :precision => 7
       %td
-        = strategy.number_of_evolution_trading_signals
+        = strategy.number_of_evolution_trading_signals/TradingStrategySet::SIMULATE_DAYS_BACK
       %td
         = strategy.simulated_fitness

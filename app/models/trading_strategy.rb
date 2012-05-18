@@ -206,7 +206,7 @@ class TradingStrategy < ActiveRecord::Base
     @quote_target = quote_target
     setup_parameters
     if out_of_range_attributes?
-      FAILED_FITNESS_VALUE
+      self.simulated_fitness = FAILED_FITNESS_VALUE
     else
       @evolution_mode = true
       @current_position_units = nil
@@ -229,14 +229,15 @@ class TradingStrategy < ActiveRecord::Base
       end
       Rails.logger.debug("Number of trading signals: #{self.number_of_evolution_trading_signals}")
       if self.number_of_evolution_trading_signals<trading_signals_min or
-         self.number_of_evolution_trading_signals>trading_signals_max
+         self.number_of_evolution_trading_signals>trading_signals_max or not
+         (@current_capital_position and @start_capital_position)
         self.simulated_fitness = FAILED_FITNESS_VALUE
       else
         self.simulated_fitness  = @current_capital_position-@start_capital_position
       end
-      self.save
-      self.simulated_fitness
     end
+    self.save
+    self.simulated_fitness
   end
 
   private

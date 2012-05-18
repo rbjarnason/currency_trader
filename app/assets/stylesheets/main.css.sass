@@ -1,0 +1,153 @@
+@charset "utf-8"
+
+// CSS Document
+
+html
+  font-size: 100%
+  // 1
+  overflow-y: scroll
+  // 2
+  -webkit-text-size-adjust: 100%
+  // 3
+  -ms-text-size-adjust: 100%
+  // 3
+
+//
+ * Addresses margins handled incorrectly in IE6/7
+
+body
+  margin: 0
+  font-family: sans-serif
+
+//
+ * Addresses font-family inconsistency between 'textarea' and other form elements.
+
+button, input, select, textarea
+  font-family: sans-serif
+
+// =============================================================================
+ * Links
+ * ==========================================================================
+
+a
+  color: #00e
+  &:visited
+    color: #551a8b
+  &:focus
+    outline: thin dotted
+  &:hover, &:active
+    outline: 0
+
+//
+ * Addresses outline displayed oddly in Chrome
+
+//
+ * Improves readability when focused and also mouse hovered in all browsers
+ * people.opera.com/patrickl/experiments/keyboard/test
+
+// =============================================================================
+ * Tables
+ * ==========================================================================
+//
+ * Remove most spacing between table cells
+
+table
+  border-collapse: collapse
+  border-spacing: 0
+  padding: 0px
+  margin: 0px 0px 15px 0px
+  width: 100%
+
+th
+  background-color: #69C
+  border: 1px solid #5d5d5d
+  text-align: left
+  padding: 5px 5px 5px 15px
+  font-size: 12px
+  background-image: url(bg_sub_strip.png)
+  background-repeat: repeat-x
+
+td
+  background-color: #FFF
+  border: 1px solid #5d5d5d
+  text-align: left
+  padding: 5px 5px 5px 15px
+  font-size: 12px
+
+body, input, select, textarea
+  font-family: "Open sans", Helvetica, Arial, Sans-serif
+  font-size: 16px
+  line-height: 1.5em
+  color: #333333
+
+h1, h2, h3
+  color: #333333
+  margin: 0 0 0 0
+  line-height: 1em
+  font-weight: 700
+
+h1
+  font-size: 28px
+  padding: 25px 5px 25px 15px
+  background-color: #fff
+  color: #fff
+  background-image: url(header_bg.png)
+  background-repeat: no-repeat
+
+h2
+  font-size: 18px
+  padding: 15px 5px 15px 15px
+  margin: 0px 0px 0px 0px
+  background-color: #0f0f0f
+  color: #eee
+  background-image: url(bg_strip.png)
+  background-repeat: repeat-x
+
+h3
+  font-size: 14px
+  padding: 15px 5px 15px 15px
+  background-color: #4c4c8e
+  color: #eee
+  background-image: url(bg_strip_2.png)
+  background-repeat: repeat-x
+
+p
+  margin: 0 0 1em 0
+
+pre
+  line-height: 1em
+
+ul, ol
+  margin: 0
+  padding: 0
+
+ul
+  padding: 0
+  &.inline
+    padding: 0
+
+ol.inline
+  padding: 0
+
+.inline li
+  display: inline
+
+li
+  list-style-type: none
+
+a
+  text-decoration: none
+  color: #454bcc
+  &:visited
+    text-decoration: none
+    color: #454bcc
+  &:hover
+    color: #2a2f9a
+
+hr
+  color: #7707d6
+  margin: 0px
+  padding: 0px
+
+.population_show_all
+  margin: 2px 20px 0px 20px
