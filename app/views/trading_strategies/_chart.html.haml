@@ -3,14 +3,19 @@
         createStockChart();
     });
 
-    var chartData = [#{@trading_strategy.get_chart_data}]
+    var chartData = [#{@trading_strategy.get_chart_data(@day_offset.to_i)}]
 
     var chart;
 
     function createStockChart() {
         chart = new AmCharts.AmStockChart();
         chart.pathToImages = "/assets/amimages/";
-        chart.panEventsEnabled = true;
+
+        // As we have minutely data, we should set minPeriod to "mm"
+        var categoryAxesSettings = new AmCharts.CategoryAxesSettings();
+        categoryAxesSettings.minPeriod = "mm";
+        chart.categoryAxesSettings = categoryAxesSettings;
+
         // DATASETS //////////////////////////////////////////
         var dataSet = new AmCharts.DataSet();
         dataSet.color = "#b0de09";
@@ -27,10 +32,6 @@
         // set data sets to the chart
         chart.dataSets = [dataSet];
 
-
-        //var categoryAxesSettings = new AmCharts.CategoryAxesSettings();
-        //categoryAxesSettings.minPeriod = "hh";
-        //chart.categoryAxesSettings = categoryAxesSettings;
         // PANELS ///////////////////////////////////////////
         // first stock panel
         var stockPanel1 = new AmCharts.StockPanel();
@@ -42,6 +43,8 @@
         // graph of first stock panel
         var graph1 = new AmCharts.StockGraph();
         graph1.valueField = "value";
+        graph1.type = "smoothedLine";
+        graph1.lineThickness = 2;
         stockPanel1.addStockGraph(graph1);
 
         // create stock legend
@@ -49,8 +52,28 @@
         stockLegend1.valueTextRegular = " ";
         stockLegend1.markerType = "none";
         stockPanel1.stockLegend = stockLegend1;
+
+
+        // second stock panel
+        var stockPanel2 = new AmCharts.StockPanel();
+        stockPanel2.title = "Volume";
+        stockPanel2.percentHeight = 30;
+        stockPanel2.panEventsEnabled = true;
+        var graph2 = new AmCharts.StockGraph();
+        graph2.valueField = "volume";
+        graph2.type = "column";
+        graph2.cornerRadiusTop = 4;
+        graph2.fillAlphas = 1;
+        stockPanel2.addStockGraph(graph2);
+
+        // create stock legend
+        var stockLegend2 = new AmCharts.StockLegend();
+        stockLegend2.valueTextRegular = " ";
+        stockLegend2.markerType = "none";
+        stockPanel2.stockLegend = stockLegend2;
+
         // set panels to the chart
-        chart.panels = [stockPanel1];
+        chart.panels = [stockPanel1, stockPanel2];
 
 
         // OTHER SETTINGS ////////////////////////////////////
@@ -66,35 +89,10 @@
 
         // PERIOD SELECTOR ///////////////////////////////////
         var periodSelector = new AmCharts.PeriodSelector();
-        periodSelector.periods = [
-        {
-            period: "DD",
-            count: 10,
-            label: "10 days"
-        }, {
-            period: "MM",
-            selected: true,
-            count: 1,
-            label: "1 month"
-        }, {
-            period: "YYYY",
-            count: 1,
-            label: "1 year"
-        }, {
-            period: "YTD",
-            label: "YTD"
-        }, {
-            period: "MAX",
-            label: "MAX"
-        },
-        {
+        periodSelector.periods = [{
             period: "hh",
             count: 1,
             label: "1 hour"
-        }, {
-            period: "hh",
-            count: 1,
-            label: "2 hours"
         }, {
             period: "hh",
             count: 2,
@@ -113,103 +111,12 @@
         }];
         chart.periodSelector = periodSelector;
 
-
         var panelsSettings = new AmCharts.PanelsSettings();
         panelsSettings.usePrefixes = true;
         panelsSettings.panEventsEnabled = true;
         chart.panelsSettings = panelsSettings;
 
-
-        // EVENTS
-        var e0 = {
-            date: new Date(2010, 8, 19),
-            type: "sign",
-            backgroundColor: "#85CDE6",
-            graph: graph1,
-            text: "S",
-            description: "This is description of an event"
-        };
-        var e1 = {
-            date: new Date(2010, 10, 19),
-            type: "flag",
-            backgroundColor: "#FFFFFF",
-            backgroundAlpha: 0.5,
-            graph: graph1,
-            text: "F",
-            description: "Some longer\ntext can also\n be added"
-        };
-        var e2 = {
-            date: new Date(2010, 11, 10),
-            showOnAxis: true,
-            backgroundColor: "#85CDE6",
-            type: "pin",
-            text: "X",
-            graph: graph1,
-            description: "This is description of an event"
-        };
-        var e3 = {
-            date: new Date(2010, 11, 26),
-            showOnAxis: true,
-            backgroundColor: "#85CDE6",
-            type: "pin",
-            text: "Z",
-            graph: graph1,
-            description: "This is description of an event"
-        };
-        var e4 = {
-            date: new Date(2011, 0, 3),
-            type: "sign",
-            backgroundColor: "#85CDE6",
-            graph: graph1,
-            text: "U",
-            description: "This is description of an event"
-        };
-        var e5 = {
-            date: new Date(2011, 1, 6),
-            type: "sign",
-            graph: graph1,
-            text: "D",
-            description: "This is description of an event"
-        };
-        var e6 = {
-            date: new Date(2011, 3, 5),
-            type: "sign",
-            graph: graph1,
-            text: "L",
-            description: "This is description of an event"
-        };
-        var e7 = {
-            date: new Date(2011, 3, 5),
-            type: "sign",
-            graph: graph1,
-            text: "R",
-            description: "This is description of an event"
-        };
-        var e8 = {
-            date: new Date(2011, 5, 15),
-            type: "arrowUp",
-            backgroundColor: "#00CC00",
-            graph: graph1,
-            text: "A",
-            description: "This is description of an event"
-        };
-        var e9 = {
-            date: new Date(2011, 6, 25),
-            type: "arrowDown",
-            backgroundColor: "#CC0000",
-            graph: graph1,
-            text: "B",
-            description: "This is description of an event"
-        };
-        var e10 = {
-            date: new Date(2011, 8, 1),
-            type: "text",
-            graph: graph1,
-            text: "Longer text can\nalso be displayed",
-            description: "This is description of an event"
-        };
-
-        dataSet.stockEvents = [e0, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10];
+        dataSet.stockEvents = [#{@trading_strategy.get_trading_events(@day_offset.to_i)}];
 
         chart.write('chartdiv_#{@trading_strategy.id}');
     }

@@ -1,5 +1,5 @@
 %h3
-  = "Trading Strategy Set #{trading_strategies.first.trading_strategy_set.id} Fitness #{trading_strategies.first.trading_strategy_set.fitness}"
+  = "Trading Strategy Set #{trading_strategies.first.trading_strategy_set.id} #{trading_strategies.first.trading_strategy_set.trading_strategy_population.quote_target.symbol} Fitness #{trading_strategies.first.trading_strategy_set.fitness}"
 %table
   %tr
     %th
@@ -7,7 +7,7 @@
     %th
       = "Trading time frame"
     %th
-      = "Short/Buy"
+      = "Short/Long"
     %th
       = "How far back in sec"
     %th
@@ -23,7 +23,7 @@
   - trading_strategies.each do |strategy|
     %tr
       %td
-        = link_to strategy.id, :controller=>"trading_strategies", :action=>"chart", :id=>strategy.id
+        = link_to strategy.id, :controller=>"trading_strategies", :action=>"chart", :id=>strategy.id, :day_offset=>0
       %td
         = "#{strategy.trading_strategy_set.trading_time_frame.from_hour}:00 - #{strategy.trading_strategy_set.trading_time_frame.to_hour}:00"
       %td

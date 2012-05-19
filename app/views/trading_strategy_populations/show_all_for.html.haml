@@ -10,7 +10,7 @@
       %th
         = "Population size"
       %th
-        = "Units to short/buy on each trade"
+        = "Units to short/long on each trade"
       %th
         = "Maximum minutes to look back for change"
       %th
@@ -50,5 +50,5 @@
     = render :partial=>"set", :locals=>{:set=>TradingStrategySet.find(@population.best_trading_strategy_set_id)}
     %h2
       = "Strongest Trading Strategy Sets"
-    - @population.trading_strategy_sets.order("accumulated_fitness desc").where("accumulated_fitness IS NOT NULL").limit(10).each do |set|
+    - @population.trading_strategy_sets.order("rand()").limit(20).each do |set|
       = render :partial=>"set", :locals=>{:set=>set}
