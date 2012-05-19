@@ -80,4 +80,13 @@ class TradingStrategiesController < ApplicationController
       format.json { head :no_content }
     end
   end
+
+  def chart
+    @trading_strategy = TradingStrategy.find(params[:id])
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @trading_strategy }
+    end
+  end
 end

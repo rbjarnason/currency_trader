@@ -16,6 +16,7 @@ class TradingStrategy < ActiveRecord::Base
   # 2: Type of trading signal (Buy or Sell)
   serialize :binary_parameters, Array
   serialize :float_parameters, Array
+  serialize :simulated_trading_signals, Array
 
   attr_reader :strategy_buy_short, :how_far_back_milliseconds, :open_magnitude_signal_trigger, :close_magnitude_signal_trigger
 
@@ -37,6 +38,21 @@ class TradingStrategy < ActiveRecord::Base
       @open_magnitude_signal_trigger  = self.float_parameters[1]/100000.0
       @close_magnitude_signal_trigger  = self.float_parameters[2]/100000.0
     end
+  end
+
+  def get_chart_data
+    @from_hour = trading_strategy_set.trading_time_frame.from_hour
+    @to_hour = trading_strategy_set.trading_time_frame.to_hour
+    quote_values = []
+    (self.simulated_start_date.to_date..self.simulated_end_date.to_date).each do |day|
+      (@from_hour..@to_hour).each do |hour|
+        (0..59).each do |minute|
+          current_quote_value = trading_strategy_set.trading_strategy_population.quote_target.get_quote_value_by_time_stamp(DateTime.parse("#{day} #{hour}:#{minute}:00"))
+          quote_values<<"{date: Date(#{day.year},#{day.month},#{day.day}), value: #{current_quote_value}, volume: #{0}}"
+        end
+      end
+    end
+    quote_values.join(",")
   end
 
   def evaluate(quote_target, date_time=DateTime.now, last_time_segment=false)
@@ -97,6 +113,7 @@ class TradingStrategy < ActiveRecord::Base
         @last_opened_position_value = @current_quote_value
         @current_capital_position-=capital_investment
         self.number_of_evolution_trading_signals+=1
+        simulated_trading_signals<<{:name=>"Short Open", :current_date_time=>@current_date_time, :description=>"I shorted #{@current_position_units} units for #{capital_investment} leaving #{@current_capital_position}"}
         Rails.logger.debug("    I shorted #{@current_position_units} units for #{capital_investment} leaving #{@current_capital_position}")
       else
         Rails.warn("Out of cash: #{self.inspect}")
@@ -130,6 +147,7 @@ class TradingStrategy < ActiveRecord::Base
        difference = shorted_at-currently_at
        @current_capital_position+=shorted_at+difference
        Rails.logger.debug("    Shorted_at #{shorted_at} currently_at #{currently_at} difference #{difference} current #{@current_capital_position}")
+       simulated_trading_signals<<{:name=>"Short Close", :current_date_time=>@current_date_time, :description=>"Shorted_at #{shorted_at} currently_at #{currently_at} difference #{difference} current #{@current_capital_position}"}
        @current_position_units = nil
      else
        # Generate Trading Signal Since
@@ -204,6 +222,8 @@ class TradingStrategy < ActiveRecord::Base
 
   def fitness(quote_target,start_date,end_date,trading_signals_min,trading_signals_max)
     @quote_target = quote_target
+    self.simulated_start_date = start_date
+    self.simulated_end_date = end_date
     setup_parameters
     if out_of_range_attributes?
       self.simulated_fitness = FAILED_FITNESS_VALUE

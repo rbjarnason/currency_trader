@@ -7,7 +7,7 @@ class StrategyBinaryParameters < BitStringGenotype((TradingStrategySet::MAX_NUMB
 end
 
 class StrategyFloatParameters <  FloatListGenotype((TradingStrategySet::MAX_NUMBER_OF_TRADING_STRATEGIES+1)*NUMBER_OF_FLOAT_EVOLUTION_PARAMETERS)
- use Elitism(TruncationSelection(0.4),1), UniformCrossover, ListMutator(:probability[ p=0.35 ],:uniform[ max_size=50 ])
+ use Elitism(TruncationSelection(0.4),1), UniformCrossover, ListMutator(:probability[ p=0.35 ],:uniform[ max_size=25 ])
 end
 
 genotypes = []
@@ -39,6 +39,7 @@ class TradingStrategyPopulation < ActiveRecord::Base
      end
    end
 
+  belongs_to :quote_target
   attr_reader :population
   before_save :marshall_population
   after_initialize :demarshall_population
