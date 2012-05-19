@@ -48,7 +48,7 @@ class TradingStrategy < ActiveRecord::Base
       (@from_hour..@to_hour).each do |hour|
         (0..59).each do |minute|
           current_quote_value = trading_strategy_set.trading_strategy_population.quote_target.get_quote_value_by_time_stamp(DateTime.parse("#{day} #{hour}:#{minute}:00"))
-          quote_values<<"{date: Date(#{day.year},#{day.month},#{day.day}), value: #{current_quote_value}, volume: #{0}}"
+          quote_values<<"{date: new Date(#{day.year},#{day.month},#{day.day},#{hour},#{minute},0,0), value: #{current_quote_value.ask}, volume: #{0}}" if current_quote_value
         end
       end
     end

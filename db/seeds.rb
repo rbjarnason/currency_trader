@@ -36,9 +36,10 @@ if false
   pop=TradingStrategyPopulation.new
   pop.save
   pop.active = true
+  pop.quote_target = QuoteTarget.last
   pop.in_process = true
   pop.max_generations = 2000000
-  pop.population_size = 120
+  pop.population_size = 200
   pop.initialize_population
   pop.save
 end
