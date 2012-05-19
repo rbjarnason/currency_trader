@@ -20,9 +20,9 @@
       %th
         = "Simulated days back"
       %th
-        = "Minimum trading signals per day per strategy"
+        = "Minimum ave. trading signals per day per strategy"
       %th
-        = "Maximum trading signals per day per strategy"
+        = "Maximum ave. trading signals per day per strategy"
       %th
         = "Release position EOD"
     %tr
@@ -35,7 +35,7 @@
       %td
         = @population.current_generation
       %td
-        = @population.trading_strategy_sets.count
+        = "#{@population.trading_strategy_sets.count} | #{@population.population_size-@population.trading_strategy_sets.where("complete=0").count*@population.population_size} left"
       %td
         = TradingStrategySet::SIMULATE_DAYS_BACK
       %td
@@ -49,6 +49,6 @@
       = "Best Trading Strategy Set"
     = render :partial=>"set", :locals=>{:set=>TradingStrategySet.find(@population.best_trading_strategy_set_id)}
     %h2
-      = "All Trading Strategy Sets"
-    - @population.trading_strategy_sets.order("accumulated_fitness DESC").limit(200).each do |set|
+      = "Strongest Trading Strategy Sets"
+    - @population.trading_strategy_sets.order("accumulated_fitness desc").where("accumulated_fitness IS NOT NULL").limit(10).each do |set|
       = render :partial=>"set", :locals=>{:set=>set}

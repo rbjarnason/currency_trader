@@ -4,7 +4,7 @@ class TradingStrategy < ActiveRecord::Base
   DEFAULT_START_CAPITAL = 100000000.0
   DEFAULT_POSITION_UNITS = 50000.0
   FAILED_FITNESS_VALUE = -999999.0
-  MAXIMUM_MINUTES_BACK = 60
+  MAXIMUM_MINUTES_BACK = 15
 
   belongs_to :trading_strategy_template
   belongs_to :trading_strategy_set
@@ -33,7 +33,7 @@ class TradingStrategy < ActiveRecord::Base
   def setup_parameters
     if self.binary_parameters and self.binary_parameters.length>0 and self.float_parameters and self.float_parameters.length>2
       @strategy_buy_short = self.binary_parameters[0]
-      @how_far_back_milliseconds = (self.float_parameters[0]*(1000*60*MAXIMUM_MINUTES_BACK)/10).abs
+      @how_far_back_milliseconds = [1000*60,(self.float_parameters[0]*(1000*60*MAXIMUM_MINUTES_BACK)/60).abs].max
       @open_magnitude_signal_trigger  = self.float_parameters[1]/100000.0
       @close_magnitude_signal_trigger  = self.float_parameters[2]/100000.0
     end
@@ -41,7 +41,7 @@ class TradingStrategy < ActiveRecord::Base
 
   def evaluate(quote_target, date_time=DateTime.now, last_time_segment=false)
     @current_date_time = date_time
-    if current_quote_value = @quote_target.quote_values.get_one_by_time(@current_date_time)
+    if current_quote_value = @quote_target.get_quote_value_by_time_stamp(@current_date_time)
       @current_quote_value = current_quote_value.ask
       if true or @strategy_buy_short==1
         Rails.logger.debug("Short mode")
@@ -71,7 +71,7 @@ class TradingStrategy < ActiveRecord::Base
   end
 
   def match_short_open_conditions
-    @quote_value_then = @quote_target.quote_values.get_one_by_time(@current_date_time-(@how_far_back_milliseconds/1000.0).seconds).ask
+    @quote_value_then = @quote_target.get_quote_value_by_time_stamp(@current_date_time-(@how_far_back_milliseconds/1000.0).seconds).ask
     Rails.logger.debug("Testing short change: #{@quote_value_then} current: #{@current_quote_value} back in minutes: #{@how_far_back_milliseconds/1000/60}")
     quote_value_change = @current_quote_value-@quote_value_then
     if quote_value_change==0.0
@@ -173,7 +173,7 @@ class TradingStrategy < ActiveRecord::Base
   end
 
   def magnitude_of_change_since(millseconds_since)
-    @quote_value_then = @quote_target.quote_values.get_one_by_time(@current_date_time-(millseconds_since/1000.0).seconds).ask
+    @quote_value_then = @quote_target.get_quote_value_by_time_stamp(@current_date_time-(millseconds_since/1000.0).seconds).ask
     Rails.logger.debug("Magnitude of change: then: #{@quote_value_then} current: #{@current_quote_value}")
     quote_value_change = @current_quote_value-@quote_value_then
     if quote_value_change>=0.0
@@ -190,7 +190,7 @@ class TradingStrategy < ActiveRecord::Base
   end
 
   def out_of_range_attributes?
-    if @how_far_back_milliseconds < 120000.0 or
+    if @how_far_back_milliseconds < 60000.0 or
        @how_far_back_milliseconds > (1000*60*MAXIMUM_MINUTES_BACK).to_f or
        @open_magnitude_signal_trigger < -1000.0 or
        @open_magnitude_signal_trigger > 1000.0 or
@@ -202,7 +202,7 @@ class TradingStrategy < ActiveRecord::Base
     end
   end
 
-  def fitness(quote_target, start_date,end_date,trading_signals_min,trading_signals_max)
+  def fitness(quote_target,start_date,end_date,trading_signals_min,trading_signals_max)
     @quote_target = quote_target
     setup_parameters
     if out_of_range_attributes?
@@ -219,13 +219,11 @@ class TradingStrategy < ActiveRecord::Base
       (start_date.to_date..end_date.to_date).each do |day|
         (@from_hour..@to_hour).each do |hour|
           (0..59).each do |minute|
-            last_minute = (hour==@to_hour and minute==59) and TradingStrategySet::FORCE_RELEASE_POSITION
-            evaluate(quote_target, DateTime.parse("#{day} #{hour}:#{minute}:00"), last_minute)
+            last_minute = (hour==@to_hour and minute==59 and TradingStrategySet::FORCE_RELEASE_POSITION)
+            evaluate(quote_target,DateTime.parse("#{day} #{hour}:#{minute}:00"), last_minute)
             break if last_minute
           end
-          break if last_minute
         end
-        break if last_minute
       end
       Rails.logger.debug("Number of trading signals: #{self.number_of_evolution_trading_signals}")
       if self.number_of_evolution_trading_signals<trading_signals_min or

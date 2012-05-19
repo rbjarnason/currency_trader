@@ -25,6 +25,8 @@ solr/*.pid
 tmp/
 lib/geoip/GeoIP.dat
 *.sql
+lib/evolution_engine.2
+lib/evolution_engine.3
 public/assets/
 public/production/*
 public/development/*

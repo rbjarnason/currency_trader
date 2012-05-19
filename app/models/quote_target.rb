@@ -1,23 +1,36 @@
 # encoding: UTF-8
 
 class QuoteTarget < ActiveRecord::Base
-  has_many :classified_paragraphs
-  has_and_belongs_to_many :rss_items, :order => "rss_items.pubDate ASC" do
-    def only_active
-      find(:all).reject{|item| item.rss_target.active==false }      
-    end
-    
-    def by_rand
-      find(:all, :order=>"RAND()")
-    end
-    
-    def get_not_rated
-      find(:all, :order=>"RAND()", :limit=>100).reject{|item| item.classified_paragraphs.hasone?(self.id)!=nil or item.rss_target.active==false }[0]
-    end
-  end
+  @@quote_value_cache = {}
+  @@quote_value_cache_timer = Time.now+10.minutes
+
   has_many :quote_values, :order => "created_at ASC" do
     def get_one_by_time(time_stamp)
       find :first, :conditions=>["created_at >= ?",time_stamp]
+    end
+  end
+
+  def get_quote_value_by_time_stamp(time_stamp)
+    time_stamp_key = time_stamp.strftime("%Y_%m_%d_%H:%M")
+    if @@quote_value_cache[time_stamp_key]
+      return_this = @@quote_value_cache[time_stamp_key]
+      if @@quote_value_cache_timer<Time.now
+        Rails.logger.debug("CLEARING QUOTE VALUE CACHE")
+        @@quote_value_cache.clear
+        @@quote_value_cache_timer = Time.now+10.minutes
+      end
+      if @@quote_value_cache[time_stamp_key] != "no_quote"
+        return_this
+      else
+        nil
+      end
+    else
+      if quote_value = quote_values.where(["created_at >= ?",time_stamp]).first
+        @@quote_value_cache[time_stamp_key] = quote_value
+      else
+        @@quote_value_cache[time_stamp_key] = "no_quote"
+        nil
+      end
     end
   end
 end

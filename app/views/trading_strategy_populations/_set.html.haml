@@ -20,6 +20,7 @@
       = "Ave. Trading signals per day"
     %th
       = "Fitness"
+  - first = true
   - set.trading_strategies.each do |strategy|
     %tr
       %td
@@ -27,7 +28,7 @@
       %td
         = "#{strategy.trading_strategy_set.trading_time_frame.from_hour}:00 - #{strategy.trading_strategy_set.trading_time_frame.to_hour}:00"
       %td
-        = strategy.strategy_buy_short.to_i
+        = "Short"
       %td
         = (strategy.how_far_back_milliseconds/1000).to_i
       %td
@@ -40,3 +41,9 @@
         = strategy.number_of_evolution_trading_signals/TradingStrategySet::SIMULATE_DAYS_BACK
       %td
         = strategy.simulated_fitness==TradingStrategy::FAILED_FITNESS_VALUE ? "Excluded by conditions" : strategy.simulated_fitness
+    - if first
+      - first=false
+      %tr
+        %td{:colspan=>"9"}
+          = "JKLDJSLKjldks"
+          = #render :partial=>"trading_strategies/chart"
