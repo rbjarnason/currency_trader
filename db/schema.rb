@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120519021801) do
+ActiveRecord::Schema.define(:version => 20120520172303) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.string   "resource_id",   :null => false
@@ -106,19 +106,25 @@ ActiveRecord::Schema.define(:version => 20120519021801) do
 
   create_table "trading_strategy_populations", :force => true do |t|
     t.integer  "quote_target_id"
-    t.datetime "created_at",                                                            :null => false
-    t.datetime "updated_at",                                                            :null => false
-    t.boolean  "complete",                                           :default => false
-    t.boolean  "active",                                             :default => false
-    t.boolean  "in_process",                                         :default => false
-    t.integer  "current_generation",                                 :default => 0
+    t.datetime "created_at",                                                                               :null => false
+    t.datetime "updated_at",                                                                               :null => false
+    t.boolean  "complete",                                                              :default => false
+    t.boolean  "active",                                                                :default => false
+    t.boolean  "in_process",                                                            :default => false
+    t.integer  "current_generation",                                                    :default => 0
     t.integer  "max_generations"
     t.integer  "population_size"
     t.float    "best_fitness"
     t.datetime "last_processing_start_time"
     t.datetime "last_processing_stop_time"
     t.integer  "best_trading_strategy_set_id"
-    t.binary   "population_data",              :limit => 2147483647
+    t.binary   "population_data",                                 :limit => 2147483647
+    t.integer  "simulation_number_of_trading_strategies_per_set"
+    t.integer  "simulation_days_back"
+    t.datetime "simulation_end_date"
+    t.integer  "simulation_min_overall_trading_signals"
+    t.integer  "simulation_max_daily_trading_signals"
+    t.integer  "simulation_max_minutes_back"
   end
 
   create_table "trading_strategy_sets", :force => true do |t|

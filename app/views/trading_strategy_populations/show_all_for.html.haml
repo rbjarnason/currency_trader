@@ -39,9 +39,9 @@
       %td
         = @population.simulation_days_back
       %td
-        = @population.simulation_min_overall_trading_signals/@population.simulation_days_back
+        = @population.simulation_min_overall_trading_signals
       %td
-        = @population.simulation_max_daily_trading_signals/@population.simulation_days_back
+        = @population.simulation_max_daily_trading_signals
       %td
         = TradingStrategySet::FORCE_RELEASE_POSITION ? "Yes" : "No"
   - if @population.best_trading_strategy_set_id

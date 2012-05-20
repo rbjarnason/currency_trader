@@ -153,6 +153,7 @@ class TradingStrategy < ActiveRecord::Base
         @last_opened_position_value = @current_quote_value
         @current_capital_position-=capital_investment
         self.number_of_evolution_trading_signals+=1
+        @daily_signals+=1
         simulated_trading_signals<<{:name=>"Short Open", :current_date_time=>@current_date_time, :description=>"I shorted #{@current_position_units} units for #{capital_investment} leaving #{@current_capital_position}"}
         Rails.logger.debug("    I shorted #{@current_position_units} units for #{capital_investment} leaving #{@current_capital_position}")
       else
@@ -189,6 +190,8 @@ class TradingStrategy < ActiveRecord::Base
        Rails.logger.debug("    Shorted_at #{shorted_at} currently_at #{currently_at} difference #{difference} current #{@current_capital_position}")
        simulated_trading_signals<<{:name=>"Short Close", :current_date_time=>@current_date_time, :description=>"Shorted_at #{shorted_at} currently_at #{currently_at} difference #{difference} current #{@current_capital_position}"}
        @current_position_units = nil
+       self.number_of_evolution_trading_signals+=1
+       @daily_signals+=1
      else
        # Generate Trading Signal Since
      end
@@ -206,6 +209,7 @@ class TradingStrategy < ActiveRecord::Base
         @last_opened_position_value = @current_quote_value
         @current_capital_position-=capital_investment
         self.number_of_evolution_trading_signals+=1
+        @daily_signals+=1
       else
         Rails.logger.warn("Out of cash: #{self.inspect}")
       end
@@ -225,6 +229,8 @@ class TradingStrategy < ActiveRecord::Base
       @current_capital_position+=@current_position_units*@current_quote_value
       Rails.logger.debug("long_close: #{@current_capital_position}+=#{@current_position_units}*#{@current_quote_value}")
       @current_position_units = nil
+      self.number_of_evolution_trading_signals+=1
+      @daily_signals+=1
     else
       # Generate Trading Signal Since
     end
@@ -262,7 +268,8 @@ class TradingStrategy < ActiveRecord::Base
 
   def fitness
     @quote_target = population.quote_target
-    self.simulated_start_date = population.simulation_end_date.to_date-population.simulation_days_back
+    Rails.logger.debug("XXXXXXXXXXXXXXX #{population.simulation_end_date.to_date}")
+    self.simulated_start_date = (population.simulation_end_date.to_date-population.simulation_days_back).to_date
     self.simulated_end_date = population.simulation_end_date.to_date
     setup_parameters
     if out_of_range_attributes?
@@ -277,11 +284,11 @@ class TradingStrategy < ActiveRecord::Base
       @daily_trading_signals = number_of_evolution_trading_signals = 0
       @daily_signals = 0
       last_minute = false
-      (start_date.to_date..end_date.to_date).each do |day|
+      (self.simulated_start_date.to_date..self.simulated_end_date.to_date).each do |day|
         (@from_hour..@to_hour).each do |hour|
           (0..59).each do |minute|
             last_minute = (hour==@to_hour and minute==59 and TradingStrategySet::FORCE_RELEASE_POSITION)
-            evaluate(quote_target,DateTime.parse("#{day} #{hour}:#{minute}:00"), last_minute)
+            evaluate(@quote_target,DateTime.parse("#{day} #{hour}:#{minute}:00"), last_minute)
             break if last_minute or @daily_signals>population.simulation_max_daily_trading_signals
           end
           break if @daily_signals>population.simulation_max_daily_trading_signals
@@ -290,7 +297,7 @@ class TradingStrategy < ActiveRecord::Base
         @daily_trading_signals=0
       end
       Rails.logger.debug("Number of trading signals: #{self.number_of_evolution_trading_signals}")
-      if self.number_of_evolution_trading_signals<simulation_min_overall_trading_signals or
+      if self.number_of_evolution_trading_signals<population.simulation_min_overall_trading_signals or
          @daily_signals>population.simulation_max_daily_trading_signals or not
          (@current_capital_position and @start_capital_position)
         self.simulated_fitness = FAILED_FITNESS_VALUE

@@ -33,7 +33,7 @@ class TradingStrategySet < ActiveRecord::Base
   end
 
   def setup_trading_strategies
-    (1..population.simulation_number_of_trading_strategies_per_set).each do |nr|
+    (1..population.simulation_number_of_trading_strategies_per_set.to_i).each do |nr|
       strategy=TradingStrategy.new
       strategy.trading_strategy_template=TradingStrategyTemplate.last
       strategy.trading_strategy_set=self
@@ -49,14 +49,14 @@ class TradingStrategySet < ActiveRecord::Base
         split_attributes = genotype.genes.each_slice(NUMBER_OF_BINARY_EVOLUTION_PARAMETERS).to_a
         Rails.logger.debug("SPLIT binary parameters #{split_attributes}")
         import_binary_parameters(split_attributes[0])
-        (0..population.simulation_number_of_trading_strategies_per_set-1).each do |i|
+        (0..(population.simulation_number_of_trading_strategies_per_set.to_i)-1).each do |i|
           all_trading_strategies[i].import_binary_parameters(split_attributes[i+1])
         end
       elsif genotype.instance_of?(StrategyFloatParameters)
         split_attributes = genotype.genes.each_slice(NUMBER_OF_FLOAT_EVOLUTION_PARAMETERS).to_a
         Rails.logger.debug("SPLIT float parameters #{split_attributes}")
         import_float_parameters(split_attributes[0])
-        (0..population.simulation_number_of_trading_strategies_per_set-1).each do |i|
+        (0..(population.simulation_number_of_trading_strategies_per_set.to_i-1)).each do |i|
           all_trading_strategies[i].import_float_parameters(split_attributes[i+1])
         end
       end
