@@ -39,4 +39,4 @@
       %td
         = strategy.number_of_evolution_trading_signals/strategy.trading_strategy_set.trading_strategy_population.simulation_days_back
       %td
-        = strategy.simulated_fitness==TradingStrategy::FAILED_FITNESS_VALUE ? "Excluded by conditions" : strategy.simulated_fitness
+        = strategy.simulated_fitness==TradingStrategy::FAILED_FITNESS_VALUE ? "Excluded by #{strategy.simulated_fitness_failure_reason}" : strategy.simulated_fitness

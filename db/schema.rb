@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120520172303) do
+ActiveRecord::Schema.define(:version => 20120520221254) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.string   "resource_id",   :null => false
@@ -102,6 +102,8 @@ ActiveRecord::Schema.define(:version => 20120520172303) do
     t.text     "simulated_trading_signals"
     t.datetime "simulated_start_date"
     t.datetime "simulated_end_date"
+    t.integer  "how_far_back_milliseconds"
+    t.string   "simulated_fitness_failure_reason"
   end
 
   create_table "trading_strategy_populations", :force => true do |t|
@@ -125,6 +127,7 @@ ActiveRecord::Schema.define(:version => 20120520172303) do
     t.integer  "simulation_min_overall_trading_signals"
     t.integer  "simulation_max_daily_trading_signals"
     t.integer  "simulation_max_minutes_back"
+    t.integer  "simulation_max_overall_trading_signals"
   end
 
   create_table "trading_strategy_sets", :force => true do |t|

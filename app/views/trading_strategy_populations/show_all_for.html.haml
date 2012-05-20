@@ -18,11 +18,13 @@
       %th
         = "Number of trading strategy sets"
       %th
-        = "Simulated days back"
+        = "From / To"
       %th
-        = "Minimum overall trading signals per strategy"
+        = "Min overall trading signals per strategy"
       %th
-        = "Maximum daily trading signals per strategy"
+        = "Max overall trading signals per strategy"
+      %th
+        = "Max daily trading signals per strategy"
       %th
         = "Release position EOD"
     %tr
@@ -35,11 +37,13 @@
       %td
         = @population.current_generation
       %td
-        = "#{@population.trading_strategy_sets.count} | #{@population.population_size-@population.trading_strategy_sets.where("complete=0").count*@population.population_size} left"
+        = "#{@population.trading_strategy_sets.count} | #{@population.trading_strategy_sets.where("complete=0").count} left"
       %td
-        = @population.simulation_days_back
+        = "#{@population.simulation_end_date.to_date-@population.simulation_days_back-1} <br> #{@population.simulation_end_date.to_date-1}".html_safe
       %td
         = @population.simulation_min_overall_trading_signals
+      %td
+        = @population.simulation_max_overall_trading_signals
       %td
         = @population.simulation_max_daily_trading_signals
       %td

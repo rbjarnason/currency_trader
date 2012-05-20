@@ -13,13 +13,28 @@ class TradingStrategySet < ActiveRecord::Base
 
   def calculate_fitness
     self.accumulated_fitness = 0.0
+    how_far_back_minutes = []
     trading_strategies.each do |strategy|
       Rails.logger.debug("Get fitness for strategy #{strategy.id}")
       strategy_fitness = strategy.fitness
+      how_far_back_minutes << strategy.how_far_back_milliseconds/1000/60
       self.accumulated_fitness+=strategy_fitness if strategy_fitness>0.0
       Rails.logger.debug(self.accumulated_fitness)
     end
-    self.accumulated_fitness
+    Rails.logger.info("YYYYYYYYYYYY #{how_far_back_minutes}")
+    if how_far_back_minutes.uniq.length==trading_strategies.count
+      self.accumulated_fitness
+    else
+      if population.best_trading_strategy_set_id
+        if next_best_fitness = TradingStrategySet.find(population.best_trading_strategy_set_id).self.accumulated_fitness
+          next_best_fitness*0.9
+        else
+          0.0
+        end
+      else
+        0.0
+      end
+    end
   end
 
   def fitness

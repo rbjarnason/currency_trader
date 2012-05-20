@@ -17,7 +17,7 @@ class TradingStrategy < ActiveRecord::Base
   serialize :float_parameters, Array
   serialize :simulated_trading_signals, Array
 
-  attr_reader :strategy_buy_short, :how_far_back_milliseconds, :open_magnitude_signal_trigger, :close_magnitude_signal_trigger
+  attr_reader :strategy_buy_short, :open_magnitude_signal_trigger, :close_magnitude_signal_trigger
 
   after_initialize :setup_parameters
   after_save :setup_parameters
@@ -41,7 +41,7 @@ class TradingStrategy < ActiveRecord::Base
   def setup_parameters
     if self.binary_parameters and self.binary_parameters.length>0 and self.float_parameters and self.float_parameters.length>2
       @strategy_buy_short = self.binary_parameters[0]
-      @how_far_back_milliseconds = [1000*60,(self.float_parameters[0]*(1000*60*population.simulation_max_minutes_back)/60).abs].max
+      self.how_far_back_milliseconds = [1000*60,(self.float_parameters[0]*(1000*60*population.simulation_max_minutes_back)/60).abs].max
       @open_magnitude_signal_trigger  = self.float_parameters[1]/100000.0
       @close_magnitude_signal_trigger  = self.float_parameters[2]/100000.0
     end
@@ -72,7 +72,7 @@ class TradingStrategy < ActiveRecord::Base
     simulated_trading_signals.each do |signal|
       events << simulated_trading_signal_to_amchart(signal)
       if signal[:name]=="Short Open"
-        events << simulated_trading_signal_to_amchart({:name=>"F", :type=>"flag", :current_date_time=>signal[:current_date_time]-(@how_far_back_milliseconds/1000/60).minutes, :background_color=>"#aaccff",
+        events << simulated_trading_signal_to_amchart({:name=>"F", :type=>"flag", :current_date_time=>signal[:current_date_time]-(self.how_far_back_milliseconds/1000/60).minutes, :background_color=>"#aaccff",
                                                        :description=>"From here"})
       end
       if signal[:name]=="Short Close"
@@ -127,8 +127,8 @@ class TradingStrategy < ActiveRecord::Base
   end
 
   def match_short_open_conditions
-    @quote_value_then = @quote_target.get_quote_value_by_time_stamp(@current_date_time-(@how_far_back_milliseconds/1000.0).seconds).ask
-    Rails.logger.debug("Testing short change: #{@quote_value_then} current: #{@current_quote_value} back in minutes: #{@how_far_back_milliseconds/1000/60}")
+    @quote_value_then = @quote_target.get_quote_value_by_time_stamp(@current_date_time-(self.how_far_back_milliseconds/1000.0).seconds).ask
+    Rails.logger.debug("Testing short change: #{@quote_value_then} current: #{@current_quote_value} back in minutes: #{self.how_far_back_milliseconds/1000/60}")
     quote_value_change = @current_quote_value-@quote_value_then
     if quote_value_change==0.0
       return false
@@ -198,7 +198,7 @@ class TradingStrategy < ActiveRecord::Base
    end
 
   def match_long_open_conditions
-    magnitude_of_change_since(@how_far_back_milliseconds)>@open_magnitude_signal_trigger
+    magnitude_of_change_since(self.how_far_back_milliseconds)>@open_magnitude_signal_trigger
   end
 
   def trigger_long_open_signal
@@ -254,12 +254,23 @@ class TradingStrategy < ActiveRecord::Base
   end
 
   def out_of_range_attributes?
-    if @how_far_back_milliseconds < 60000.0 or
-       @how_far_back_milliseconds > (1000*60*population.simulation_max_minutes_back).to_f or
-       @open_magnitude_signal_trigger < -1000.0 or
-       @open_magnitude_signal_trigger > 1000.0 or
-       @close_magnitude_signal_trigger < -1000.0 or
-       @close_magnitude_signal_trigger > 1000.0
+    if self.how_far_back_milliseconds < 60000.0
+      self.simulated_fitness_failure_reason = "MS <"
+      true
+    elsif self.how_far_back_milliseconds > (1000*60*population.simulation_max_minutes_back).to_f
+      self.simulated_fitness_failure_reason = "MS >"
+      true
+    elsif @open_magnitude_signal_trigger < -1000.0
+      self.simulated_fitness_failure_reason = "Open M <"
+      true
+    elsif @open_magnitude_signal_trigger > 1000.0
+      self.simulated_fitness_failure_reason = "Open M >"
+      true
+    elsif @close_magnitude_signal_trigger < -1000.0
+      self.simulated_fitness_failure_reason = "Close M <"
+      true
+    elsif @close_magnitude_signal_trigger > 1000.0
+      self.simulated_fitness_failure_reason = "Close M >"
       true
     else
       false
@@ -281,8 +292,7 @@ class TradingStrategy < ActiveRecord::Base
       @current_capital_position = @start_capital_position = DEFAULT_START_CAPITAL
       @from_hour = trading_strategy_set.trading_time_frame.from_hour
       @to_hour = trading_strategy_set.trading_time_frame.to_hour
-      @daily_trading_signals = number_of_evolution_trading_signals = 0
-      @daily_signals = 0
+      @daily_signals = number_of_evolution_trading_signals = 0
       last_minute = false
       (self.simulated_start_date.to_date..self.simulated_end_date.to_date).each do |day|
         (@from_hour..@to_hour).each do |hour|
@@ -294,12 +304,20 @@ class TradingStrategy < ActiveRecord::Base
           break if @daily_signals>population.simulation_max_daily_trading_signals
         end
         break if @daily_signals>population.simulation_max_daily_trading_signals
-        @daily_trading_signals=0
+        @daily_signals=0
       end
       Rails.logger.debug("Number of trading signals: #{self.number_of_evolution_trading_signals}")
-      if self.number_of_evolution_trading_signals<population.simulation_min_overall_trading_signals or
-         @daily_signals>population.simulation_max_daily_trading_signals or not
-         (@current_capital_position and @start_capital_position)
+      if self.number_of_evolution_trading_signals<population.simulation_min_overall_trading_signals
+        self.simulated_fitness_failure_reason = "Min Signals O"
+        self.simulated_fitness = FAILED_FITNESS_VALUE
+      elsif self.number_of_evolution_trading_signals>population.simulation_max_overall_trading_signals
+          self.simulated_fitness_failure_reason = "Min Signals O"
+          self.simulated_fitness = FAILED_FITNESS_VALUE
+      elsif @daily_signals>population.simulation_max_daily_trading_signals
+        self.simulated_fitness_failure_reason = "Max Signals D"
+        self.simulated_fitness = FAILED_FITNESS_VALUE
+      elsif not (@current_capital_position and @start_capital_position)
+        self.simulated_fitness_failure_reason = "No Positions"
         self.simulated_fitness = FAILED_FITNESS_VALUE
       else
         self.simulated_fitness  = @current_capital_position-@start_capital_position
