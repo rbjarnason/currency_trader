@@ -39,7 +39,13 @@ if false
   pop.quote_target = QuoteTarget.last
   pop.in_process = true
   pop.max_generations = 2000000
-  pop.population_size = 200
+  pop.population_size = 400
+  pop.simulation_number_of_trading_strategies_per_set = 3
+  pop.simulation_days_back = 4
+  pop.simulation_end_date = Date.parse("18/05/2012")
+  pop.simulation_min_overall_trading_signals = 2*4
+  pop.simulation_max_daily_trading_signals = 10
+  pop.simulation_max_minutes_back = 15
   pop.initialize_population
   pop.save
 end

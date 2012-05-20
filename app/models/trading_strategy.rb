@@ -4,7 +4,6 @@ class TradingStrategy < ActiveRecord::Base
   DEFAULT_START_CAPITAL = 100000000.0
   DEFAULT_POSITION_UNITS = 50000.0
   FAILED_FITNESS_VALUE = -999999.0
-  MAXIMUM_MINUTES_BACK = 15
 
   belongs_to :trading_strategy_template
   belongs_to :trading_strategy_set
@@ -23,6 +22,14 @@ class TradingStrategy < ActiveRecord::Base
   after_initialize :setup_parameters
   after_save :setup_parameters
 
+  def set
+    self.trading_strategy_set
+  end
+
+  def population
+    self.trading_strategy_set.population
+  end
+
   def import_binary_parameters(parameters)
     self.binary_parameters = parameters
   end
@@ -34,7 +41,7 @@ class TradingStrategy < ActiveRecord::Base
   def setup_parameters
     if self.binary_parameters and self.binary_parameters.length>0 and self.float_parameters and self.float_parameters.length>2
       @strategy_buy_short = self.binary_parameters[0]
-      @how_far_back_milliseconds = [1000*60,(self.float_parameters[0]*(1000*60*MAXIMUM_MINUTES_BACK)/60).abs].max
+      @how_far_back_milliseconds = [1000*60,(self.float_parameters[0]*(1000*60*population.simulation_max_minutes_back)/60).abs].max
       @open_magnitude_signal_trigger  = self.float_parameters[1]/100000.0
       @close_magnitude_signal_trigger  = self.float_parameters[2]/100000.0
     end
@@ -242,7 +249,7 @@ class TradingStrategy < ActiveRecord::Base
 
   def out_of_range_attributes?
     if @how_far_back_milliseconds < 60000.0 or
-       @how_far_back_milliseconds > (1000*60*MAXIMUM_MINUTES_BACK).to_f or
+       @how_far_back_milliseconds > (1000*60*population.simulation_max_minutes_back).to_f or
        @open_magnitude_signal_trigger < -1000.0 or
        @open_magnitude_signal_trigger > 1000.0 or
        @close_magnitude_signal_trigger < -1000.0 or
@@ -253,10 +260,10 @@ class TradingStrategy < ActiveRecord::Base
     end
   end
 
-  def fitness(quote_target,start_date,end_date,trading_signals_min,trading_signals_max)
-    @quote_target = quote_target
-    self.simulated_start_date = start_date
-    self.simulated_end_date = end_date
+  def fitness
+    @quote_target = population.quote_target
+    self.simulated_start_date = population.simulation_end_date.to_date-population.simulation_days_back
+    self.simulated_end_date = population.simulation_end_date.to_date
     setup_parameters
     if out_of_range_attributes?
       self.simulated_fitness = FAILED_FITNESS_VALUE
@@ -267,20 +274,24 @@ class TradingStrategy < ActiveRecord::Base
       @current_capital_position = @start_capital_position = DEFAULT_START_CAPITAL
       @from_hour = trading_strategy_set.trading_time_frame.from_hour
       @to_hour = trading_strategy_set.trading_time_frame.to_hour
-      number_of_evolution_trading_signals = 0
+      @daily_trading_signals = number_of_evolution_trading_signals = 0
+      @daily_signals = 0
       last_minute = false
       (start_date.to_date..end_date.to_date).each do |day|
         (@from_hour..@to_hour).each do |hour|
           (0..59).each do |minute|
             last_minute = (hour==@to_hour and minute==59 and TradingStrategySet::FORCE_RELEASE_POSITION)
             evaluate(quote_target,DateTime.parse("#{day} #{hour}:#{minute}:00"), last_minute)
-            break if last_minute
+            break if last_minute or @daily_signals>population.simulation_max_daily_trading_signals
           end
+          break if @daily_signals>population.simulation_max_daily_trading_signals
         end
+        break if @daily_signals>population.simulation_max_daily_trading_signals
+        @daily_trading_signals=0
       end
       Rails.logger.debug("Number of trading signals: #{self.number_of_evolution_trading_signals}")
-      if self.number_of_evolution_trading_signals<trading_signals_min or
-         self.number_of_evolution_trading_signals>trading_signals_max or not
+      if self.number_of_evolution_trading_signals<simulation_min_overall_trading_signals or
+         @daily_signals>population.simulation_max_daily_trading_signals or not
          (@current_capital_position and @start_capital_position)
         self.simulated_fitness = FAILED_FITNESS_VALUE
       else
