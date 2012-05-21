@@ -13,7 +13,7 @@ class QuoteTarget < ActiveRecord::Base
   def get_quote_value_by_time_stamp(time_stamp)
     time_stamp_key = time_stamp.strftime("%Y_%m_%d_%H:%M")
     if @@quote_value_cache[time_stamp_key]
-      return_this = @@quote_value_cache[time_stamp_key]
+      return_this = @@quote_value_cache[time_stamp_key] unless @@quote_value_cache[time_stamp_key] == "no_quote"
       if @@quote_value_cache_timer<Time.now
         Rails.logger.debug("CLEARING QUOTE VALUE CACHE")
         @@quote_value_cache.clear

@@ -133,18 +133,16 @@ class TradingStrategy < ActiveRecord::Base
   def match_short_open_conditions
     #return true
     @quote_value_then = @quote_target.get_quote_value_by_time_stamp(@current_date_time-(self.how_far_back_milliseconds/1000.0).seconds).ask
-    Rails.logger.debug("Testing short change: #{@quote_value_then} current: #{@current_quote_value} back in minutes: #{self.how_far_back_milliseconds/1000/60}")
+    Rails.logger.debug("Testing short open: #{@quote_value_then} current: #{@current_quote_value} back in minutes: #{self.how_far_back_milliseconds/1000/60}")
     quote_value_change = @current_quote_value-@quote_value_then
     if quote_value_change==0.0
       return false
     elsif quote_value_change>=0.0
-      Rails.logger.debug("Testing short change: #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@open_magnitude_signal_trigger)}")
+      Rails.logger.debug("Testing short open: #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@open_magnitude_signal_trigger)}")
       magnitude = quote_value_change.abs/@current_quote_value
     else
-      Rails.logger.debug("Testing short change: Has gone down")
+      Rails.logger.debug("Testing short open: Has gone down")
       return false
-      Rails.logger.debug("Testing short change: #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@open_magnitude_signal_trigger)}")
-      magnitude = -(quote_value_change.abs/@current_quote_value)
     end
     magnitude>@open_magnitude_signal_trigger.abs
   end
@@ -175,45 +173,43 @@ class TradingStrategy < ActiveRecord::Base
   end
 
   def match_short_close_conditions
-     return true if rand(8)==5
-     @last_opened_position_value = @trading_position.value_open if @trading_position
-     difference = @current_quote_value-@last_opened_position_value
-     Rails.logger.debug("close_conditions:  current #{@current_quote_value} - last_opened #{@last_opened_position_value} = #{difference}")
-     if difference==0.0
-       return false
-     elsif difference>=0.0
-       Rails.logger.debug("close_conditions: Has gone up")
-       return false
-       Rails.logger.debug("close_conditions: (#{with_precision(@current_quote_value/difference)})>#{with_precision(@close_magnitude_signal_trigger)}=#{(@current_quote_value/difference.abs)>@close_magnitude_signal_trigger}")
-       (@current_quote_value/difference.abs)>@close_magnitude_signal_trigger
-     else
-       Rails.logger.debug("close_conditions: testing #{with_precision(difference.abs/@current_quote_value)}>#{with_precision(@close_magnitude_signal_trigger)}=#{(difference.abs/@current_quote_value).abs>@close_magnitude_signal_trigger}")
-       (difference.abs/@current_quote_value).abs>@close_magnitude_signal_trigger.abs
-     end
-   end
+    @quote_value_then = @quote_target.get_quote_value_by_time_stamp(@current_date_time-(self.how_far_back_milliseconds/1000.0).seconds).ask
+    Rails.logger.debug("Testing short close: #{@quote_value_then} current: #{@current_quote_value} back in minutes: #{self.how_far_back_milliseconds/1000/60}")
+    quote_value_change = @current_quote_value-@quote_value_then
+    if quote_value_change==0.0
+      return false
+    elsif quote_value_change>=0.0
+      Rails.logger.debug("close_conditions: Has gone up")
+      return false
+    else
+      Rails.logger.debug("Testing short close: #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@close_magnitude_signal_trigger)}")
+      magnitude = quote_value_change.abs/@current_quote_value
+    end
+    magnitude>@close_magnitude_signal_trigger.abs
+  end
 
-   def trigger_short_close_signal
-     if @evolution_mode
-       Rails.logger.debug("--> Trigger short CLOSE investment")
-       shorted_at = @last_opened_position_value * @current_position_units
-       currently_at = @current_quote_value * @current_position_units
-       difference = shorted_at-currently_at
-       @current_capital_position+=shorted_at+difference
-       Rails.logger.debug("    Shorted_at #{shorted_at} currently_at #{currently_at} difference #{difference} current #{@current_capital_position}")
-       simulated_trading_signals<<{:name=>"Short Close", :current_date_time=>@current_date_time, :description=>"Shorted_at #{shorted_at} currently_at #{currently_at} difference #{difference} current #{@current_capital_position}"}
-       @current_position_units = nil
-       self.number_of_evolution_trading_signals+=1
-       @daily_signals+=1
-     else
-       signal = TradingSignal.new
-       signal.name = "Short Close"
-       signal.trading_operation_id = @trading_operation_id
-       signal.trading_position_id = @trading_position_id
-       signal.close_quote_value = @current_quote_value
-       signal.trading_strategy_id = self.id
-       signal.save
-     end
-   end
+  def trigger_short_close_signal
+    if @evolution_mode
+      Rails.logger.debug("--> Trigger short CLOSE investment")
+      shorted_at = @last_opened_position_value * @current_position_units
+      currently_at = @current_quote_value * @current_position_units
+      difference = shorted_at-currently_at
+      @current_capital_position+=shorted_at+difference
+      Rails.logger.debug("    Shorted_at #{shorted_at} currently_at #{currently_at} difference #{difference} current #{@current_capital_position}")
+      simulated_trading_signals<<{:name=>"Short Close", :current_date_time=>@current_date_time, :description=>"Shorted_at #{shorted_at} currently_at #{currently_at} difference #{difference} current #{@current_capital_position}"}
+      @current_position_units = nil
+      self.number_of_evolution_trading_signals+=1
+      @daily_signals+=1
+    else
+      signal = TradingSignal.new
+      signal.name = "Short Close"
+      signal.trading_operation_id = @trading_operation_id
+      signal.trading_position_id = @trading_position_id
+      signal.close_quote_value = @current_quote_value
+      signal.trading_strategy_id = self.id
+      signal.save
+    end
+  end
 
   def match_long_open_conditions
     magnitude_of_change_since(self.how_far_back_milliseconds)>@open_magnitude_signal_trigger

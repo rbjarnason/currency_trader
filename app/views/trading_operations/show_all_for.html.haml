@@ -43,6 +43,42 @@
         %td
           = position.units
   %h2
+    Open Magnitude
+  %table
+    - @operation.trading_strategy_population.best_set.trading_strategies.each do |strategy|
+      %th
+        = strategy.id
+    %tr
+      - @operation.trading_strategy_population.best_set.trading_strategies.each do |strategy|
+        - quote_value = @operation.trading_strategy_population.quote_target.get_quote_value_by_time_stamp(DateTime.now-2.hours)
+        - quote_value_ask = quote_value ? quote_value.ask : 1.0
+        - start_price = quote_value_ask
+        - end_price = number_with_precision quote_value_ask+(quote_value_ask*strategy.open_magnitude_signal_trigger).abs, :precision => 5
+        - number_of_minutes = (strategy.how_far_back_milliseconds/1000/60).to_i
+        %td{:width=>"33%"}
+          = render :partial=>"trading_strategies/magnitude_chart", :locals=>{:trading_strategy_id=>strategy.id,
+                                                                             :start_price=>start_price,
+                                                                             :end_price=>end_price,
+                                                                             :number_of_minutes=>number_of_minutes}
+  %h2
+    Close Magnitude
+  %table
+    - @operation.trading_strategy_population.best_set.trading_strategies.each do |strategy|
+      %th
+        = strategy.id
+    %tr
+      - @operation.trading_strategy_population.best_set.trading_strategies.each do |strategy|
+        - quote_value = @operation.trading_strategy_population.quote_target.get_quote_value_by_time_stamp(DateTime.now-2.hours)
+        - quote_value_ask = quote_value ? quote_value.ask : 1.0
+        - start_price = quote_value_ask
+        - end_price = number_with_precision quote_value_ask-(quote_value_ask*strategy.close_magnitude_signal_trigger).abs, :precision => 5
+        - number_of_minutes = (strategy.how_far_back_milliseconds/1000/60).to_i
+        %td{:width=>"33%"}
+          = render :partial=>"trading_strategies/magnitude_chart", :locals=>{:trading_strategy_id=>"#{strategy.id}_close",
+                                                                             :start_price=>start_price,
+                                                                             :end_price=>end_price,
+                                                                             :number_of_minutes=>number_of_minutes}
+  %h2
     Chart
   = render :partial=>"chart"
   %br

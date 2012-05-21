@@ -17,13 +17,13 @@ class TradingOperationsWorker < BaseDaemonWorker
         @set.trading_strategies.each do |strategy|
           unless @operation.trading_positions.where(["open=1 AND trading_strategy_id=?",strategy.id]).first
             info("DateTime-1.hour!!! About to evaluate #{strategy.id} #{@set.id} #{@set.population.quote_target.symbol}")
-            strategy.evaluate(@set.population.quote_target,DateTime.now-1.hour,false,@operation.id)
+            strategy.evaluate(@set.population.quote_target,DateTime.now,false,@operation.id)
           end
         end
       end
       @operation.trading_positions.where("open=1").each do |position|
         info("Checking position #{position.id}")
-        position.trading_strategy.evaluate(@set.population.quote_target,DateTime.now-1.hour,false,@operation.id,position.id)
+        position.trading_strategy.evaluate(@set.population.quote_target,DateTime.now,false,@operation.id,position.id)
       end
     end
   end
