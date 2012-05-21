@@ -12,17 +12,18 @@ class TradingOperationsWorker < BaseDaemonWorker
       @operation.last_processing_time = Time.now+1.hour
       @operation.save
       @set = @operation.trading_strategy_population.best_set
+      #positions_left_to_open = @operation.trading_strategy_population.simulation_number_of_trading_strategies_per_set-@operation.trading_positions.where("open=1").count
+      if @set and not @set.trading_strategies.empty?
+        @set.trading_strategies.each do |strategy|
+          unless @operation.trading_positions.where(["open=1 AND trading_strategy_id=?",strategy.id]).first
+            info("DateTime-1.hour!!! About to evaluate #{strategy.id} #{@set.id} #{@set.population.quote_target.symbol}")
+            strategy.evaluate(@set.population.quote_target,DateTime.now-1.hour,false,@operation.id)
+          end
+        end
+      end
       @operation.trading_positions.where("open=1").each do |position|
         info("Checking position #{position.id}")
         position.trading_strategy.evaluate(@set.population.quote_target,DateTime.now-1.hour,false,@operation.id,position.id)
-      end
-      positions_left_to_open = @operation.trading_strategy_population.simulation_number_of_trading_strategies_per_set-@operation.trading_positions.where("open=1").count
-      if @set and positions_left_to_open>0
-        strategies = @set.trading_strategies.order("rand()")
-        strategies[0..positions_left_to_open].each do |strategy|
-          info("DateTime-1.hour!!! About to evaluate #{strategy.id} #{@set.id} #{@set.population.quote_target.symbol}")
-          strategy.evaluate(@set.population.quote_target,DateTime.now-1.hour,false,@operation.id)
-        end
       end
     end
   end
@@ -52,7 +53,7 @@ class TradingOperationsWorker < BaseDaemonWorker
     position.profit_loss = difference
     position.open = false
     position.save
-    @operation.current_capital+=shorted_at+difference
+    @operation.current_capital +=currently_at
     @signal.profit_loss = difference
   end
 

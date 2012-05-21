@@ -1,0 +1,124 @@
+:javascript
+    AmCharts.ready(function () {
+        createStockChart();
+    });
+
+    var chartData = [#{@operation.get_chart_data(@day_offset.to_i)}]
+
+    var chart;
+
+    function createStockChart() {
+        chart = new AmCharts.AmStockChart();
+        chart.pathToImages = "/assets/amimages/";
+
+        // As we have minutely data, we should set minPeriod to "mm"
+        var categoryAxesSettings = new AmCharts.CategoryAxesSettings();
+        categoryAxesSettings.minPeriod = "mm";
+        chart.categoryAxesSettings = categoryAxesSettings;
+
+        // DATASETS //////////////////////////////////////////
+        var dataSet = new AmCharts.DataSet();
+        dataSet.color = "#b0de09";
+        dataSet.fieldMappings = [{
+            fromField: "value",
+            toField: "value"
+        }, {
+            fromField: "volume",
+            toField: "volume"
+        }];
+        dataSet.dataProvider = chartData;
+        dataSet.categoryField = "date";
+
+        // set data sets to the chart
+        chart.dataSets = [dataSet];
+
+        // PANELS ///////////////////////////////////////////
+        // first stock panel
+        var stockPanel1 = new AmCharts.StockPanel();
+        stockPanel1.showCategoryAxis = false;
+        stockPanel1.title = "Value";
+        stockPanel1.percentHeight = 70;
+        stockPanel1.panEventsEnabled = true;
+
+        // graph of first stock panel
+        var graph1 = new AmCharts.StockGraph();
+        graph1.valueField = "value";
+        graph1.type = "smoothedLine";
+        graph1.lineThickness = 2;
+        stockPanel1.addStockGraph(graph1);
+
+        // create stock legend
+        var stockLegend1 = new AmCharts.StockLegend();
+        stockLegend1.valueTextRegular = " ";
+        stockLegend1.markerType = "none";
+        stockPanel1.stockLegend = stockLegend1;
+
+
+        // second stock panel
+        var stockPanel2 = new AmCharts.StockPanel();
+        stockPanel2.title = "Volume";
+        stockPanel2.percentHeight = 30;
+        stockPanel2.panEventsEnabled = true;
+        var graph2 = new AmCharts.StockGraph();
+        graph2.valueField = "volume";
+        graph2.type = "column";
+        graph2.cornerRadiusTop = 4;
+        graph2.fillAlphas = 1;
+        stockPanel2.addStockGraph(graph2);
+
+        // create stock legend
+        var stockLegend2 = new AmCharts.StockLegend();
+        stockLegend2.valueTextRegular = " ";
+        stockLegend2.markerType = "none";
+        stockPanel2.stockLegend = stockLegend2;
+
+        // set panels to the chart
+        chart.panels = [stockPanel1, stockPanel2];
+
+
+        // OTHER SETTINGS ////////////////////////////////////
+        var scrollbarSettings = new AmCharts.ChartScrollbarSettings();
+        scrollbarSettings.graph = graph1;
+        scrollbarSettings.updateOnReleaseOnly = true;
+        chart.chartScrollbarSettings = scrollbarSettings;
+
+        var cursorSettings = new AmCharts.ChartCursorSettings();
+        cursorSettings.valueBalloonsEnabled = true;
+        chart.chartCursorSettings = cursorSettings;
+
+
+        // PERIOD SELECTOR ///////////////////////////////////
+        var periodSelector = new AmCharts.PeriodSelector();
+        periodSelector.periods = [{
+            period: "hh",
+            count: 1,
+            label: "1 hour"
+        }, {
+            period: "hh",
+            count: 2,
+            label: "2 hours"
+        }, {
+            period: "hh",
+            count: 5,
+            label: "5 hour"
+        }, {
+            period: "hh",
+            count: 12,
+            label: "12 hours"
+        }, {
+            period: "MAX",
+            label: "MAX"
+        }];
+        chart.periodSelector = periodSelector;
+
+        var panelsSettings = new AmCharts.PanelsSettings();
+        panelsSettings.usePrefixes = true;
+        panelsSettings.panEventsEnabled = true;
+        chart.panelsSettings = panelsSettings;
+
+        dataSet.stockEvents = [#{@operation.get_trading_events(@day_offset.to_i)}];
+
+        chart.write('chartdiv_#{@operation.id}');
+    }
+
+%div{:id=>"chartdiv_#{@operation.id}", :style => "width:100%; height:500px;margin-bottom:10px;"}

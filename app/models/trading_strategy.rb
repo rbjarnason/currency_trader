@@ -175,7 +175,7 @@ class TradingStrategy < ActiveRecord::Base
   end
 
   def match_short_close_conditions
-     #return true
+     return true if rand(8)==5
      @last_opened_position_value = @trading_position.value_open if @trading_position
      difference = @current_quote_value-@last_opened_position_value
      Rails.logger.debug("close_conditions:  current #{@current_quote_value} - last_opened #{@last_opened_position_value} = #{difference}")

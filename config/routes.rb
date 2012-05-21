@@ -23,8 +23,11 @@ CurrencyTrader::Application.routes.draw do
 
   match 'trading_strategy_populations/show_all_for/:id' => 'trading_strategy_populations#show_all_for'
 
+  match 'trading_operations/show_all_for/:id' => 'trading_operations#show_all_for'
+
   match 'trading_strategies/chart/:id' => 'trading_strategies#chart'
 
+  match 'trading_operations/chart/:id' => 'trading_operations#chart'
   # The priority is based upon order of creation:
   # first created -> highest priority.
 

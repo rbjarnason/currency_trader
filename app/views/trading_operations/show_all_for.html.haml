@@ -1,0 +1,101 @@
+%div.population_show_all
+  %h1
+    = "Currency Trader - Version 0.1"
+  %hr
+  %br
+  %h2
+    = "Trading Operation #{@operation.id}"
+  %table
+    %tr
+      %th
+        = "Symbol"
+      %th
+        = "Initial Capital"
+      %th
+        = "Current Capital"
+      %th
+        = "Profit Loss"
+    %tr
+      %td
+        = @operation.quote_target.symbol
+      %td
+        = @operation.initial_capital_amount
+      %td
+        = @operation.current_capital
+      %td
+        = @operation.trading_positions.sum("profit_loss")
+  %h2
+    = "Open Positions"
+  %table
+    %tr
+      %th
+        = "Date"
+      %th
+        = "Open Value"
+      %th
+        = "Units"
+    - @operation.trading_positions.where("open=1").order("created_at DESC").limit(20).each do |position|
+      %tr
+        %td
+          = position.created_at
+        %td
+          = position.value_open
+        %td
+          = position.units
+  %h2
+    Chart
+  = render :partial=>"chart"
+  %br
+  - (@operation.created_at.to_date..Date.today).each_with_index do |day,i|
+    = link_to "#{day}", :controller=>"trading_operations", :action=>"show_all_for", :id=>@operation.id, :day_offset=>i
+  %h2
+    = "Current trading strategy"
+    = render :partial=>"trading_strategies/list", :locals=>{:trading_strategies=>@operation.trading_strategy_population.best_set.trading_strategies}
+  %h2
+    = "Closed Positions"
+  %table
+    %tr
+      %th
+        = "Date"
+      %th
+        = "Open Value"
+      %th
+        = "Close Value"
+      %th
+        = "Profit/Loss"
+    - @operation.trading_positions.where("open=0").order("created_at DESC").limit(20).each do |position|
+      %tr
+        %td
+          = position.updated_at
+        %td
+          = position.value_open
+        %td
+          = position.value_close
+        %td
+          = position.profit_loss
+  %h2
+    = "Trading Signals"
+  %table
+    %tr
+      %th
+        = "Date"
+      %th
+        = "Name"
+      %th
+        = "Open Value"
+      %th
+        = "Close Value"
+      %th
+        = "Profit/Loss"
+    - @operation.trading_signals.order("created_at DESC").limit(40).each do |signal|
+      %tr
+        %td
+          = signal.created_at
+        %td
+          = signal.name
+        %td
+          = signal.open_quote_value
+        %td
+          = signal.close_quote_value
+        %td
+          = signal.profit_loss

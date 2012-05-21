@@ -59,14 +59,16 @@ if false
 
   acct = TradingAccount.new
   acct.save
+
+  pop = TradingStrategyPopulation.last
   operation = TradingOperation.new
-  operation.trading_strategy_population = TradingStrategyPopulation.last
+  operation.trading_strategy_population = pop
   operation.trading_account = acct
   operation.initial_capital_amount = 10000000
   operation.current_capital = 10000000
   operation.last_processing_time = DateTime.now-1.hour
-  operation.processing_time_interval = 45
-  operation.quote_target = QuoteTarget.where("symbol='EUR/USD'").first
+  operation.processing_time_interval = 30
+  operation.quote_target = pop.quote_target
   operation.save
 
 end
