@@ -96,14 +96,16 @@ class TradingStrategy < ActiveRecord::Base
   end
 
   def evaluate(quote_target, date_time=DateTime.now, last_time_segment=false, trading_operation_id=nil, trading_position_id=nil)
+    @quote_target = quote_target
     @trading_operation_id = trading_operation_id
     @trading_position_id = trading_position_id
     @current_date_time = date_time
+    @trading_position = TradingPosition.find(@trading_position_id) if @trading_position_id
     if current_quote_value = @quote_target.get_quote_value_by_time_stamp(@current_date_time)
       @current_quote_value = current_quote_value.ask
       if true or @strategy_buy_short==1
         Rails.logger.debug("Short mode")
-        if @current_position_units or @trading_operation_id
+        if @current_position_units or @trading_position_id
           Rails.logger.debug("Holding position")
           trigger_short_close_signal if match_short_close_conditions or last_time_segment
         else
@@ -129,6 +131,7 @@ class TradingStrategy < ActiveRecord::Base
   end
 
   def match_short_open_conditions
+    #return true
     @quote_value_then = @quote_target.get_quote_value_by_time_stamp(@current_date_time-(self.how_far_back_milliseconds/1000.0).seconds).ask
     Rails.logger.debug("Testing short change: #{@quote_value_then} current: #{@current_quote_value} back in minutes: #{self.how_far_back_milliseconds/1000/60}")
     quote_value_change = @current_quote_value-@quote_value_then
@@ -172,6 +175,8 @@ class TradingStrategy < ActiveRecord::Base
   end
 
   def match_short_close_conditions
+     #return true
+     @last_opened_position_value = @trading_position.value_open if @trading_position
      difference = @current_quote_value-@last_opened_position_value
      Rails.logger.debug("close_conditions:  current #{@current_quote_value} - last_opened #{@last_opened_position_value} = #{difference}")
      if difference==0.0

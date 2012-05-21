@@ -50,3 +50,23 @@ if false
   pop.initialize_population
   pop.save
 end
+
+if false
+  TradingOperation.delete_all
+  TradingSignal.delete_all
+  TradingPosition.delete_all
+  TradingAccount.delete_all
+
+  acct = TradingAccount.new
+  acct.save
+  operation = TradingOperation.new
+  operation.trading_strategy_population = TradingStrategyPopulation.last
+  operation.trading_account = acct
+  operation.initial_capital_amount = 10000000
+  operation.current_capital = 10000000
+  operation.last_processing_time = DateTime.now-1.hour
+  operation.processing_time_interval = 45
+  operation.quote_target = QuoteTarget.where("symbol='EUR/USD'").first
+  operation.save
+
+end

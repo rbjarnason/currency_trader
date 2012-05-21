@@ -22,6 +22,14 @@ class AddSignalsMore < ActiveRecord::Migration
       t.datetime "created_at",             :null => false
       t.datetime "updated_at",             :null => false
     end
+    add_column :trading_operations, :active, :boolean, :default=>true
+    add_column :trading_operations, :last_processing_time, :datetime
+    add_column :trading_operations, :processing_time_interval, :datetime
+    add_column :trading_signals, :complete, :boolean, :default=>false
+    add_column :trading_operations, :trading_strategy_population_id, :integer
+    add_column :trading_positions, :profit_loss, :float
+    remove_column :trading_operations, :processing_time_interval
+    add_column :trading_operations, :processing_time_interval, :integer
   end
 
   def down
