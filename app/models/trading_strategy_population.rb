@@ -7,7 +7,7 @@ class StrategyBinaryParameters < BitStringGenotype((TradingStrategySet::MAX_NUMB
 end
 
 class StrategyFloatParameters <  FloatListGenotype((TradingStrategySet::MAX_NUMBER_OF_TRADING_STRATEGIES+1)*NUMBER_OF_FLOAT_EVOLUTION_PARAMETERS)
- use Elitism(TruncationSelection(0.4),1), UniformCrossover, ListMutator(:probability[ p=0.35 ],:uniform[ max_size=25 ])
+ use Elitism(TruncationSelection(0.5),1), UniformCrossover, ListMutator(:probability[ p=0.4 ],:uniform[ max_size=25 ])
 end
 
 genotypes = []
@@ -47,6 +47,14 @@ class TradingStrategyPopulation < ActiveRecord::Base
   def initialize_population
     @population = NetworkedPopulation.new(TradingStrategySetParameters,self.population_size)
     create_trading_strategy_sets(@population)
+  end
+
+  def best_set
+    if self.best_trading_strategy_set_id
+      TradingStrategySet.find(self.best_trading_strategy_set_id)
+    else
+      nil
+    end
   end
 
   def evolve

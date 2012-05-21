@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 require 'rubygems'
 require 'daemons'
 require 'yaml'
@@ -8,12 +10,12 @@ worker_config = YAML.load(f)
 ENV['RAILS_ENV'] = worker_config['rails_env']
 
 options = {
-    :app_name   => "evolution_engine_worker_"+ENV['RAILS_ENV'],
+    :app_name   => "crawler_worker_"+ENV['RAILS_ENV'],
     :dir_mode   => :script,
     :backtrace  => true,
-    :monitor    => false,
+    :monitor    => true,
     :log_output => false,
-    :script     => "evolution_engine_worker_daemon.rb"
+    :script     => "crawler_worker_daemon.rb" 
   }
 
-Daemons.run(File.join(File.dirname(__FILE__), 'evolution_engine_worker_daemon.rb'), options)
+Daemons.run(File.join(File.dirname(__FILE__), 'trading_operations_worker_daemon.rb'), options)

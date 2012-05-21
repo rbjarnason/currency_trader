@@ -95,18 +95,20 @@ class TradingStrategy < ActiveRecord::Base
              backgroundColor: '#{background_color}', graph: graph1, text: '#{event[:name]}', description: '#{event[:description]}'}"
   end
 
-  def evaluate(quote_target, date_time=DateTime.now, last_time_segment=false)
+  def evaluate(quote_target, date_time=DateTime.now, last_time_segment=false, trading_operation_id=nil, trading_position_id=nil)
+    @trading_operation_id = trading_operation_id
+    @trading_position_id = trading_position_id
     @current_date_time = date_time
     if current_quote_value = @quote_target.get_quote_value_by_time_stamp(@current_date_time)
       @current_quote_value = current_quote_value.ask
       if true or @strategy_buy_short==1
         Rails.logger.debug("Short mode")
-        if not @current_position_units
-          Rails.logger.debug("Not holding position")
-          trigger_short_open_signal if match_short_open_conditions
-        else
+        if @current_position_units or @trading_operation_id
           Rails.logger.debug("Holding position")
           trigger_short_close_signal if match_short_close_conditions or last_time_segment
+        else
+          Rails.logger.debug("Not holding position")
+          trigger_short_open_signal if match_short_open_conditions
         end
       else
         Rails.logger.debug("Long mode")
@@ -160,7 +162,12 @@ class TradingStrategy < ActiveRecord::Base
         Rails.warn("Out of cash: #{self.inspect}")
       end
     else
-      # Generate Trading Signal Since
+      signal = TradingSignal.new
+      signal.name = "Short Open"
+      signal.trading_operation_id = @trading_operation_id
+      signal.open_quote_value = @current_quote_value
+      signal.trading_strategy_id = self.id
+      signal.save
     end
   end
 
@@ -193,7 +200,13 @@ class TradingStrategy < ActiveRecord::Base
        self.number_of_evolution_trading_signals+=1
        @daily_signals+=1
      else
-       # Generate Trading Signal Since
+       signal = TradingSignal.new
+       signal.name = "Short Close"
+       signal.trading_operation_id = @trading_operation_id
+       signal.trading_position_id = @trading_position_id
+       signal.close_quote_value = @current_quote_value
+       signal.trading_strategy_id = self.id
+       signal.save
      end
    end
 
@@ -280,8 +293,8 @@ class TradingStrategy < ActiveRecord::Base
   def fitness
     @quote_target = population.quote_target
     Rails.logger.debug("XXXXXXXXXXXXXXX #{population.simulation_end_date.to_date}")
-    self.simulated_start_date = (population.simulation_end_date.to_date-population.simulation_days_back).to_date
-    self.simulated_end_date = population.simulation_end_date.to_date
+    self.simulated_end_date = population.simulation_end_date ? population.simulation_end_date.to_date : Date.today
+    self.simulated_start_date = (self.simulated_end_date.to_date-population.simulation_days_back).to_date
     setup_parameters
     if out_of_range_attributes?
       self.simulated_fitness = FAILED_FITNESS_VALUE
