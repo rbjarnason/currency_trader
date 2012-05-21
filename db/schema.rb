@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120520221254) do
+ActiveRecord::Schema.define(:version => 20120521224439) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.string   "resource_id",   :null => false
@@ -58,6 +58,8 @@ ActiveRecord::Schema.define(:version => 20120520221254) do
     t.datetime "last_yahoo_processing_time"
   end
 
+  add_index "quote_targets", ["symbol"], :name => "index_quote_targets_on_symbol"
+
   create_table "quote_values", :force => true do |t|
     t.integer  "quote_target_id"
     t.datetime "data_time"
@@ -66,6 +68,9 @@ ActiveRecord::Schema.define(:version => 20120520221254) do
     t.float    "ask"
   end
 
+  add_index "quote_values", ["created_at"], :name => "index_quote_values_on_created_at"
+  add_index "quote_values", ["data_time"], :name => "index_quote_values_on_data_time"
+
   create_table "trading_accounts", :force => true do |t|
     t.string   "name"
     t.datetime "created_at", :null => false
@@ -73,20 +78,47 @@ ActiveRecord::Schema.define(:version => 20120520221254) do
   end
 
   create_table "trading_operations", :force => true do |t|
-    t.integer  "quote_target_id",        :null => false
-    t.integer  "trading_account_id",     :null => false
-    t.float    "initial_capital_amount", :null => false
-    t.float    "current_capital_amount", :null => false
-    t.datetime "created_at",             :null => false
-    t.datetime "updated_at",             :null => false
+    t.integer  "quote_target_id",                                  :null => false
+    t.integer  "trading_account_id",                               :null => false
+    t.float    "initial_capital_amount",                           :null => false
+    t.datetime "created_at",                                       :null => false
+    t.datetime "updated_at",                                       :null => false
+    t.float    "current_capital"
+    t.boolean  "active",                         :default => true
+    t.datetime "last_processing_time"
+    t.integer  "trading_strategy_population_id"
+    t.integer  "processing_time_interval"
+  end
+
+  add_index "trading_operations", ["quote_target_id"], :name => "index_trading_operations_on_quote_target_id"
+
+  create_table "trading_positions", :force => true do |t|
+    t.integer  "trading_operation_id",                   :null => false
+    t.integer  "trading_strategy_id",                    :null => false
+    t.boolean  "open",                 :default => true
+    t.float    "value_open"
+    t.float    "value_close"
+    t.integer  "units"
+    t.datetime "created_at",                             :null => false
+    t.datetime "updated_at",                             :null => false
+    t.float    "profit_loss"
   end
 
   create_table "trading_signals", :force => true do |t|
-    t.integer  "trading_strategy_id", :null => false
-    t.float    "signal",              :null => false
-    t.datetime "created_at",          :null => false
-    t.datetime "updated_at",          :null => false
+    t.integer  "trading_strategy_id",                     :null => false
+    t.datetime "created_at",                              :null => false
+    t.datetime "updated_at",                              :null => false
+    t.float    "open_quote_value"
+    t.float    "close_quote_value"
+    t.float    "profit_loss"
+    t.integer  "trading_position_id"
+    t.integer  "trading_operation_id"
+    t.string   "name"
+    t.text     "debug_information"
+    t.boolean  "complete",             :default => false
   end
+
+  add_index "trading_signals", ["trading_strategy_id"], :name => "index_trading_signals_on_trading_strategy_id"
 
   create_table "trading_strategies", :force => true do |t|
     t.integer  "trading_strategy_template_id",                       :null => false
@@ -105,6 +137,8 @@ ActiveRecord::Schema.define(:version => 20120520221254) do
     t.integer  "how_far_back_milliseconds"
     t.string   "simulated_fitness_failure_reason"
   end
+
+  add_index "trading_strategies", ["trading_strategy_set_id"], :name => "index_trading_strategies_on_trading_strategy_set_id"
 
   create_table "trading_strategy_populations", :force => true do |t|
     t.integer  "quote_target_id"
@@ -130,6 +164,8 @@ ActiveRecord::Schema.define(:version => 20120520221254) do
     t.integer  "simulation_max_overall_trading_signals"
   end
 
+  add_index "trading_strategy_populations", ["quote_target_id"], :name => "index_trading_strategy_populations_on_quote_target_id"
+
   create_table "trading_strategy_sets", :force => true do |t|
     t.integer  "trading_strategy_population_id",                    :null => false
     t.integer  "trading_time_frame_id",                             :null => false
@@ -148,6 +184,10 @@ ActiveRecord::Schema.define(:version => 20120520221254) do
     t.integer  "processing_time_interval",       :default => 1800
     t.float    "accumulated_fitness"
   end
+
+  add_index "trading_strategy_sets", ["accumulated_fitness"], :name => "index_trading_strategy_sets_on_accumulated_fitness"
+  add_index "trading_strategy_sets", ["trading_strategy_population_id"], :name => "index_trading_strategy_sets_on_trading_strategy_population_id"
+  add_index "trading_strategy_sets", ["trading_time_frame_id"], :name => "index_trading_strategy_sets_on_trading_time_frame_id"
 
   create_table "trading_strategy_templates", :force => true do |t|
     t.string   "name",       :null => false
