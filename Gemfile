@@ -9,7 +9,7 @@ gem 'mysql2'
 gem "daemons"
 gem "capistrano"
 gem "sys-filesystem"
-gem 'activeadmin'
+#gem 'activeadmin'
 gem "meta_search",    '>= 1.1.0.pre'
 gem 'haml'
 gem 'awesome_print'
