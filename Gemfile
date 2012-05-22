@@ -7,6 +7,7 @@ gem 'rails', '3.2.3'
 
 gem 'mysql2'
 gem "daemons"
+gem "capistrano"
 gem "sys-filesystem"
 gem 'activeadmin'
 gem "meta_search",    '>= 1.1.0.pre'
