@@ -1,5 +1,4 @@
-class TradingOperationsController < InheritedResources::Base
-
+class TradingOperationsController < ApplicationController
   def show_all_for
     @operation = TradingOperation.find(params[:id])
     @day_offset = params[:day_offset]

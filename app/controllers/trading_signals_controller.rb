@@ -1,2 +1,2 @@
-class TradingSignalsController < InheritedResources::Base
+class TradingSignalsController < ApplicationController
 end
