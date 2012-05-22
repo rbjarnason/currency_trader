@@ -17,8 +17,6 @@ CurrencyTrader::Application.routes.draw do
 
   resources :trading_strategy_sets
 
-  ActiveAdmin.routes(self)
-
   match 'trading_strategy_populations/show_all_for/:id' => 'trading_strategy_populations#show_all_for'
 
   match 'trading_operations/show_all_for/:id' => 'trading_operations#show_all_for'
