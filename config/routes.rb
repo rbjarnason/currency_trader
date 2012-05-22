@@ -19,8 +19,6 @@ CurrencyTrader::Application.routes.draw do
 
   ActiveAdmin.routes(self)
 
-  devise_for :admin_users, ActiveAdmin::Devise.config
-
   match 'trading_strategy_populations/show_all_for/:id' => 'trading_strategy_populations#show_all_for'
 
   match 'trading_operations/show_all_for/:id' => 'trading_operations#show_all_for'
