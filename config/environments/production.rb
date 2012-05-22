@@ -15,7 +15,7 @@ CurrencyTrader::Application.configure do
   config.assets.compress = true
 
   # Don't fallback to assets pipeline if a precompiled asset is missed
-  config.assets.compile = true
+  config.assets.compile = false
 
   # Generate digests for assets URLs
   config.assets.digest = true
@@ -61,6 +61,7 @@ CurrencyTrader::Application.configure do
   # Send deprecation notices to registered listeners
   config.active_support.deprecation = :notify
 
+  config.action_dispatch.x_sendfile_header = 'X-Sendfile'
 
   #config.assets.initialize_on_precompile = false
   # Log the query plan for queries taking more than this (works
