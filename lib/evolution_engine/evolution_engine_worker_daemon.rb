@@ -65,4 +65,4 @@ end
 f = File.open( File.dirname(__FILE__) + '/config/worker.yml')
 worker_config = YAML.load(f)
 
-EvolutionEngineWorker.new(worker_config, Logger.new( File.join(File.dirname(__FILE__), "evolution_engine_worker_#{ENV['RAILS_ENV']}.log"))).run
+EvolutionEngineWorker.new(worker_config, Rails.logger = Logger.new( File.join(File.dirname(__FILE__), "evolution_engine_worker_#{ENV['RAILS_ENV']}.log"))).run
