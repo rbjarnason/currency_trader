@@ -35,7 +35,7 @@ if false
   #TradingStrategy.delete_all
   pop=TradingStrategyPopulation.new
   pop.active = true
-  pop.quote_target = QuoteTarget.last
+  pop.quote_target = QuoteTarget.where("symbol='EUR/USD'").first
   pop.in_process = true
   pop.max_generations = 2000000
   pop.population_size = 120

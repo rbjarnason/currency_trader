@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120521224439) do
+ActiveRecord::Schema.define(:version => 20120522194455) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.string   "resource_id",   :null => false
@@ -58,18 +58,23 @@ ActiveRecord::Schema.define(:version => 20120521224439) do
     t.datetime "last_yahoo_processing_time"
   end
 
-  add_index "quote_targets", ["symbol"], :name => "index_quote_targets_on_symbol"
-
   create_table "quote_values", :force => true do |t|
     t.integer  "quote_target_id"
     t.datetime "data_time"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.float    "ask"
+    t.integer  "timestamp_ms"
+    t.float    "bid_big_figure"
+    t.float    "bid_points"
+    t.float    "offer_big_figure"
+    t.float    "offer_points"
+    t.float    "high"
+    t.float    "low"
+    t.float    "open"
+    t.float    "bid"
+    t.float    "offer"
   end
-
-  add_index "quote_values", ["created_at"], :name => "index_quote_values_on_created_at"
-  add_index "quote_values", ["data_time"], :name => "index_quote_values_on_data_time"
 
   create_table "trading_accounts", :force => true do |t|
     t.string   "name"

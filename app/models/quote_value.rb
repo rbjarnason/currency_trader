@@ -48,9 +48,19 @@ class QuoteValue < ActiveRecord::Base
     normalize_float(self.last_trade.to_f)
   end
 
-  def import_csv_data(logger,quote_data)
-    logger.debug(quote_data.inspect)
-    self.ask = quote_data[0].to_f
+  def import_csv_data(quote_data)
+    Rails.logger.debug(quote_data.inspect)
+    self.timestamp_ms = quote_data[1].to_i
+    self.bid_big_figure = quote_data[2].to_f
+    self.bid_points = quote_data[3].to_f
+    self.bid = "#{self.bid_big_figure}#{self.bid_points.to_i}"
+    self.offer_big_figure = quote_data[4].gsub("#","").to_f
+    self.offer_points = quote_data[5].to_f
+    self.offer = "#{self.offer_big_figure}#{self.offer_points.to_i}"
+    self.high = quote_data[6].to_f
+    self.low = quote_data[7].to_f
+    self.open = quote_data[8].to_f
+    self.ask = self.bid
   end
 
 private

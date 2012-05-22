@@ -10,9 +10,9 @@ class QuoteTarget < ActiveRecord::Base
     end
   end
 
-  def get_quote_value_by_time_stamp(time_stamp)
-    time_stamp_key = time_stamp.strftime("%Y_%m_%d_%H:%M")
-    if @@quote_value_cache[time_stamp_key]
+  def get_quote_value_by_time_stamp(time_stamp=nil)
+    time_stamp_key = time_stamp ? time_stamp.strftime("%Y_%m_%d_%H:%M") : nil
+    if time_stamp_key and @@quote_value_cache[time_stamp_key]
       return_this = @@quote_value_cache[time_stamp_key] unless @@quote_value_cache[time_stamp_key] == "no_quote"
       if @@quote_value_cache_timer<Time.now
         Rails.logger.debug("CLEARING QUOTE VALUE CACHE")
@@ -25,11 +25,15 @@ class QuoteTarget < ActiveRecord::Base
         nil
       end
     else
-      if quote_value = quote_values.where(["created_at >= ?",time_stamp]).first
-        @@quote_value_cache[time_stamp_key] = quote_value
+      if time_stamp
+        if quote_value = quote_values.where(["created_at >= ?",time_stamp]).first
+          @@quote_value_cache[time_stamp_key] = quote_value
+        else
+          @@quote_value_cache[time_stamp_key] = "no_quote"
+          nil
+        end
       else
-        @@quote_value_cache[time_stamp_key] = "no_quote"
-        nil
+        quote_values.last
       end
     end
   end

@@ -101,8 +101,13 @@ class TradingStrategy < ActiveRecord::Base
     @trading_position_id = trading_position_id
     @current_date_time = date_time
     @trading_position = TradingPosition.find(@trading_position_id) if @trading_position_id
-    if current_quote_value = @quote_target.get_quote_value_by_time_stamp(@current_date_time)
-      @current_quote_value = current_quote_value.ask
+    if @evolution_mode
+      @current_quote = @quote_target.get_quote_value_by_time_stamp(@current_date_time)
+    else
+      @current_quote = @quote_target.get_quote_value_by_time_stamp
+    end
+    if  @current_quote
+      @current_quote_value = @current_quote.ask
       if true or @strategy_buy_short==1
         Rails.logger.debug("Short mode")
         if @current_position_units or @trading_position_id
@@ -123,7 +128,7 @@ class TradingStrategy < ActiveRecord::Base
         end
       end
     else
-      Rails.logger.warn("No quote value!")
+      Rails.logger.warn("No quote value for #{@current_date_time}!")
     end
     Rails.logger.debug "Current date time #{@current_date_time} quote_value: #{@current_quote_value} units: #{@current_position_units} current: #{@current_capital_position} last_opened: #{@last_opened_position_value}"
     Rails.logger.debug("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
@@ -149,7 +154,7 @@ class TradingStrategy < ActiveRecord::Base
 
   def trigger_short_open_signal
     capital_investment = DEFAULT_POSITION_UNITS*@current_quote_value
-    Rails.logger.debug("--> Trigger short OPEN investment")
+    Rails.logger.info("--> Trigger short OPEN")
     if @evolution_mode
       if @current_capital_position-capital_investment>0
         @current_position_units = DEFAULT_POSITION_UNITS
@@ -173,22 +178,50 @@ class TradingStrategy < ActiveRecord::Base
   end
 
   def match_short_close_conditions
-    @quote_value_then = @quote_target.get_quote_value_by_time_stamp(@current_date_time-(self.how_far_back_milliseconds/1000.0).seconds).ask
-    Rails.logger.debug("Testing short close: #{@quote_value_then} current: #{@current_quote_value} back in minutes: #{self.how_far_back_milliseconds/1000/60}")
-    quote_value_change = @current_quote_value-@quote_value_then
-    if quote_value_change==0.0
+    Rails.logger.info("--- MATCH SHORT")
+    if quote_value_then = @quote_target.get_quote_value_by_time_stamp(@current_date_time-(self.how_far_back_milliseconds/1000.0).seconds)
+      @quote_value_then = quote_value_then.ask
+    else
+      Rails.logger.error("Can't find ask for #{@current_date_time-(self.how_far_back_milliseconds/1000.0).seconds}")
       return false
+    end
+    Rails.logger.info("Testing short close: #{@quote_value_then} current: #{@current_quote_value} back in minutes: #{self.how_far_back_milliseconds/1000/60}")
+    quote_value_change = @current_quote_value-@quote_value_then
+    short_timeout = false
+    if @trading_position
+      Rails.logger.info("!!!!! Checking trading position #{@trading_position.id} #{@trading_position.created_at+2.hours} #{DateTime.now} #{@current_quote_value}<#{@trading_position.value_open}")
+      if @trading_position
+        Rails.logger.info("TP #{(@trading_position.created_at+2.hour)}<#{DateTime.now+1.hour}")
+        if (@trading_position.created_at+2.hours)<DateTime.now+1.hour
+          Rails.logger.info("TIMEOUT")
+          if @current_quote_value<@trading_position.value_open
+            Rails.logger.info("Value is less!")
+            short_timeout = true
+          end
+        end
+      end
+    end
+
+    if short_timeout
+      return true
+    elsif quote_value_change==0.0
+      return false
+    elsif short_timeout
+      return true
     elsif quote_value_change>=0.0
       Rails.logger.debug("close_conditions: Has gone up")
       return false
     else
-      Rails.logger.debug("Testing short close: #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@close_magnitude_signal_trigger)}")
+      Rails.logger.debug("Testing short close: #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@close_magnitude_signal_trigger.abs)}")
       magnitude = quote_value_change.abs/@current_quote_value
     end
     magnitude>@close_magnitude_signal_trigger.abs
   end
 
+  # If falling quickly hold on if falling and if making profits...
+
   def trigger_short_close_signal
+    Rails.logger.info("--> Trigger short CLOSE")
     if @evolution_mode
       Rails.logger.debug("--> Trigger short CLOSE investment")
       shorted_at = @last_opened_position_value * @current_position_units
@@ -252,7 +285,7 @@ class TradingStrategy < ActiveRecord::Base
 
   def magnitude_of_change_since(millseconds_since)
     @quote_value_then = @quote_target.get_quote_value_by_time_stamp(@current_date_time-(millseconds_since/1000.0).seconds).ask
-    Rails.logger.debug("Magnitude of change: then: #{@quote_value_then} current: #{@current_quote_value}")
+    Rails.logger.info("Magnitude of change: then: #{@quote_value_then} current: #{@current_quote_value}")
     quote_value_change = @current_quote_value-@quote_value_then
     if quote_value_change>=0.0
       Rails.logger.debug("Magnitude of change: change: #{quote_value_change.abs} mag: #{quote_value_change.abs/@current_quote_value}")

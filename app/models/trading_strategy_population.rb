@@ -121,18 +121,20 @@ class TradingStrategyPopulation < ActiveRecord::Base
 
     def create_trading_strategy_sets(settings)
       Rails.logger.info("create_trading_strategy_sets")
-      for setting in settings
-        trading_strategy_set = TradingStrategySet.new
-        trading_strategy_set.trading_strategy_population_id = self.id
-        trading_strategy_set.trading_time_frame = TradingTimeFrame.last
-        trading_strategy_set.save
-        trading_strategy_set.setup_trading_strategies
-        trading_strategy_set.import_settings_from_population(self,setting)
-        trading_strategy_set.active = true
-        trading_strategy_set.in_population_process = true
-        trading_strategy_set.save
-        setting.trading_strategy_set_id = trading_strategy_set.id
-        Rails.logger.info("create_trading_strategy_sets id: #{trading_strategy_set.id}")
+      TradingStrategySet.transaction do
+        for setting in settings
+          trading_strategy_set = TradingStrategySet.new
+          trading_strategy_set.trading_strategy_population_id = self.id
+          trading_strategy_set.trading_time_frame = TradingTimeFrame.last
+          trading_strategy_set.save
+          trading_strategy_set.setup_trading_strategies
+          trading_strategy_set.import_settings_from_population(self,setting)
+          trading_strategy_set.active = true
+          trading_strategy_set.in_population_process = true
+          trading_strategy_set.save
+          setting.trading_strategy_set_id = trading_strategy_set.id
+          Rails.logger.info("create_trading_strategy_sets id: #{trading_strategy_set.id}")
+        end
       end
     end
   end

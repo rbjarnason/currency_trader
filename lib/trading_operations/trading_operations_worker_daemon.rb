@@ -84,5 +84,5 @@ end
 f = File.open( File.dirname(__FILE__) + '/config/worker.yml')
 worker_config = YAML.load(f)
 
-crawler_worker = TradingOperationsWorker.new(worker_config, Logger.new( File.join(File.dirname(__FILE__), "trading_operations#{ENV['RAILS_ENV']}.log")))
+crawler_worker = TradingOperationsWorker.new(worker_config, Rails.logger=Logger.new( File.join(File.dirname(__FILE__), "trading_operations_#{ENV['RAILS_ENV']}.log")))
 crawler_worker.run
