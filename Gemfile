@@ -12,6 +12,7 @@ gem "sys-filesystem"
 #gem 'activeadmin'
 gem "meta_search",    '>= 1.1.0.pre'
 gem 'haml'
+gem 'dalli'
 gem 'awesome_print'
 #gem "charlie"
 # Gems used only for assets and not required

@@ -45,6 +45,7 @@ GEM
       execjs
     coffee-script-source (1.3.3)
     daemons (1.1.8)
+    dalli (2.0.5)
     erubis (2.7.0)
     execjs (1.4.0)
       multi_json (~> 1.0)
@@ -139,6 +140,7 @@ DEPENDENCIES
   capistrano
   coffee-rails (~> 3.2.1)
   daemons
+  dalli
   haml
   jquery-rails
   meta_search (>= 1.1.0.pre)

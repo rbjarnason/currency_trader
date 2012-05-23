@@ -67,4 +67,6 @@ CurrencyTrader::Application.configure do
   # Log the query plan for queries taking more than this (works
   # with SQLite, MySQL, and PostgreSQL)
   # config.active_record.auto_explain_threshold_in_seconds = 0.5
+  config.cache_store = :dalli_store, '127.0.0.1:11211', { :namespace => "ct_1_#{Rails.env}_#{Rails.application.config.database_configuration[Rails.env]["git_branch"]}",
+                                                            :compress => true, :compress_threshold => 64*1024 }
 end

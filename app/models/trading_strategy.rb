@@ -51,10 +51,12 @@ class TradingStrategy < ActiveRecord::Base
     day_offset = 0 unless day_offset
     quote_values = []
     @day = self.simulated_start_date.to_date+day_offset #(self.simulated_start_date+4).to_date
-    (00..23).each do |hour|
-      (0..59).each do |minute|
-        current_quote_value = trading_strategy_set.trading_strategy_population.quote_target.get_quote_value_by_time_stamp(DateTime.parse("#{@day} #{hour}:#{minute}:00"))
-        quote_values<<"{date: new Date(#{@day.year},#{@day.month},#{@day.day},#{hour},#{minute},0,0), value: #{current_quote_value.ask}, volume: #{0}}" if current_quote_value
+    QuoteValue.transaction do
+      (00..23).each do |hour|
+        (0..59).each do |minute|
+          current_quote_value = trading_strategy_set.trading_strategy_population.quote_target.get_quote_value_by_time_stamp(DateTime.parse("#{@day} #{hour}:#{minute}:00"))
+          quote_values<<"{date: new Date(#{@day.year},#{@day.month},#{@day.day},#{hour},#{minute},0,0), value: #{current_quote_value.ask}, volume: #{0}}" if current_quote_value
+        end
       end
     end
     quote_values.join(",")
