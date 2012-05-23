@@ -51,7 +51,7 @@ class QuoteTarget < ActiveRecord::Base
     else
       if time_stamp
         if quote_value = quote_values.where(["created_at >= ?",time_stamp]).first
-          Rails.cache.write(time_stamp_key,quote_value)
+          Rails.cache.write(time_stamp_key,quote_value) if quote_value
           quote_value
         end
       else
