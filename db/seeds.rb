@@ -38,7 +38,7 @@ if false
   pop.quote_target = QuoteTarget.where("symbol='EUR/USD'").first
   pop.in_process = true
   pop.max_generations = 2000000
-  pop.population_size = 120
+  pop.population_size = 700
   pop.simulation_number_of_trading_strategies_per_set = 3
   pop.simulation_days_back = 4
   pop.simulation_end_date = DateTime.parse("18/05/2012 23:59:59")+1.day

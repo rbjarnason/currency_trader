@@ -1,7 +1,7 @@
 class TradingOperationsController < ApplicationController
   def show_all_for
     @operation = TradingOperation.find(params[:id])
-    @day_offset = params[:day_offset]
+    @current_day = params[:current_day] ? Date.parse(params[:current_day]) : Date.today
   end
 
   def chart

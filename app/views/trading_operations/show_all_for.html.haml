@@ -21,7 +21,7 @@
       %td
         = @operation.initial_capital_amount
       %td
-        = @operation.current_capital
+        = @operation.initial_capital_amount+@operation.trading_positions.sum("profit_loss")
       %td
         = @operation.trading_positions.sum("profit_loss")
   %h2
@@ -104,11 +104,12 @@
                                                                              :end_price=>end_price,
                                                                              :number_of_minutes=>number_of_minutes}
   %h2
-    Chart
+    = "Chart for #{@current_day}"
   = render :partial=>"chart"
   %br
   - (@operation.created_at.to_date..Date.today).each_with_index do |day,i|
-    = link_to "#{day}", :controller=>"trading_operations", :action=>"show_all_for", :id=>@operation.id, :day_offset=>i
+    = link_to @current_day.to_date==day ? "<b>#{day}</b>".html_safe : "#{day}", :controller=>"trading_operations", :action=>"show_all_for", :id=>@operation.id, :current_day=>day.to_s
+    %br
   %h2
     = "Current trading strategy"
     = render :partial=>"trading_strategies/list", :locals=>{:trading_strategies=>@operation.trading_strategy_population.best_set.trading_strategies}

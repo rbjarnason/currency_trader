@@ -6,24 +6,25 @@ class TradingOperation < ActiveRecord::Base
   has_many :trading_positions
   has_many :trading_signals
 
-  def get_chart_data(day_offset=0)
-    day_offset = 0 unless day_offset
+
+  def get_chart_data(current_day=nil)
     quote_values = []
-    @day = self.created_at.to_date+day_offset #(self.simulated_start_date+4).to_date
-    (00..23).each do |hour|
-      (0..59).each do |minute|
-        current_quote_value = self.quote_target.get_quote_value_by_time_stamp(DateTime.parse("#{@day} #{hour}:#{minute}:00"))
-        quote_values<<"{date: new Date(#{@day.year},#{@day.month},#{@day.day},#{hour},#{minute},0,0), value: #{current_quote_value.ask}, volume: #{0}}" if current_quote_value
-      end
+    current_day = current_day ? current_day : Date.today
+    from_date = current_day.to_datetime.beginning_of_day
+    to_date = current_day.to_datetime.end_of_day
+    quote_target.quote_values.select("ask, created_at, MINUTE(created_at) as CTMINUTE, MIN(ask) AS MINASK, MAX(ask) AS MAXASK").
+                              where(["created_at>=? AND created_at<=?",from_date.to_formatted_s(:db),to_date.to_formatted_s(:db)]).
+                              group("MINUTE(created_at), HOUR(created_at)").each do |quote_value|
+      quote_values<<"{date: new Date(#{quote_value.created_at.year},#{quote_value.created_at.month-1},#{quote_value.created_at.day},#{quote_value.created_at.hour},#{quote_value.CTMINUTE},0,0), value: #{quote_value.ask}, volume: #{0}}"
     end
     quote_values.join(",")
   end
 
-  def get_trading_events(day_offset=0)
-    day_offset = 0 unless day_offset
+  def get_trading_events(current_day=nil)
+
     @from_hour = TradingTimeFrame.last.from_hour
     @to_hour = TradingTimeFrame.last.to_hour
-    @day = self.created_at.to_date+day_offset
+    @day = current_day ? current_day : Date.today
     events = []
     events << simulated_trading_signal_to_amchart({:name=>"B", :current_date_time=>DateTime.parse("#{@day} #{@from_hour}:00:00"), :background_color=>"#22ee22",
                                                   :description=>"Trading Time Frame Start"})
@@ -31,14 +32,21 @@ class TradingOperation < ActiveRecord::Base
                                                   :description=>"Trading Time Frame Stop"})
     trading_signals.each do |signal|
       if signal.name=="Short Open"
-        events << simulated_trading_signal_to_amchart({:name=>"F", :type=>"flag",
+#        events << simulated_trading_signal_to_amchart({:name=>"#{signal.name}",
+#                                                       :type=>"arrowUp",
+#                                                       :current_date_time=>signal.created_at.to_datetime,
+#                                                       :background_color=>"#cccccc",
+#                                                       :description=>"#{signal.open_quote_value} #{signal.reason}"})
+        events << simulated_trading_signal_to_amchart({:name=>"O",
+                                                       :type=>"sign",
+                                                       :current_date_time=>signal.created_at.to_datetime,
+                                                       :background_color=>"#cccccc",
+                                                       :description=>signal.close_quote_value})
+        events << simulated_trading_signal_to_amchart({:name=>"F",
+                                                       :type=>"flag",
                                                        :current_date_time=>signal.created_at.to_datetime-(signal.trading_strategy.how_far_back_milliseconds/1000/60).minutes,
                                                        :background_color=>"#aaccff",
                                                        :description=>signal.trading_strategy.id})
-        events << simulated_trading_signal_to_amchart({:name=>signal.name, :type=>"arrowUp",
-                                                       :current_date_time=>signal.created_at.to_datetime,
-                                                       :background_color=>"#cccccc",
-                                                       :description=>signal.open_quote_value})
       end
       if signal.name=="Short Close"
         events << simulated_trading_signal_to_amchart({:name=>signal.name, :type=>"arrowDown",
@@ -50,7 +58,7 @@ class TradingOperation < ActiveRecord::Base
                                                        :type=>"sign",
                                                        :current_date_time=>signal.created_at.to_datetime,
                                                        :background_color=> signal.profit_loss>=0.0 ? "#44ff33" : "#ff3366",
-                                                       :description=>"P/L #{signal.profit_loss}"})
+                                                       :description=>"P/L #{signal.profit_loss} #{signal.reason}"})
       end
     end
     events.join(",")
@@ -61,7 +69,7 @@ class TradingOperation < ActiveRecord::Base
     event_type = event[:type] ? event[:type] : "sign"
     event_type = "arrowUp" if event[:name]=="Short Open"
     event_type = "arrowDown" if event[:name]=="Short Close"
-    "{ date: new Date(#{event[:current_date_time].year},#{event[:current_date_time].month},#{event[:current_date_time].day},#{event[:current_date_time].hour},#{event[:current_date_time].minute},0,0), type: '#{event_type}', \
+    "{ date: new Date(#{event[:current_date_time].year},#{event[:current_date_time].month-1},#{event[:current_date_time].day},#{event[:current_date_time].hour},#{event[:current_date_time].minute},0,0), type: '#{event_type}', \
              backgroundColor: '#{background_color}', graph: graph1, text: '#{event[:name]}', description: '#{event[:description]}'}"
   end
 

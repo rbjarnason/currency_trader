@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120522194455) do
+ActiveRecord::Schema.define(:version => 20120523222453) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.string   "resource_id",   :null => false
@@ -121,6 +121,7 @@ ActiveRecord::Schema.define(:version => 20120522194455) do
     t.string   "name"
     t.text     "debug_information"
     t.boolean  "complete",             :default => false
+    t.text     "reason"
   end
 
   add_index "trading_signals", ["trading_strategy_id"], :name => "index_trading_signals_on_trading_strategy_id"

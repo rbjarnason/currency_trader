@@ -30,6 +30,10 @@ class TradingStrategy < ActiveRecord::Base
     self.trading_strategy_set.population
   end
 
+  def quote_target
+    trading_strategy_set.trading_strategy_population.quote_target
+  end
+
   def import_binary_parameters(parameters)
     self.binary_parameters = parameters
   end
@@ -47,23 +51,21 @@ class TradingStrategy < ActiveRecord::Base
     end
   end
 
-  def get_chart_data(day_offset=0)
-    day_offset = 0 unless day_offset
+  def get_chart_data(current_day=nil)
     quote_values = []
-    @day = self.simulated_start_date.to_date+day_offset #(self.simulated_start_date+4).to_date
-    QuoteValue.transaction do
-      (00..23).each do |hour|
-        (0..59).each do |minute|
-          current_quote_value = trading_strategy_set.trading_strategy_population.quote_target.get_quote_value_by_time_stamp(DateTime.parse("#{@day} #{hour}:#{minute}:00"))
-          quote_values<<"{date: new Date(#{@day.year},#{@day.month},#{@day.day},#{hour},#{minute},0,0), value: #{current_quote_value.ask}, volume: #{0}}" if current_quote_value
-        end
-      end
+    current_day = current_day ? current_day : Date.today
+    from_date = current_day.to_datetime.beginning_of_day
+    to_date = current_day.to_datetime.end_of_day
+    quote_target.quote_values.select("ask, created_at, MINUTE(created_at) as CTMINUTE, MIN(ask) AS MINASK, MAX(ask) AS MAXASK").
+                              where(["created_at>=? AND created_at<=?",from_date.to_formatted_s(:db),to_date.to_formatted_s(:db)]).
+                              group("MINUTE(created_at), HOUR(created_at)").each do |quote_value|
+      quote_values<<"{date: new Date(#{quote_value.created_at.year},#{quote_value.created_at.month-1},#{quote_value.created_at.day},#{quote_value.created_at.hour},#{quote_value.CTMINUTE},0,0), value: #{quote_value.ask}, volume: #{0}}"
     end
     quote_values.join(",")
   end
 
-  def get_trading_events(day_offset=0)
-    day_offset = 0 unless day_offset
+  def get_trading_events(current_day=nil)
+    @day = current_day ? current_day : Date.today
     @from_hour = trading_strategy_set.trading_time_frame.from_hour
     @to_hour = trading_strategy_set.trading_time_frame.to_hour
     events = []
@@ -93,7 +95,7 @@ class TradingStrategy < ActiveRecord::Base
     event_type = event[:type] ? event[:type] : "sign"
     event_type = "arrowUp" if event[:name]=="Short Open"
     event_type = "arrowDown" if event[:name]=="Short Close"
-    "{ date: new Date(#{event[:current_date_time].year},#{event[:current_date_time].month},#{event[:current_date_time].day},#{event[:current_date_time].hour},#{event[:current_date_time].minute},0,0), type: '#{event_type}', \
+    "{ date: new Date(#{event[:current_date_time].year},#{event[:current_date_time].month-1},#{event[:current_date_time].day},#{event[:current_date_time].hour},#{event[:current_date_time].minute},0,0), type: '#{event_type}', \
              backgroundColor: '#{background_color}', graph: graph1, text: '#{event[:name]}', description: '#{event[:description]}'}"
   end
 
@@ -145,7 +147,7 @@ class TradingStrategy < ActiveRecord::Base
     if quote_value_change==0.0
       return false
     elsif quote_value_change>=0.0
-      Rails.logger.debug("Testing short open: #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@open_magnitude_signal_trigger)}")
+      Rails.logger.debug(@short_open_reason = "Testing short open: value change #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@open_magnitude_signal_trigger)}")
       magnitude = quote_value_change.abs/@current_quote_value
     else
       Rails.logger.debug("Testing short open: Has gone down")
@@ -175,6 +177,7 @@ class TradingStrategy < ActiveRecord::Base
       signal.trading_operation_id = @trading_operation_id
       signal.open_quote_value = @current_quote_value
       signal.trading_strategy_id = self.id
+      signal.reason = @short_open_reason
       signal.save
     end
   end
@@ -193,13 +196,44 @@ class TradingStrategy < ActiveRecord::Base
     if @trading_position
       Rails.logger.info("!!!!! Checking trading position #{@trading_position.id} #{@trading_position.created_at+2.hours} #{DateTime.now} #{@current_quote_value}<#{@trading_position.value_open}")
       if @trading_position
-        Rails.logger.info("TP #{(@trading_position.created_at+2.hour)}<#{DateTime.now+1.hour}")
+        Rails.logger.info("Checking timeout #{(@trading_position.created_at+2.hour)}<#{DateTime.now+1.hour}")
+        shorted_at = @trading_position.value_open *  @trading_position.units
+        currently_at = @current_quote_value * @trading_position.units
+        open_difference = shorted_at-currently_at
         if (@trading_position.created_at+2.hours)<DateTime.now+1.hour
-          Rails.logger.info("TIMEOUT")
+          Rails.logger.info("2 hour timeout")
           if @current_quote_value<@trading_position.value_open
-            Rails.logger.info("Value is less!")
+            Rails.logger.info("Closing out in profits")
             short_timeout = true
+            @short_close_reason = "Forced in profit after 2 hours but value is less at #{@current_quote_value} value open was #{@trading_position.value_open}"
           end
+          if open_difference<-250
+            Rails.logger.info("Closing out with loss min -250")
+            short_timeout = true
+            @short_close_reason = "Forced at loss with #{open_difference} after 2 hours but value is less at #{@current_quote_value} value open was #{@trading_position.value_open}"
+          end
+        end
+        if (@trading_position.created_at+4.hours)<DateTime.now+1.hour
+          Rails.logger.info("4 hour timeout")
+          if open_difference<-100
+            Rails.logger.info("Closing out with loss min -100")
+            short_timeout = true
+            @short_close_reason = "Forced at loss with #{open_difference} after 2 hours but value is less at #{@current_quote_value} value open was #{@trading_position.value_open}"
+          end
+        end
+        if (@trading_position.created_at+6.hours)<DateTime.now+1.hour
+          Rails.logger.info("6 hour timeout")
+          if open_difference<-50
+            Rails.logger.info("Closing out with loss -50")
+            short_timeout = true
+            @short_close_reason = "Forced at loss with #{open_difference} after 2 hours but value is less at #{@current_quote_value} value open was #{@trading_position.value_open}"
+          end
+        end
+        if (@trading_position.created_at+8.hours)<DateTime.now+1.hour
+          Rails.logger.info("8 hour timeout")
+          Rails.logger.info("Closing out with loss forced")
+          short_timeout = true
+          @short_close_reason = "Forced at loss with #{open_difference} after 2 hours but value is less at #{@current_quote_value} value open was #{@trading_position.value_open}"
         end
       end
     end
@@ -214,7 +248,7 @@ class TradingStrategy < ActiveRecord::Base
       Rails.logger.debug("close_conditions: Has gone up")
       return false
     else
-      Rails.logger.debug("Testing short close: #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@close_magnitude_signal_trigger.abs)}")
+      Rails.logger.debug(@short_close_reason = "Testing short close: value change #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@close_magnitude_signal_trigger.abs)}")
       magnitude = quote_value_change.abs/@current_quote_value
     end
     magnitude>@close_magnitude_signal_trigger.abs
@@ -242,6 +276,7 @@ class TradingStrategy < ActiveRecord::Base
       signal.trading_position_id = @trading_position_id
       signal.close_quote_value = @current_quote_value
       signal.trading_strategy_id = self.id
+      signal.reason = @short_close_reason
       signal.save
     end
   end

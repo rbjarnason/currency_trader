@@ -6,6 +6,6 @@
   = render :partial=>"chart"
   %br
   - (@trading_strategy.simulated_start_date.to_date..@trading_strategy.simulated_end_date.to_date).each_with_index do |day,i|
-    = link_to "#{day}", :controller=>"trading_strategies", :action=>"chart", :id=>@trading_strategy.id, :day_offset=>i
+    = link_to @current_day.to_date==day ? "<b>#{day}</b>".html_safe : "#{day}",  :controller=>"trading_strategies", :action=>"chart", :id=>@trading_strategy.id, :current_day=>day
     %br
   = link_to "Back", :controller=>"trading_strategy_populations", :action=>"show_all_for", :id=>@trading_strategy.trading_strategy_set.trading_strategy_population.id

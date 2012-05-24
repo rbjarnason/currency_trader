@@ -3,7 +3,7 @@
         createStockChart();
     });
 
-    var chartData = [#{@operation.get_chart_data(@day_offset.to_i)}]
+    var chartData = [#{@operation.get_chart_data(@current_day)}]
 
     var chart;
 
@@ -116,7 +116,7 @@
         panelsSettings.panEventsEnabled = true;
         chart.panelsSettings = panelsSettings;
 
-        dataSet.stockEvents = [#{@operation.get_trading_events(@day_offset.to_i)}];
+        dataSet.stockEvents = [#{@operation.get_trading_events(@current_day)}];
 
         chart.write('chartdiv_#{@operation.id}');
     }

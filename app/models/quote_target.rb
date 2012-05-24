@@ -38,6 +38,12 @@ class QuoteTarget < ActiveRecord::Base
     end
   end
 
+  def get_quote_values_from_to(from,to)
+    key = "#{time_stamp.strftime("from_%Y_%m_%d_%H:%M")}_#{self.id}
+    from_key = "#{time_stamp.strftime("from_%Y_%m_%d_%H:%M")}_#{self.id}
+
+  end
+
   def get_quote_value_by_time_stamp(time_stamp=nil)
     time_stamp_key = time_stamp ? "#{time_stamp.strftime("%Y_%m_%d_%H:%M")}_#{self.id}" : nil
     results = Rails.cache.read(time_stamp_key) if time_stamp_key

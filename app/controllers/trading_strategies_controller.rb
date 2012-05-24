@@ -83,7 +83,7 @@ class TradingStrategiesController < ApplicationController
 
   def chart
     @trading_strategy = TradingStrategy.find(params[:id])
-    @day_offset = params[:day_offset]
+    @current_day = params[:current_day] ? Date.parse(params[:current_day]) : Date.today
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @trading_strategy }
