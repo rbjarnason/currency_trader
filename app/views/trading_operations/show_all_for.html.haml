@@ -76,6 +76,17 @@
           = link_to @current_day.to_date==day ? "<b>#{day}</b>".html_safe : "#{day}", :controller=>"trading_operations", :action=>"show_all_for", :id=>@operation.id, :current_day=>day.to_s
     %br
   = render :partial=>"chart"
+
+  %h2
+    Profit Loss per day
+  %table
+    - @operation.trading_positions.select("updated_at, SUM(profit_loss) as PANDL").where("open=0").group("DAY(updated_at),MONTH(updated_at)").each do |position|
+      %tr
+        %td
+          - day = position.updated_at.to_date
+          = link_to @current_day.to_date==day ? "<b>#{day}</b>".html_safe : "#{day}", :controller=>"trading_operations", :action=>"show_all_for", :id=>@operation.id, :current_day=>day.to_s
+        %td
+          = position.PANDL
   %h2
     Open Magnitude
   %table
