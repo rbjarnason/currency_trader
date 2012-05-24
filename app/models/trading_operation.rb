@@ -41,7 +41,7 @@ class TradingOperation < ActiveRecord::Base
                                                        :type=>"sign",
                                                        :current_date_time=>signal.created_at.to_datetime,
                                                        :background_color=>"#cccccc",
-                                                       :description=>signal.close_quote_value})
+                                                       :description=>"#{signal.open_quote_value} #{signal.reason}"})
         events << simulated_trading_signal_to_amchart({:name=>"F",
                                                        :type=>"flag",
                                                        :current_date_time=>signal.created_at.to_datetime-(signal.trading_strategy.how_far_back_milliseconds/1000/60).minutes,
