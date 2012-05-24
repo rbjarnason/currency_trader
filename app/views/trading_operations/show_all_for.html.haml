@@ -68,6 +68,15 @@
         = @operation.trading_positions.sum("profit_loss")+total_pl
 
   %h2
+    = "Chart for #{@current_day}"
+  %table{:width=>"100%"}
+    %tr
+      - (@operation.created_at.to_date..Date.today).each_with_index do |day,i|
+        %td
+          = link_to @current_day.to_date==day ? "<b>#{day}</b>".html_safe : "#{day}", :controller=>"trading_operations", :action=>"show_all_for", :id=>@operation.id, :current_day=>day.to_s
+    %br
+  = render :partial=>"chart"
+  %h2
     Open Magnitude
   %table
     - @operation.trading_strategy_population.best_set.trading_strategies.each do |strategy|
@@ -103,13 +112,6 @@
                                                                              :start_price=>start_price,
                                                                              :end_price=>end_price,
                                                                              :number_of_minutes=>number_of_minutes}
-  %h2
-    = "Chart for #{@current_day}"
-  = render :partial=>"chart"
-  %br
-  - (@operation.created_at.to_date..Date.today).each_with_index do |day,i|
-    = link_to @current_day.to_date==day ? "<b>#{day}</b>".html_safe : "#{day}", :controller=>"trading_operations", :action=>"show_all_for", :id=>@operation.id, :current_day=>day.to_s
-    %br
   %h2
     = "Current trading strategy"
     = render :partial=>"trading_strategies/list", :locals=>{:trading_strategies=>@operation.trading_strategy_population.best_set.trading_strategies}

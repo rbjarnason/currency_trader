@@ -235,6 +235,11 @@ class TradingStrategy < ActiveRecord::Base
           short_timeout = true
           @short_close_reason = "Forced at loss with #{open_difference} after 2 hours but value is less at #{@current_quote_value} value open was #{@trading_position.value_open}"
         end
+        if open_difference<-500
+          Rails.logger.info("No timeout. Closing out with loss -500")
+          short_timeout = true
+          @short_close_reason = "Forced at loss with #{open_difference} after 2 hours but value is less at #{@current_quote_value} value open was #{@trading_position.value_open}"
+        end
       end
     end
 
