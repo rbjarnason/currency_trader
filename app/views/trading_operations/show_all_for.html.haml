@@ -96,13 +96,31 @@
   %h2
     Profit Loss per day
   %table
+    %th
+      = "Date"
+    %th
+      = "Profit Loss"
+    %th
+      ROIC per day
+    %th
+      ROIC per month (20 days)
+    %th
+      ROIC per year (20*12 days)
     - @operation.trading_positions.select("updated_at, SUM(profit_loss) as PANDL").where("open=0").group("DAY(updated_at),MONTH(updated_at)").each do |position|
       %tr
         %td
           - day = position.updated_at.to_date
+          - pandl = position.PANDL
           = link_to @current_day.to_date==day ? "<b>#{day}</b>".html_safe : "#{day}", :controller=>"trading_operations", :action=>"show_all_for", :id=>@operation.id, :current_day=>day.to_s
         %td
-          = position.PANDL
+          = pandl
+        %td
+          = number_to_percentage((pandl/@operation.initial_capital_amount)*100.0, :precision => 1)
+        %td
+          = number_to_percentage((((pandl/@operation.initial_capital_amount)*100.0))*20, :precision => 0)
+        %td
+          = number_to_percentage((((pandl/@operation.initial_capital_amount)*100.0))*20*12, :precision => 0)
+
   %h2
     Open Magnitude
   %table
