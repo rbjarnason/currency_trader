@@ -208,7 +208,7 @@ class TradingStrategy < ActiveRecord::Base
             @short_close_reason = "Forced in profit >80 after 2 hours but value is less at #{@current_quote_value} value open was #{@trading_position.value_open}"
           end
           if open_difference<-150
-            Rails.logger.info("Closing out with loss min -250")
+            Rails.logger.info("Closing out with loss min -150")
             short_timeout = true
             @short_close_reason = "Forced at loss with #{open_difference} after 2 hours but value is less at #{@current_quote_value} value open was #{@trading_position.value_open}"
           end
