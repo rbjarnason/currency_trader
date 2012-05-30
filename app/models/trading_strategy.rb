@@ -378,9 +378,14 @@ class TradingStrategy < ActiveRecord::Base
 
   def fitness
     @quote_target = population.quote_target
-    Rails.logger.debug("XXXXXXXXXXXXXXX #{population.simulation_end_date.to_date}")
-    self.simulated_end_date = population.simulation_end_date ? population.simulation_end_date.to_date : Date.today
-    self.simulated_start_date = (self.simulated_end_date.to_date-population.simulation_days_back).to_date
+    Rails.logger.debug("XXXXXXXXXXXXXXX #{population.simulation_end_date.to_date}") if population.simulation_end_date
+    if population.simulated_end_date
+      self.simulated_end_date = population.simulation_end_date ? population.simulation_end_date.to_date : Date.today
+      self.simulated_start_date = (self.simulated_end_date.to_date-population.simulation_days_back).to_date
+    else
+      self.simulated_start_date = Date.today-population.simulation_days_back
+      self.simulated_end_date = Date.today-1
+    end
     setup_parameters
     if out_of_range_attributes?
       self.simulated_fitness = FAILED_FITNESS_VALUE

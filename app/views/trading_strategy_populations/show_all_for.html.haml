@@ -39,7 +39,10 @@
       %td
         = "#{@population.trading_strategy_sets.count} | #{@population.trading_strategy_sets.where("complete=0").count} left"
       %td
-        = "#{@population.simulation_end_date.to_date-@population.simulation_days_back-1} <br> #{@population.simulation_end_date.to_date-1}".html_safe
+        -  if @population.simulation_end_date
+          = "#{@population.simulation_end_date.to_date-@population.simulation_days_back-1} <br> #{@population.simulation_end_date.to_date-1}".html_safe
+        - else
+          = "#{Date.today-@population.simulation_days_back} <br> #{Date.today-1}".html_safe
       %td
         = @population.simulation_min_overall_trading_signals
       %td
