@@ -379,7 +379,7 @@ class TradingStrategy < ActiveRecord::Base
   def fitness
     @quote_target = population.quote_target
     Rails.logger.debug("XXXXXXXXXXXXXXX #{population.simulation_end_date.to_date}") if population.simulation_end_date
-    if population.simulated_end_date
+    if population.simulation_end_date
       self.simulated_end_date = population.simulation_end_date ? population.simulation_end_date.to_date : Date.today
       self.simulated_start_date = (self.simulated_end_date.to_date-population.simulation_days_back).to_date
     else
