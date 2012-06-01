@@ -263,8 +263,12 @@ class TradingStrategy < ActiveRecord::Base
       Rails.logger.debug("close_conditions: Has gone up")
       return false
     else
-      Rails.logger.debug(@short_close_reason = "Testing short close: value change #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@close_magnitude_signal_trigger.abs)}")
-      magnitude = quote_value_change.abs/@current_quote_value
+      if @trading_position and (@current_quote_value<@trading_position.value_open)
+        Rails.logger.debug(@short_close_reason = "Testing short close: value change #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@close_magnitude_signal_trigger.abs)}")
+        magnitude = quote_value_change.abs/@current_quote_value
+      else
+        return false
+      end
     end
     magnitude>@close_magnitude_signal_trigger.abs
   end
