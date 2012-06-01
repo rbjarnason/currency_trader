@@ -42,6 +42,36 @@ class CrawlerWorker < BaseDaemonWorker
     end
   end
 
+  def process_forexfeed_quote_values
+    url = "http://fxf.forexfeed.net/data?key=133850083068971&interval=60&symbol=#{QuoteTarget.all.collect {|t| t.symbol.gsub("/","")}.join(",")}"
+    raw_quote_data = Net::HTTP.get(URI.parse(url))
+#    raw_quote_data = "SYMBOL,TITLE,TIMESTAMP,OPEN,HIGH,LOW,CLOSE\n\"Status\",\"OK\"\n\"Version\",\"1.0\"\n\"Copyright\",\"ForexFeed\"\n\"Website\",\"http://forexfeed.net\"\n\"Redistribution\",\"REDISTRIBUTION OF CURRENCY DATA IS STRICTLY PROHIBITED BY LAW. The license Agreement only permits download of this data directly from forexfeed.net to a single Computer. CURRENCY DATA MAY NOT BE SHARED WITH OTHER Computers. You may use currency data in calculations involving other non-currency data and distribute the results but each Computer requiring currency data on its own requires separate licensing from forexfeed.net. For more information refer to your copy of the licence agreement or contact us at: tos@forexfeed.net\"\n\"License\",\"All use of this data is strictly regulated under the licensing Agreement. Unauthorized use or distribution is a violation of your legal duties and responsibilities.\"\n\"Access period\",\"day\"\n\"Permitted accesses per period\",\"1440\"\n\"Accesses so far this period\",\"1\"\n\"Accesses remaining in this period\",\"1439\"\n\"Access period began\",\"2012-06-01 02:17:54\",\"UTC\",\"0\",\"seconds ago\"\n\"Next access period begins\",\"2012-06-02 02:17:54\",\"UTC\",\"86400\",\"seconds from now\"\n\"UTC Time\",\"1338517074\"\n\"UTC Timestamp\",\"2012-06-01 02:17:54\"\n\"Data Interval\",\"60\"\nQUOTE START\nUSDEUR,USD/EUR,1338517020,0.81020,0.81020,0.81013,0.81013\nEURUSD,EUR/USD,1338517020,1.23426,1.23436,1.23426,1.23436\nAUDUSD,AUD/USD,1338517020,0.9675,0.9675,0.9674,0.9675\nUSDJPY,USD/JPY,1338517020,78.47,78.48,78.47,78.48\nQUOTE END\n" #Net::HTTP.get(URI.parse(url))
+
+    #debug(url)
+    #debug(raw_quote_data)
+    quote_data = CSV.parse(raw_quote_data.strip)
+    skip_until = true
+    quote_data.each do |quote|
+      puts quote.inspect
+      if quote[0]=="QUOTE START"
+        skip_until = false
+        next
+      end
+      next if skip_until
+      break if quote[0]=="QUOTE END"
+      quote_target = QuoteTarget.where(:symbol=>quote[1].strip).first
+      quote_value = QuoteValue.new
+      quote_value.quote_target_id = quote_target.id
+      quote_value.data_time = DateTime.now
+      quote_value.timestamp_ms = quote[2].to_i
+      quote_value.open = quote[3].to_f
+      quote_value.high = quote[4].to_f
+      quote_value.low = quote[5].to_f
+      quote_value.ask = quote[6].to_f
+      quote_value.save
+      Rails.logger.info "#{quote_target.symbol} - #{quote_value.ask}"
+    end
+  end
 
   def poll_for_yahoo_quote_work
     info("poll_for_quote_work")
@@ -55,8 +85,8 @@ class CrawlerWorker < BaseDaemonWorker
 
   def poll_for_work
     debug("poll_for_work")
-    process_truefx_quote_values
-    sleep 15
+    process_forexfeed_quote_values
+    sleep 60
   end
 end
 

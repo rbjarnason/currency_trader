@@ -87,7 +87,7 @@ if false
   pop.simulation_days_back = 7
   pop.simulation_min_overall_trading_signals = 2*pop.simulation_days_back
   pop.simulation_max_overall_trading_signals = 10*pop.simulation_days_back
-  pop.simulation_max_daily_trading_signals = 14
+  pop.simulation_max_daily_trading_signals = 12
   pop.simulation_max_minutes_back = 15
   pop.save
   pop.initialize_population
