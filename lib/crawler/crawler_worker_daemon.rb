@@ -18,7 +18,7 @@ class CrawlerWorker < BaseDaemonWorker
       quote_value = QuoteValue.new
       quote_value.quote_target_id = @quote_target.id
       quote_value.data_time = DateTime.now
-      quote_value.import_csv_data(@logger,quote_data)
+      quote_value.import_yahoo_csv_data(quote_data)
       quote_value.save
     end
   end
@@ -83,11 +83,18 @@ class CrawlerWorker < BaseDaemonWorker
     end
   end
 
-  def poll_for_work
+  def poll_for_work_forex
     debug("poll_for_work")
     process_forexfeed_quote_values
     sleep 60
   end
+
+  def poll_for_work
+    debug("poll_for_work")
+    poll_for_yahoo_quote_work
+    sleep 20
+  end
+
 end
 
 f = File.open( File.dirname(__FILE__) + '/config/worker.yml')
