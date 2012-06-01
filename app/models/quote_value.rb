@@ -48,6 +48,10 @@ class QuoteValue < ActiveRecord::Base
     normalize_float(self.last_trade.to_f)
   end
 
+  def import_yahoo_csv_data(quote_data)
+    self.ask = quote_data[0].to_f
+  end
+
   def import_csv_data(quote_data)
     Rails.logger.debug(quote_data.inspect)
     self.timestamp_ms = quote_data[1].to_i
