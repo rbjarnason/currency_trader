@@ -42,6 +42,13 @@ class CrawlerWorker < BaseDaemonWorker
     end
   end
 
+  def try_to_get_back_data
+    url = "http://fxf.forexfeed.net/data?key=133850083068971&periods=600&interval=60&symbol=#{QuoteTarget.all.collect {|t| t.symbol.gsub("/","")}.join(",")}"
+    raw_quote_data = Net::HTTP.get(URI.parse(url))
+    puts raw_quote_data
+    File.open("/home/robert/out.csv").write(raw_quote_data)
+  end
+
   def process_forexfeed_quote_values
     url = "http://fxf.forexfeed.net/data?key=133850083068971&interval=60&symbol=#{QuoteTarget.all.collect {|t| t.symbol.gsub("/","")}.join(",")}"
     raw_quote_data = Net::HTTP.get(URI.parse(url))
@@ -75,7 +82,7 @@ class CrawlerWorker < BaseDaemonWorker
 
   def poll_for_yahoo_quote_work
     info("poll_for_quote_work")
-    @quote_target = QuoteTarget.find(:first, :conditions => "active = 1 AND yahoo_quote_enabled = 1 AND last_yahoo_processing_time < NOW() - processing_time_interval", :lock => true)
+    @quote_target = QuoteTarget.find(:first, :order=>"rand()", :conditions => "active = 1 AND yahoo_quote_enabled = 1 AND last_yahoo_processing_time < NOW() - processing_time_interval", :lock => true)
     if @quote_target
       @quote_target.last_yahoo_processing_time = Time.now+1.hour
       @quote_target.save
@@ -92,7 +99,7 @@ class CrawlerWorker < BaseDaemonWorker
   def poll_for_work
     debug("poll_for_work")
     poll_for_yahoo_quote_work
-    sleep 20
+    sleep 10
   end
 
 end

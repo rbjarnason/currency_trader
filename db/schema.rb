@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120523222453) do
+ActiveRecord::Schema.define(:version => 20120602030932) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.string   "resource_id",   :null => false
@@ -75,6 +75,9 @@ ActiveRecord::Schema.define(:version => 20120523222453) do
     t.float    "bid"
     t.float    "offer"
   end
+
+  add_index "quote_values", ["created_at"], :name => "index_quote_values_on_created_at"
+  add_index "quote_values", ["data_time"], :name => "index_quote_values_on_data_time"
 
   create_table "trading_accounts", :force => true do |t|
     t.string   "name"
@@ -140,8 +143,9 @@ ActiveRecord::Schema.define(:version => 20120523222453) do
     t.text     "simulated_trading_signals"
     t.datetime "simulated_start_date"
     t.datetime "simulated_end_date"
-    t.integer  "how_far_back_milliseconds"
+    t.integer  "open_how_far_back_milliseconds"
     t.string   "simulated_fitness_failure_reason"
+    t.integer  "close_how_far_back_milliseconds",     :default => 5
   end
 
   add_index "trading_strategies", ["trading_strategy_set_id"], :name => "index_trading_strategies_on_trading_strategy_set_id"
@@ -168,6 +172,7 @@ ActiveRecord::Schema.define(:version => 20120523222453) do
     t.integer  "simulation_max_daily_trading_signals"
     t.integer  "simulation_max_minutes_back"
     t.integer  "simulation_max_overall_trading_signals"
+    t.text     "description"
   end
 
   add_index "trading_strategy_populations", ["quote_target_id"], :name => "index_trading_strategy_populations_on_quote_target_id"

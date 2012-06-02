@@ -122,6 +122,7 @@ class TradingStrategyPopulation < ActiveRecord::Base
     def create_trading_strategy_sets(settings)
       Rails.logger.info("create_trading_strategy_sets")
       TradingStrategySet.transaction do
+        self.trading_strategy_sets.where(["id != ?",self.best_trading_strategy_set_id]).destroy
         for setting in settings
           trading_strategy_set = TradingStrategySet.new
           trading_strategy_set.trading_strategy_population_id = self.id

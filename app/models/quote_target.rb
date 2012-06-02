@@ -4,9 +4,9 @@ class QuoteTarget < ActiveRecord::Base
   @@quote_value_cache = {}
   @@quote_value_cache_timer = Time.now+10.minutes
 
-  has_many :quote_values, :order => "created_at ASC" do
+  has_many :quote_values, :order => "data_time ASC" do
     def get_one_by_time(time_stamp)
-      find :first, :conditions=>["created_at >= ?",time_stamp]
+      find :first, :conditions=>["data_time >= ?",time_stamp]
     end
   end
 
@@ -26,7 +26,7 @@ class QuoteTarget < ActiveRecord::Base
       end
     else
       if time_stamp
-        if quote_value = quote_values.where(["created_at >= ?",time_stamp]).first
+        if quote_value = quote_values.where(["data_time >= ?",time_stamp]).first
           @@quote_value_cache[time_stamp_key] = quote_value
         else
           @@quote_value_cache[time_stamp_key] = "no_quote"
@@ -56,7 +56,7 @@ class QuoteTarget < ActiveRecord::Base
       end
     else
       if time_stamp
-        if quote_value = quote_values.where(["created_at >= ?",time_stamp]).first
+        if quote_value = quote_values.where(["data_time >= ?",time_stamp]).first
           Rails.cache.write(time_stamp_key,quote_value) if quote_value
           quote_value
         end

@@ -1,9 +1,13 @@
+#TODO Make stop signals evolve
+
 class TradingStrategy < ActiveRecord::Base
   include ActionView::Helpers::NumberHelper
 
   DEFAULT_START_CAPITAL = 100000000.0
   DEFAULT_POSITION_UNITS = 50000.0
   FAILED_FITNESS_VALUE = -999999.0
+
+  MINUTES_BETWEEN_POS_OPENINGS = 2.minutes
 
   belongs_to :trading_strategy_template
   belongs_to :trading_strategy_set
@@ -45,9 +49,10 @@ class TradingStrategy < ActiveRecord::Base
   def setup_parameters
     if self.binary_parameters and self.binary_parameters.length>0 and self.float_parameters and self.float_parameters.length>2
       @strategy_buy_short = self.binary_parameters[0]
-      self.how_far_back_milliseconds = [1000*60,(self.float_parameters[0]*(1000*60*population.simulation_max_minutes_back)/60).abs].max
-      @open_magnitude_signal_trigger  = self.float_parameters[1]/100000.0
-      @close_magnitude_signal_trigger  = self.float_parameters[2]/100000.0
+      self.open_how_far_back_milliseconds = [1000*60,(self.float_parameters[0]*(1000*60*population.simulation_max_minutes_back)/60).abs].max
+      self.close_how_far_back_milliseconds = [1000*60,(self.float_parameters[1]*(1000*60*population.simulation_max_minutes_back)/60).abs].max
+      @open_magnitude_signal_trigger  = self.float_parameters[2]/100000.0
+      @close_magnitude_signal_trigger  = self.float_parameters[3]/100000.0
     end
   end
 
@@ -56,10 +61,10 @@ class TradingStrategy < ActiveRecord::Base
     current_day = current_day ? current_day : Date.today
     from_date = current_day.to_datetime.beginning_of_day
     to_date = current_day.to_datetime.end_of_day
-    quote_target.quote_values.select("ask, created_at, MINUTE(created_at) as CTMINUTE, MIN(ask) AS MINASK, MAX(ask) AS MAXASK").
-                              where(["created_at>=? AND created_at<=?",from_date.to_formatted_s(:db),to_date.to_formatted_s(:db)]).
-                              group("MINUTE(created_at), HOUR(created_at)").each do |quote_value|
-      quote_values<<"{date: new Date(#{quote_value.created_at.year},#{quote_value.created_at.month-1},#{quote_value.created_at.day},#{quote_value.created_at.hour},#{quote_value.CTMINUTE},0,0), value: #{quote_value.ask}, volume: #{0}}"
+    quote_target.quote_values.select("ask, data_time, MINUTE(data_time) as CTMINUTE, MIN(ask) AS MINASK, MAX(ask) AS MAXASK").
+                              where(["data_time>=? AND data_time<=?",from_date.to_formatted_s(:db),to_date.to_formatted_s(:db)]).
+                              group("MINUTE(data_time), HOUR(data_time)").each do |quote_value|
+      quote_values<<"{date: new Date(#{quote_value.data_time.year},#{quote_value.data_time.month-1},#{quote_value.data_time.day},#{quote_value.data_time.hour},#{quote_value.CTMINUTE},0,0), value: #{quote_value.ask}, volume: #{0}}"
     end
     quote_values.join(",")
   end
@@ -76,7 +81,7 @@ class TradingStrategy < ActiveRecord::Base
     simulated_trading_signals.each do |signal|
       events << simulated_trading_signal_to_amchart(signal)
       if signal[:name]=="Short Open"
-        events << simulated_trading_signal_to_amchart({:name=>"F", :type=>"flag", :current_date_time=>signal[:current_date_time]-(self.how_far_back_milliseconds/1000/60).minutes, :background_color=>"#aaccff",
+        events << simulated_trading_signal_to_amchart({:name=>"F", :type=>"flag", :current_date_time=>signal[:current_date_time]-(self.open_how_far_back_milliseconds/1000/60).minutes, :background_color=>"#aaccff",
                                                        :description=>"From here"})
       end
       if signal[:name]=="Short Close"
@@ -141,8 +146,8 @@ class TradingStrategy < ActiveRecord::Base
 
   def match_short_open_conditions
     #return true
-    @quote_value_then = @quote_target.get_quote_value_by_time_stamp(@current_date_time-(self.how_far_back_milliseconds/1000.0).seconds).ask
-    Rails.logger.debug("Testing short open: #{@quote_value_then} current: #{@current_quote_value} back in minutes: #{self.how_far_back_milliseconds/1000/60}")
+    @quote_value_then = @quote_target.get_quote_value_by_time_stamp(@current_date_time-(self.open_how_far_back_milliseconds/1000.0).seconds).ask
+    Rails.logger.debug("Testing short open: #{@quote_value_then} current: #{@current_quote_value} back in minutes: #{self.open_how_far_back_milliseconds/1000/60}")
     quote_value_change = @current_quote_value-@quote_value_then
     if quote_value_change==0.0
       return false
@@ -172,6 +177,13 @@ class TradingStrategy < ActiveRecord::Base
         Rails.warn("Out of cash: #{self.inspect}")
       end
     else
+      if @trading_operation_id and operation = TradingOperation.where(["id=?",@trading_operation_id]).first
+        position = operation.trading_positions.last
+        if position and position.created_at+MINUTES_BETWEEN_POS_OPENINGS>DateTime.now
+          Rails.logger.info("Not putting it on because of short time since #{position}")
+          return
+        end
+      end
       signal = TradingSignal.new
       signal.name = "Short Open"
       signal.trading_operation_id = @trading_operation_id
@@ -184,13 +196,13 @@ class TradingStrategy < ActiveRecord::Base
 
   def match_short_close_conditions
     Rails.logger.info("--- MATCH SHORT")
-    if quote_value_then = @quote_target.get_quote_value_by_time_stamp(@current_date_time-(self.how_far_back_milliseconds/1000.0).seconds)
+    if quote_value_then = @quote_target.get_quote_value_by_time_stamp(@current_date_time-(self.close_how_far_back_milliseconds/1000.0).seconds)
       @quote_value_then = quote_value_then.ask
     else
-      Rails.logger.error("Can't find ask for #{@current_date_time-(self.how_far_back_milliseconds/1000.0).seconds}")
+      Rails.logger.error("Can't find ask for #{@current_date_time-(self.close_how_far_back_milliseconds/1000.0).seconds}")
       return false
     end
-    Rails.logger.info("Testing short close: #{@quote_value_then} current: #{@current_quote_value} back in minutes: #{self.how_far_back_milliseconds/1000/60}")
+    Rails.logger.info("Testing short close: #{@quote_value_then} current: #{@current_quote_value} back in minutes: #{self.close_how_far_back_milliseconds/1000/60}")
     quote_value_change = @current_quote_value-@quote_value_then
     short_timeout = false
     if @trading_position
@@ -301,7 +313,7 @@ class TradingStrategy < ActiveRecord::Base
   end
 
   def match_long_open_conditions
-    magnitude_of_change_since(self.how_far_back_milliseconds)>@open_magnitude_signal_trigger
+    magnitude_of_change_since(self.open_how_far_back_milliseconds)>@open_magnitude_signal_trigger
   end
 
   def trigger_long_open_signal
@@ -357,15 +369,21 @@ class TradingStrategy < ActiveRecord::Base
   end
 
   def out_of_range_attributes?
-    if self.how_far_back_milliseconds < 60000.0
-      self.simulated_fitness_failure_reason = "MS <"
+    if self.open_how_far_back_milliseconds < 60000.0
+      self.simulated_fitness_failure_reason = "O.MS <"
       true
-    elsif self.how_far_back_milliseconds > (1000*60*population.simulation_max_minutes_back).to_f
-      self.simulated_fitness_failure_reason = "MS >"
+    elsif self.open_how_far_back_milliseconds > (1000*60*population.simulation_max_minutes_back).to_f
+      self.simulated_fitness_failure_reason = "O.MS >"
+      true
+    elsif self.close_how_far_back_milliseconds < 60000.0
+      self.simulated_fitness_failure_reason = "C.MS <"
+      true
+    elsif self.close_how_far_back_milliseconds > (1000*60*population.simulation_max_minutes_back).to_f
+      self.simulated_fitness_failure_reason = "C.MS >"
       true
     elsif @open_magnitude_signal_trigger < -1000.0
       self.simulated_fitness_failure_reason = "Open M <"
-      true
+    true
     elsif @open_magnitude_signal_trigger > 1000.0
       self.simulated_fitness_failure_reason = "Open M >"
       true
@@ -382,7 +400,7 @@ class TradingStrategy < ActiveRecord::Base
 
   def fitness
     @quote_target = population.quote_target
-    Rails.logger.debug("XXXXXXXXXXXXXXX #{population.simulation_end_date.to_date}") if population.simulation_end_date
+    Rails.logger.debug("#{population.simulation_end_date.to_date}") if population.simulation_end_date
     if population.simulation_end_date
       self.simulated_end_date = population.simulation_end_date ? population.simulation_end_date.to_date : Date.today
       self.simulated_start_date = (self.simulated_end_date.to_date-population.simulation_days_back).to_date

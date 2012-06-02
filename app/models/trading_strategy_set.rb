@@ -14,21 +14,25 @@ class TradingStrategySet < ActiveRecord::Base
   def calculate_fitness
     # MISSING SECOND LAYER OF TEST WHERE THE BEST EVOLVED CATEGORIES ARE FITNESS TESTED FOR RANDOM SAMPLE (OUT OF TRAINING DATA) RATE IN SAME CATEGORY
     self.accumulated_fitness = 0.0
-    how_far_back_minutes = []
+    how_far_back_minutes_open = []
+    how_far_back_minutes_close = []
     trading_strategies.each do |strategy|
       Rails.logger.debug("Get fitness for strategy #{strategy.id}")
       strategy_fitness = strategy.fitness
-      how_far_back_minutes << (strategy.how_far_back_milliseconds/1000/60).to_i
+      how_far_back_minutes_open << (strategy.open_how_far_back_milliseconds/1000/60).to_i
+      how_far_back_minutes_close << (strategy.close_how_far_back_milliseconds/1000/60).to_i
       self.accumulated_fitness+=strategy_fitness if strategy_fitness>0.0
       Rails.logger.debug(self.accumulated_fitness)
     end
-    if how_far_back_minutes.uniq.length==trading_strategies.count
-      Rails.logger.info("YYYYYYYYYYYY #{how_far_back_minutes} OK")
-      self.accumulated_fitness
-    else
-      Rails.logger.info("YYYYYYYYYYYY #{how_far_back_minutes} Punish!")
+    if how_far_back_minutes_open.uniq.length!=trading_strategies.count
       self.accumulated_fitness=self.accumulated_fitness*PUNISHMENT_FOR_SAME_MINUTES_IN_STRATEGIES
+      Rails.logger.info("#{how_far_back_minutes_open} To Similar Open Minutes Punish")
     end
+    if how_far_back_minutes_close.uniq.length!=trading_strategies.count
+      self.accumulated_fitness=self.accumulated_fitness*PUNISHMENT_FOR_SAME_MINUTES_IN_STRATEGIES
+      Rails.logger.info("#{how_far_back_minutes_open} To Similar Close Minutes Punish")
+    end
+    self.accumulated_fitness
   end
 
   def fitness

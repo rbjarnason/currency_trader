@@ -133,7 +133,7 @@
         - quote_value_ask = quote_value ? quote_value.ask : 1.0
         - start_price = quote_value_ask
         - end_price = number_with_precision quote_value_ask+(quote_value_ask*strategy.open_magnitude_signal_trigger).abs, :precision => 5
-        - number_of_minutes = (strategy.how_far_back_milliseconds/1000/60).to_i
+        - number_of_minutes = (strategy.open_how_far_back_milliseconds/1000/60).to_i
         %td{:width=>"33%"}
           = render :partial=>"trading_strategies/magnitude_chart", :locals=>{:trading_strategy_id=>strategy.id,
                                                                              :start_price=>start_price,
@@ -151,7 +151,7 @@
         - quote_value_ask = quote_value ? quote_value.ask : 1.0
         - start_price = quote_value_ask
         - end_price = number_with_precision quote_value_ask-(quote_value_ask*strategy.close_magnitude_signal_trigger).abs, :precision => 5
-        - number_of_minutes = (strategy.how_far_back_milliseconds/1000/60).to_i
+        - number_of_minutes = (strategy.close_how_far_back_milliseconds/1000/60).to_i
         %td{:width=>"33%"}
           = render :partial=>"trading_strategies/magnitude_chart", :locals=>{:trading_strategy_id=>"#{strategy.id}_close",
                                                                              :start_price=>start_price,

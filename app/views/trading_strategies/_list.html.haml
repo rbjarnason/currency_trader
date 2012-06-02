@@ -9,9 +9,9 @@
     %th
       = "Short/Long"
     %th
-      = "How far back in sec"
+      = "Open How far back in min"
     %th
-      = "How far back in min"
+      = "Close How far back in min"
     %th
       = "Open Magnitude Signal"
     %th
@@ -29,9 +29,9 @@
       %td
         = "Short"
       %td
-        = (strategy.how_far_back_milliseconds/1000).to_i
+        = (strategy.open_how_far_back_milliseconds/1000/60).to_i
       %td
-        = (strategy.how_far_back_milliseconds/1000/60).to_i
+        = (strategy.close_how_far_back_milliseconds/1000/60).to_i
       %td
         = number_with_precision strategy.open_magnitude_signal_trigger.abs, :precision => 7
       %td

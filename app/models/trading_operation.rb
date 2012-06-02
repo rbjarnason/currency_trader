@@ -12,10 +12,8 @@ class TradingOperation < ActiveRecord::Base
     current_day = current_day ? current_day : Date.today
     from_date = current_day.to_datetime.beginning_of_day
     to_date = current_day.to_datetime.end_of_day
-    quote_target.quote_values.select("ask, created_at, MINUTE(created_at) as CTMINUTE, MIN(ask) AS MINASK, MAX(ask) AS MAXASK").
-                              where(["created_at>=? AND created_at<=?",from_date.to_formatted_s(:db),to_date.to_formatted_s(:db)]).
-                              group("MINUTE(created_at), HOUR(created_at)").each do |quote_value|
-      quote_values<<"{date: new Date(#{quote_value.created_at.year},#{quote_value.created_at.month-1},#{quote_value.created_at.day},#{quote_value.created_at.hour},#{quote_value.CTMINUTE},0,0), value: #{quote_value.ask}, volume: #{0}}"
+    quote_target.quote_values.where(["data_time>=? AND data_time<=?",from_date.to_formatted_s(:db),to_date.to_formatted_s(:db)]).all.each do |quote_value|
+      quote_values<<"{date: new Date(#{quote_value.data_time.year},#{quote_value.data_time.month-1},#{quote_value.data_time.day},#{quote_value.data_time.hour},#{quote_value.data_time.minute},0,0), value: #{quote_value.ask}, volume: #{0}}"
     end
     quote_values.join(",")
   end
@@ -42,9 +40,9 @@ class TradingOperation < ActiveRecord::Base
                                                        :current_date_time=>signal.created_at.to_datetime,
                                                        :background_color=>"#cccccc",
                                                        :description=>"#{signal.open_quote_value} #{signal.reason}"})
-        events << simulated_trading_signal_to_amchart({:name=>"F",
+        events << simulated_trading_signal_to_amchart({:name=>"O",
                                                        :type=>"flag",
-                                                       :current_date_time=>signal.created_at.to_datetime-(signal.trading_strategy.how_far_back_milliseconds/1000/60).minutes,
+                                                       :current_date_time=>signal.created_at.to_datetime-(signal.trading_strategy.open_how_far_back_milliseconds/1000/60).minutes,
                                                        :background_color=>"#aaccff",
                                                        :description=>signal.trading_strategy.id})
       end
@@ -53,7 +51,11 @@ class TradingOperation < ActiveRecord::Base
                                                        :current_date_time=>signal.created_at.to_datetime,
                                                        :background_color=>"#cccccc",
                                                        :description=>signal.close_quote_value})
-
+        events << simulated_trading_signal_to_amchart({:name=>"C",
+                                                       :type=>"flag",
+                                                       :current_date_time=>signal.created_at.to_datetime-(signal.trading_strategy.close_how_far_back_milliseconds/1000/60).minutes,
+                                                       :background_color=>"#ccccff",
+                                                       :description=>signal.trading_strategy.id})
         events << simulated_trading_signal_to_amchart({:name=>"#{signal.profit_loss.to_i}",
                                                        :type=>"sign",
                                                        :current_date_time=>signal.created_at.to_datetime,

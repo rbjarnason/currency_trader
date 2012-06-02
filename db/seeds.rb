@@ -77,12 +77,17 @@ if false
   #TradingStrategyPopulation.delete_all
   #TradingStrategySet.delete_all
   #TradingStrategy.delete_all
+  timeframe = TradingTimeFrame.new
+  timeframe.from_hour = 00
+  timeframe.to_hour = 23
+  timeframe.save
+
   pop=TradingStrategyPopulation.new
   pop.active = true
   pop.quote_target = QuoteTarget.where("symbol='EUR/USD'").first
   pop.in_process = true
   pop.max_generations = 2000000
-  pop.population_size = 700
+  pop.population_size = 200
   pop.simulation_number_of_trading_strategies_per_set = 3
   pop.simulation_days_back = 7
   pop.simulation_min_overall_trading_signals = 2*pop.simulation_days_back
