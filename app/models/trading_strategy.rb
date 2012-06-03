@@ -31,7 +31,7 @@ class TradingStrategy < ActiveRecord::Base
   end
 
   def population
-    self.trading_strategy_set.population
+    self.trading_strategy_set.population if self.trading_strategy_set
   end
 
   def quote_target
@@ -47,7 +47,7 @@ class TradingStrategy < ActiveRecord::Base
   end
 
   def setup_parameters
-    if self.binary_parameters and self.binary_parameters.length>0 and self.float_parameters and self.float_parameters.length>2
+    if population and self.binary_parameters and self.binary_parameters.length>0 and self.float_parameters and self.float_parameters.length>2
       @strategy_buy_short = self.binary_parameters[0]
       self.open_how_far_back_milliseconds = [1000*60,(self.float_parameters[0]*(1000*60*population.simulation_max_minutes_back)/60).abs].max
       self.close_how_far_back_milliseconds = [1000*60,(self.float_parameters[1]*(1000*60*population.simulation_max_minutes_back)/60).abs].max
@@ -163,11 +163,12 @@ class TradingStrategy < ActiveRecord::Base
 
   def trigger_short_open_signal
     capital_investment = DEFAULT_POSITION_UNITS*@current_quote_value
-    Rails.logger.info("--> Trigger short OPEN")
+    Rails.logger.debug("--> Trigger short OPEN")
     if @evolution_mode
       if @current_capital_position-capital_investment>0
         @current_position_units = DEFAULT_POSITION_UNITS
         @last_opened_position_value = @current_quote_value
+        @last_opened_position_datetime = @current_date_time
         @current_capital_position-=capital_investment
         self.number_of_evolution_trading_signals+=1
         @daily_signals+=1
@@ -194,77 +195,84 @@ class TradingStrategy < ActiveRecord::Base
     end
   end
 
+  def match_stops(value_open,time_open,current_time,shorted_at,currently_at)
+    short_timeout = false
+    Rails.logger.debug("Checking timeout #{(time_open+2.hour)}<#{current_time}")
+    open_difference = shorted_at-currently_at
+    if (time_open+2.hours)<current_time
+      Rails.logger.debug("2 hour timeout")
+      if (@current_quote_value<value_open) and open_difference>80
+        Rails.logger.debug("Closing out in profits")
+        short_timeout = true
+        @short_close_reason = "Forced in profit >80 after 2 hours but value is less at #{@current_quote_value} value open was #{value_open}"
+      end
+      if open_difference<-150
+        Rails.logger.debug("Closing out with loss min -150")
+        short_timeout = true
+        @short_close_reason = "Forced at loss with #{open_difference} after 2 hours but value is less at #{@current_quote_value} value open was #{value_open}"
+      end
+    end
+    if (time_open+4.hours)<current_time
+      Rails.logger.info("4 hour timeout")
+      if (@current_quote_value<value_open) and open_difference>40
+        Rails.logger.debug("Closing out in profits")
+        short_timeout = true
+        @short_close_reason = "Forced in profit >40 after4 hours but value is less at #{@current_quote_value} value open was #{value_open}"
+      end
+      if open_difference<-100
+        Rails.logger.debug("Closing out with loss min -100")
+        short_timeout = true
+        @short_close_reason = "Forced at loss with #{open_difference} after 2 hours but value is less at #{@current_quote_value} value open was #{value_open}"
+      end
+    end
+    if (time_open+6.hours)<current_time
+      Rails.logger.info("6 hour timeout")
+      if (@current_quote_value<value_open)
+        Rails.logger.info("Closing out in profits")
+        short_timeout = true
+        @short_close_reason = "Forced in profit >0 after 6 hours but value is less at #{@current_quote_value} value open was #{value_open}"
+      end
+      if open_difference<-50
+        Rails.logger.info("Closing out with loss -50")
+        short_timeout = true
+        @short_close_reason = "Forced at loss with #{open_difference} after 2 hours but value is less at #{@current_quote_value} value open was #{value_open}"
+      end
+    end
+    if (time_open+8.hours)<current_time
+      Rails.logger.info("8 hour timeout")
+      Rails.logger.info("Closing out with loss forced")
+      short_timeout = true
+      @short_close_reason = "Forced at loss with #{open_difference} after 2 hours but value is less at #{@current_quote_value} value open was #{value_open}"
+    end
+    if open_difference<-500
+      Rails.logger.info("No timeout. Closing out with loss -500")
+      short_timeout = true
+      @short_close_reason = "Forced at loss with #{open_difference} after 2 hours but value is less at #{@current_quote_value} value open was #{value_open}"
+    end
+    short_timeout
+  end
+
   def match_short_close_conditions
-    Rails.logger.info("--- MATCH SHORT")
+    Rails.logger.debug("--- MATCH SHORT")
     if quote_value_then = @quote_target.get_quote_value_by_time_stamp(@current_date_time-(self.close_how_far_back_milliseconds/1000.0).seconds)
       @quote_value_then = quote_value_then.ask
     else
       Rails.logger.error("Can't find ask for #{@current_date_time-(self.close_how_far_back_milliseconds/1000.0).seconds}")
       return false
     end
-    Rails.logger.info("Testing short close: #{@quote_value_then} current: #{@current_quote_value} back in minutes: #{self.close_how_far_back_milliseconds/1000/60}")
+    Rails.logger.debug("Testing short close: #{@quote_value_then} current: #{@current_quote_value} back in minutes: #{self.close_how_far_back_milliseconds/1000/60}")
     quote_value_change = @current_quote_value-@quote_value_then
     short_timeout = false
     if @trading_position
-      Rails.logger.info("!!!!! Checking trading position #{@trading_position.id} #{@trading_position.created_at+2.hours} #{DateTime.now} #{@current_quote_value}<#{@trading_position.value_open}")
-      if @trading_position
-        Rails.logger.info("Checking timeout #{(@trading_position.created_at+2.hour)}<#{DateTime.now}")
-        shorted_at = @trading_position.value_open *  @trading_position.units
-        currently_at = @current_quote_value * @trading_position.units
-        open_difference = shorted_at-currently_at
-        if (@trading_position.created_at+2.hours)<DateTime.now
-          Rails.logger.info("2 hour timeout")
-          if (@current_quote_value<@trading_position.value_open) and open_difference>80
-            Rails.logger.info("Closing out in profits")
-            short_timeout = true
-            @short_close_reason = "Forced in profit >80 after 2 hours but value is less at #{@current_quote_value} value open was #{@trading_position.value_open}"
-          end
-          if open_difference<-150
-            Rails.logger.info("Closing out with loss min -150")
-            short_timeout = true
-            @short_close_reason = "Forced at loss with #{open_difference} after 2 hours but value is less at #{@current_quote_value} value open was #{@trading_position.value_open}"
-          end
-        end
-        if (@trading_position.created_at+4.hours)<DateTime.now
-          Rails.logger.info("4 hour timeout")
-          if (@current_quote_value<@trading_position.value_open) and open_difference>40
-            Rails.logger.info("Closing out in profits")
-            short_timeout = true
-            @short_close_reason = "Forced in profit >40 after4 hours but value is less at #{@current_quote_value} value open was #{@trading_position.value_open}"
-          end
-          if open_difference<-100
-            Rails.logger.info("Closing out with loss min -100")
-            short_timeout = true
-            @short_close_reason = "Forced at loss with #{open_difference} after 2 hours but value is less at #{@current_quote_value} value open was #{@trading_position.value_open}"
-          end
-        end
-        if (@trading_position.created_at+6.hours)<DateTime.now
-          Rails.logger.info("6 hour timeout")
-          if (@current_quote_value<@trading_position.value_open)
-            Rails.logger.info("Closing out in profits")
-            short_timeout = true
-            @short_close_reason = "Forced in profit >0 after 6 hours but value is less at #{@current_quote_value} value open was #{@trading_position.value_open}"
-          end
-          if open_difference<-50
-            Rails.logger.info("Closing out with loss -50")
-            short_timeout = true
-            @short_close_reason = "Forced at loss with #{open_difference} after 2 hours but value is less at #{@current_quote_value} value open was #{@trading_position.value_open}"
-          end
-        end
-        if (@trading_position.created_at+8.hours)<DateTime.now
-          Rails.logger.info("8 hour timeout")
-          Rails.logger.info("Closing out with loss forced")
-          short_timeout = true
-          @short_close_reason = "Forced at loss with #{open_difference} after 2 hours but value is less at #{@current_quote_value} value open was #{@trading_position.value_open}"
-        end
-        if open_difference<-500
-          Rails.logger.info("No timeout. Closing out with loss -500")
-          short_timeout = true
-          @short_close_reason = "Forced at loss with #{open_difference} after 2 hours but value is less at #{@current_quote_value} value open was #{@trading_position.value_open}"
-        end
-      end
+      Rails.logger.debug("!!!!! Checking trading position #{@trading_position.id} #{@trading_position.created_at+2.hours} #{DateTime.now} #{@current_quote_value}<#{@trading_position.value_open}")
+      shorted_at = @trading_position.value_open *  @trading_position.units
+      currently_at = @current_quote_value * @trading_position.units
+      short_timeout = match_stops(@trading_position.value_open,@trading_position.created_at,DateTime.now,shorted_at,currently_at)
+    elsif @last_opened_position_value
+      shorted_at = @last_opened_position_value *  DEFAULT_POSITION_UNITS
+      currently_at = @current_quote_value * DEFAULT_POSITION_UNITS
+      short_timeout = match_stops(@last_opened_position_value,@last_opened_position_datetime,@current_date_time,shorted_at,currently_at)
     end
-
     if short_timeout
       return true
     elsif quote_value_change==0.0
@@ -278,6 +286,11 @@ class TradingStrategy < ActiveRecord::Base
       if @trading_position and (@current_quote_value<@trading_position.value_open)
         Rails.logger.debug(@short_close_reason = "Testing short close: value change #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@close_magnitude_signal_trigger.abs)}")
         magnitude = quote_value_change.abs/@current_quote_value
+      elsif @trading_position
+        return false
+      elsif @last_opened_position_value and @current_quote_value<@last_opened_position_value
+        Rails.logger.debug(@short_close_reason = "Testing short close: value change #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@close_magnitude_signal_trigger.abs)}")
+        magnitude = quote_value_change.abs/@current_quote_value
       else
         return false
       end
@@ -288,7 +301,7 @@ class TradingStrategy < ActiveRecord::Base
   # If falling quickly hold on if falling and if making profits...
 
   def trigger_short_close_signal
-    Rails.logger.info("--> Trigger short CLOSE")
+    Rails.logger.debug("--> Trigger short CLOSE")
     if @evolution_mode
       Rails.logger.debug("--> Trigger short CLOSE investment")
       shorted_at = @last_opened_position_value * @current_position_units
@@ -296,7 +309,7 @@ class TradingStrategy < ActiveRecord::Base
       difference = shorted_at-currently_at
       @current_capital_position+=shorted_at+difference
       Rails.logger.debug("    Shorted_at #{shorted_at} currently_at #{currently_at} difference #{difference} current #{@current_capital_position}")
-      simulated_trading_signals<<{:name=>"Short Close", :current_date_time=>@current_date_time, :description=>"Shorted_at #{shorted_at} currently_at #{currently_at} difference #{difference} current #{@current_capital_position}"}
+      simulated_trading_signals<<{:name=>"Short Close", :current_date_time=>@current_date_time, :description=>"#{@short_close_reason} Shorted_at #{shorted_at} currently_at #{currently_at} difference #{difference} current #{@current_capital_position}"}
       @current_position_units = nil
       self.number_of_evolution_trading_signals+=1
       @daily_signals+=1
@@ -332,8 +345,6 @@ class TradingStrategy < ActiveRecord::Base
       # Generate Trading Signal Since
     end
   end
-
-
 
   def match_long_close_conditions
     match_short_close_conditions
@@ -437,7 +448,7 @@ class TradingStrategy < ActiveRecord::Base
         self.simulated_fitness_failure_reason = "Min Signals O"
         self.simulated_fitness = FAILED_FITNESS_VALUE
       elsif self.number_of_evolution_trading_signals>population.simulation_max_overall_trading_signals
-          self.simulated_fitness_failure_reason = "Min Signals O"
+          self.simulated_fitness_failure_reason = "Max Signals O"
           self.simulated_fitness = FAILED_FITNESS_VALUE
       elsif @daily_signals>population.simulation_max_daily_trading_signals
         self.simulated_fitness_failure_reason = "Max Signals D"

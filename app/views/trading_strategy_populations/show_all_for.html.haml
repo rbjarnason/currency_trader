@@ -4,7 +4,7 @@
   %hr
   %br
   %h2
-    = "Evolving Population"
+    = "Evolving Population #{@population.description}"
   %table
     %tr
       %th
@@ -56,6 +56,6 @@
       = "Best Trading Strategy Set"
     = render :partial=>"set", :locals=>{:set=>TradingStrategySet.find(@population.best_trading_strategy_set_id)}
     %h2
-      = "Strongest Trading Strategy Sets"
+      = "Strongest Trading Strategy Sets #{@population.trading_strategy_sets.order("accumulated_fitness desc").count}"
     - @population.trading_strategy_sets.order("accumulated_fitness desc").limit(20).each do |set|
       = render :partial=>"set", :locals=>{:set=>set}

@@ -5,7 +5,7 @@ class TradingStrategySetsController < ApplicationController
     @trading_strategy_sets = TradingStrategySet.all
 
     respond_to do |format|
-      format.html # index.html.erb
+      format.html # index.html.haml
       format.json { render json: @trading_strategy_sets }
     end
   end

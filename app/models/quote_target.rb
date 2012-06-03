@@ -4,6 +4,8 @@ class QuoteTarget < ActiveRecord::Base
   @@quote_value_cache = {}
   @@quote_value_cache_timer = Time.now+10.minutes
 
+  ::MEMORY_STORE = ActiveSupport::Cache::MemoryStore.new(:size=>256.megabytes)
+
   has_many :quote_values, :order => "data_time ASC" do
     def get_one_by_time(time_stamp)
       find :first, :conditions=>["data_time >= ?",time_stamp]
@@ -46,7 +48,7 @@ class QuoteTarget < ActiveRecord::Base
 
   def get_quote_value_by_time_stamp(time_stamp=nil)
     time_stamp_key = time_stamp ? "#{time_stamp.strftime("%Y_%m_%d_%H:%M")}_#{self.id}" : nil
-    results = Rails.cache.read(time_stamp_key) if time_stamp_key
+    results = MEMORY_STORE.read(time_stamp_key) if time_stamp_key
     if time_stamp_key and results
       return_this = results unless results == "no_quote"
       if results != "no_quote"
@@ -57,7 +59,7 @@ class QuoteTarget < ActiveRecord::Base
     else
       if time_stamp
         if quote_value = quote_values.where(["data_time >= ?",time_stamp]).first
-          Rails.cache.write(time_stamp_key,quote_value) if quote_value
+          MEMORY_STORE.write(time_stamp_key,quote_value) if quote_value
           quote_value
         end
       else

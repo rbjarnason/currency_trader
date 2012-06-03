@@ -7,7 +7,7 @@ class QuoteValuesController < ApplicationController
     @quote_values = QuoteValue.find(:all, :order=>"quote_target_id ASC, data_time ASC", :limit=>250)
 
     respond_to do |format|
-      format.html # index.html.erb
+      format.html # index.html.haml
       format.xml  { render :xml => @quote_values }
     end
   end

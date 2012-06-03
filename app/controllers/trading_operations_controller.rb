@@ -4,6 +4,10 @@ class TradingOperationsController < ApplicationController
     @current_day = params[:current_day] ? Date.parse(params[:current_day]) : Date.today
   end
 
+  def index
+    @trading_operations = TradingOperation.where("active = 1").all
+  end
+
   def chart
     @operation = TradingOperation.find(params[:id])
     @day_offset = params[:day_offset]

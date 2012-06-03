@@ -5,7 +5,7 @@ class TradingTimeFramesController < ApplicationController
     @trading_time_frames = TradingTimeFrame.all
 
     respond_to do |format|
-      format.html # index.html.erb
+      format.html # index.html.haml
       format.json { render json: @trading_time_frames }
     end
   end

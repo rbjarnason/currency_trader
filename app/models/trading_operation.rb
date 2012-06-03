@@ -7,13 +7,17 @@ class TradingOperation < ActiveRecord::Base
   has_many :trading_signals
 
 
+  def population
+    self.trading_strategy_population
+  end
+
   def get_chart_data(current_day=nil)
     quote_values = []
     current_day = current_day ? current_day : Date.today
     from_date = current_day.to_datetime.beginning_of_day
     to_date = current_day.to_datetime.end_of_day
     quote_target.quote_values.where(["data_time>=? AND data_time<=?",from_date.to_formatted_s(:db),to_date.to_formatted_s(:db)]).all.each do |quote_value|
-      quote_values<<"{date: new Date(#{quote_value.data_time.year},#{quote_value.data_time.month-1},#{quote_value.data_time.day},#{quote_value.data_time.hour},#{quote_value.data_time.minute},0,0), value: #{quote_value.ask}, volume: #{0}}"
+      quote_values<<"{date: new Date(#{quote_value.data_time.year},#{quote_value.data_time.month-1},#{quote_value.data_time.day},#{quote_value.data_time.hour},#{quote_value.data_time.min},0,0), value: #{quote_value.ask}, volume: #{0}}"
     end
     quote_values.join(",")
   end

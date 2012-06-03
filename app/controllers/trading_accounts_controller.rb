@@ -5,7 +5,7 @@ class TradingAccountsController < ApplicationController
     @trading_accounts = TradingAccount.all
 
     respond_to do |format|
-      format.html # index.html.erb
+      format.html # index.html.haml
       format.json { render json: @trading_accounts }
     end
   end

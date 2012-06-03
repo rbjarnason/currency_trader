@@ -1,0 +1,60 @@
+%div.population_show_all
+  %h1
+    = "Currency Trader - Version 0.1"
+  %hr
+  %br
+  %h2
+    = "Trading Operations"
+  %table
+    %tr
+      %th
+        = "Trading Operation"
+      %th
+        = "Symbol"
+      %th
+        = "Days running"
+      %th
+        = "Population"
+      %th
+        = "Overall P&L"
+      %th
+        = "Todays P&L"
+      %th
+        ROIC
+      %th
+        ROIC per day
+      %th
+        ROIC per month (20 days)
+      %th
+        ROIC per year (20*12 days)
+    - @trading_operations.each do |operation|
+      %tr
+        %td
+          = link_to operation.id, :action=>"show_all_for", :id=>operation.id
+        %td
+          = "#{operation.quote_target.symbol} at #{operation.trading_strategy_population.quote_target.get_quote_value_by_time_stamp.ask}"
+        %td
+          = (operation.created_at.to_date..Date.today).count
+        %td
+          = link_to operation.population.description ? operation.population.description : operation.population.id,
+                    :controller=>"trading_strategy_populations", :action=>"show_all_for", :id=>operation.population.id
+        %td
+          = operation.trading_positions.sum("profit_loss")
+        %td
+          - todays = operation.trading_positions.select("updated_at, SUM(profit_loss) as PANDL").where(["open=0 AND created_at > ?",(DateTime.now).beginning_of_day]).first.PANDL
+          - if todays
+            - if todays>0.0
+              = todays
+            - else
+              %span{:style=>"color: red"}
+                = todays
+          - else
+            = 0.0
+        %td
+          = number_to_percentage((operation.trading_positions.sum("profit_loss")/operation.initial_capital_amount)*100.0, :precision => 1)
+        %td
+          = number_to_percentage(((operation.trading_positions.sum("profit_loss")/operation.initial_capital_amount)*100.0)/(operation.created_at.to_date..Date.today).to_a.length, :precision => 1)
+        %td
+          = number_to_percentage((((operation.trading_positions.sum("profit_loss")/operation.initial_capital_amount)*100.0)/(operation.created_at.to_date..Date.today).to_a.length)*20, :precision => 0)
+        %td
+          = number_to_percentage((((operation.trading_positions.sum("profit_loss")/operation.initial_capital_amount)*100.0)/(operation.created_at.to_date..Date.today).to_a.length)*20*12, :precision => 0)

@@ -20,7 +20,7 @@ class QuoteTargetsController < ApplicationController
     @quote_targets = QuoteTarget.find(:all)
 
     respond_to do |format|
-      format.html # index.html.erb
+      format.html # index.html.haml
       format.xml  { render :xml => @quote_targets }
     end
   end
