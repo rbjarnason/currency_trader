@@ -30,7 +30,7 @@ class TradingStrategySet < ActiveRecord::Base
     end
     if how_far_back_minutes_close.uniq.length!=trading_strategies.count
       self.accumulated_fitness=self.accumulated_fitness*PUNISHMENT_FOR_SAME_MINUTES_IN_STRATEGIES
-      Rails.logger.info("#{how_far_back_minutes_open} To Similar Close Minutes Punish")
+      Rails.logger.info("#{how_far_back_minutes_close} To Similar Close Minutes Punish")
     end
     self.accumulated_fitness
   end
