@@ -213,7 +213,7 @@ class TradingStrategy < ActiveRecord::Base
       end
     end
     if (time_open+4.hours)<current_time
-      Rails.logger.info("4 hour timeout")
+      Rails.logger.debug("4 hour timeout")
       if (@current_quote_value<value_open) and open_difference>40
         Rails.logger.debug("Closing out in profits")
         short_timeout = true
@@ -226,26 +226,26 @@ class TradingStrategy < ActiveRecord::Base
       end
     end
     if (time_open+6.hours)<current_time
-      Rails.logger.info("6 hour timeout")
+      Rails.logger.debug("6 hour timeout")
       if (@current_quote_value<value_open)
-        Rails.logger.info("Closing out in profits")
+        Rails.logger.debug("Closing out in profits")
         short_timeout = true
         @short_close_reason = "Forced in profit >0 after 6 hours but value is less at #{@current_quote_value} value open was #{value_open}"
       end
       if open_difference<-50
-        Rails.logger.info("Closing out with loss -50")
+        Rails.logger.debug("Closing out with loss -50")
         short_timeout = true
         @short_close_reason = "Forced at loss with #{open_difference} after 2 hours but value is less at #{@current_quote_value} value open was #{value_open}"
       end
     end
     if (time_open+8.hours)<current_time
-      Rails.logger.info("8 hour timeout")
-      Rails.logger.info("Closing out with loss forced")
+      Rails.logger.debug("8 hour timeout")
+      Rails.logger.debug("Closing out with loss forced")
       short_timeout = true
       @short_close_reason = "Forced at loss with #{open_difference} after 2 hours but value is less at #{@current_quote_value} value open was #{value_open}"
     end
     if open_difference<-500
-      Rails.logger.info("No timeout. Closing out with loss -500")
+      Rails.logger.debug("No timeout. Closing out with loss -500")
       short_timeout = true
       @short_close_reason = "Forced at loss with #{open_difference} after 2 hours but value is less at #{@current_quote_value} value open was #{value_open}"
     end

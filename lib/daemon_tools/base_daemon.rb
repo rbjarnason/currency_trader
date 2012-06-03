@@ -61,6 +61,11 @@ class BaseDaemonWorker
   def initialize(config, logger)
     @logger = logger
     @shell = Shell.new(self)
+    if ENV['RAILS_ENV']=="production"
+      @logger.level = Logger::INFO
+    else
+      @logger.level = Logger::DEBUG
+    end
     @worker_config = config
     @counter = 0
     @last_report_time = 0
