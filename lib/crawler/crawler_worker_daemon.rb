@@ -90,13 +90,13 @@ class CrawlerWorker < BaseDaemonWorker
     end
   end
 
-  def poll_for_work_forex
+  def poll_for_work
     debug("poll_for_work")
     process_forexfeed_quote_values
     sleep 60
   end
 
-  def poll_for_work
+  def poll_for_work_yahoo
     debug("poll_for_work")
     poll_for_yahoo_quote_work
     sleep 10
