@@ -87,7 +87,7 @@ class TradingStrategy < ActiveRecord::Base
       if signal[:name]=="Short Close"
         dstart = signal[:description].index("difference")
         cstart = signal[:description].index("current")
-        gained = signal[:description][dstart+11..cstart-2]
+        gained = signal[:description][dstart+11..cstart-2] if cstart and dstart
 #        events << simulated_trading_signal_to_amchart({:name=>"#{gained}", :type=>"sign", :current_date_time=>signal[:current_date_time], :background_color=>"#ffffff",
 #                                                       :description=>"Gained #{gained}"})
       end
@@ -204,7 +204,7 @@ class TradingStrategy < ActiveRecord::Base
       if (@current_quote_value<value_open) and open_difference>80
         Rails.logger.debug("Closing out in profits")
         short_timeout = true
-        @short_close_reason = "Forced in profit >80 after 2 hours but value is less at #{@current_quote_value} value open was #{value_open}"
+        @short_close_reason = "Forced in profit more than 80 after 2 hours but value is less at #{@current_quote_value} value open was #{value_open}"
       end
       if open_difference<-150
         Rails.logger.debug("Closing out with loss min -150")
@@ -217,7 +217,7 @@ class TradingStrategy < ActiveRecord::Base
       if (@current_quote_value<value_open) and open_difference>40
         Rails.logger.debug("Closing out in profits")
         short_timeout = true
-        @short_close_reason = "Forced in profit >40 after4 hours but value is less at #{@current_quote_value} value open was #{value_open}"
+        @short_close_reason = "Forced in profit more than 40 after4 hours but value is less at #{@current_quote_value} value open was #{value_open}"
       end
       if open_difference<-100
         Rails.logger.debug("Closing out with loss min -100")
@@ -230,7 +230,7 @@ class TradingStrategy < ActiveRecord::Base
       if (@current_quote_value<value_open)
         Rails.logger.debug("Closing out in profits")
         short_timeout = true
-        @short_close_reason = "Forced in profit >0 after 6 hours but value is less at #{@current_quote_value} value open was #{value_open}"
+        @short_close_reason = "Forced in profit more than 0 after 6 hours but value is less at #{@current_quote_value} value open was #{value_open}"
       end
       if open_difference<-50
         Rails.logger.debug("Closing out with loss -50")
