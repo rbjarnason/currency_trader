@@ -24,7 +24,7 @@ class TradingStrategy < ActiveRecord::Base
   before_save :marshall_simulated_trading_signals
   after_initialize :demarshall_simulated_trading_signals
 
-  attr_reader :strategy_buy_short, :open_magnitude_signal_trigger, :close_magnitude_signal_trigger
+  attr_reader :strategy_buy_short, :open_magnitude_signal_trigger, :close_magnitude_signal_trigger, :simulated_trading_signals_array
 
   after_initialize :setup_parameters
   after_save :setup_parameters
@@ -93,7 +93,7 @@ class TradingStrategy < ActiveRecord::Base
                                                   :description=>"Trading Time Frame Start"})
     events << simulated_trading_signal_to_amchart({:name=>"E", :current_date_time=>DateTime.parse("#{@day} #{@to_hour}:00:00"), :background_color=>"#ff6655",
                                                   :description=>"Trading Time Frame Stop"})
-    simulated_trading_signals.each do |signal|
+    @simulated_trading_signals_array.each do |signal|
       events << simulated_trading_signal_to_amchart(signal)
       if signal[:name]=="Short Open"
         events << simulated_trading_signal_to_amchart({:name=>"F", :type=>"flag", :current_date_time=>signal[:current_date_time]-(self.open_how_far_back_milliseconds/1000/60).minutes, :background_color=>"#aaccff",
@@ -187,7 +187,7 @@ class TradingStrategy < ActiveRecord::Base
         @current_capital_position-=capital_investment
         self.number_of_evolution_trading_signals+=1
         @daily_signals+=1
-        simulated_trading_signals<<{:name=>"Short Open", :current_date_time=>@current_date_time, :description=>"I shorted #{@current_position_units} units for #{capital_investment} leaving #{@current_capital_position}"}
+        @simulated_trading_signals_array<<{:name=>"Short Open", :current_date_time=>@current_date_time, :description=>"I shorted #{@current_position_units} units for #{capital_investment} leaving #{@current_capital_position}"}
         Rails.logger.debug("    I shorted #{@current_position_units} units for #{capital_investment} leaving #{@current_capital_position}")
       else
         Rails.warn("Out of cash: #{self.inspect}")
@@ -324,7 +324,7 @@ class TradingStrategy < ActiveRecord::Base
       difference = shorted_at-currently_at
       @current_capital_position+=shorted_at+difference
       Rails.logger.debug("    Shorted_at #{shorted_at} currently_at #{currently_at} difference #{difference} current #{@current_capital_position}")
-      simulated_trading_signals<<{:name=>"Short Close", :current_date_time=>@current_date_time, :description=>"#{@short_close_reason} Shorted_at #{shorted_at} currently_at #{currently_at} difference #{difference} current #{@current_capital_position}"}
+      @simulated_trading_signals_array<<{:name=>"Short Close", :current_date_time=>@current_date_time, :description=>"#{@short_close_reason} Shorted_at #{shorted_at} currently_at #{currently_at} difference #{difference} current #{@current_capital_position}"}
       @current_position_units = nil
       self.number_of_evolution_trading_signals+=1
       @daily_signals+=1
@@ -441,6 +441,7 @@ class TradingStrategy < ActiveRecord::Base
       @evolution_mode = true
       @current_position_units = nil
       @last_opened_position_value = nil
+      @simulated_trading_signals_array = []
       @current_capital_position = @start_capital_position = DEFAULT_START_CAPITAL
       @from_hour = trading_strategy_set.trading_time_frame.from_hour
       @to_hour = trading_strategy_set.trading_time_frame.to_hour

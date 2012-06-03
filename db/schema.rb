@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120602030932) do
+ActiveRecord::Schema.define(:version => 20120603202400) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.string   "resource_id",   :null => false
@@ -140,7 +140,7 @@ ActiveRecord::Schema.define(:version => 20120602030932) do
     t.text     "binary_parameters"
     t.text     "float_parameters"
     t.float    "simulated_fitness"
-    t.text     "simulated_trading_signals"
+    t.binary   "simulated_trading_signals"
     t.datetime "simulated_start_date"
     t.datetime "simulated_end_date"
     t.integer  "open_how_far_back_milliseconds"
