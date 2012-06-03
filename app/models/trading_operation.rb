@@ -26,13 +26,15 @@ class TradingOperation < ActiveRecord::Base
 
     @from_hour = TradingTimeFrame.last.from_hour
     @to_hour = TradingTimeFrame.last.to_hour
-    @day = current_day ? current_day : Date.today
+    current_day = @day = current_day ? current_day : Date.today
+    from_date = current_day.to_datetime.beginning_of_day
+    to_date = current_day.to_datetime.end_of_day
     events = []
     events << simulated_trading_signal_to_amchart({:name=>"B", :current_date_time=>DateTime.parse("#{@day} #{@from_hour}:00:00"), :background_color=>"#22ee22",
                                                   :description=>"Trading Time Frame Start"})
     events << simulated_trading_signal_to_amchart({:name=>"E", :current_date_time=>DateTime.parse("#{@day} #{@to_hour}:00:00"), :background_color=>"#ff6655",
                                                   :description=>"Trading Time Frame Stop"})
-    trading_signals.each do |signal|
+    trading_signals.where(["created_at>=? AND created_at<=?",from_date.to_formatted_s(:db),to_date.to_formatted_s(:db)]).all.each do |signal|
       if signal.name=="Short Open"
 #        events << simulated_trading_signal_to_amchart({:name=>"#{signal.name}",
 #                                                       :type=>"arrowUp",

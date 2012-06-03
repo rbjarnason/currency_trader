@@ -45,7 +45,7 @@ class EvolutionEngineWorker < BaseDaemonWorker
   def poll_for_evolution_work
     debug("poll_for_evolution_work")
     TradingStrategyPopulation.transaction do
-      @population = TradingStrategyPopulation.find(:first, :conditions => "active = 1 AND complete = 0 AND in_process = 1", :order => 'rand()', :lock=>true)
+      @population = TradingStrategyPopulation.where("active = 1 AND complete = 0 AND in_process = 1").order('rand()').lock(true).first
       if @population and @population.is_generation_testing_complete?
         @population.last_processing_start_time = Time.now
         @population.in_process = 0
@@ -57,8 +57,8 @@ class EvolutionEngineWorker < BaseDaemonWorker
   end
 
   def poll_for_work
-    poll_for_evolution_work
     50.times { poll_for_trading_strategy_set_work }
+    poll_for_evolution_work
   end
 end
 
