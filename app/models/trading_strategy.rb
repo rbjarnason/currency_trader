@@ -19,12 +19,27 @@ class TradingStrategy < ActiveRecord::Base
   # 2: Type of trading signal (Buy or Sell)
   serialize :binary_parameters, Array
   serialize :float_parameters, Array
-  serialize :simulated_trading_signals, Array
+  #serialize :simulated_trading_signals, Array
+
+  before_save :marshall_simulated_trading_signals
+  after_initialize :demarshall_simulated_trading_signals
 
   attr_reader :strategy_buy_short, :open_magnitude_signal_trigger, :close_magnitude_signal_trigger
 
   after_initialize :setup_parameters
   after_save :setup_parameters
+
+  def marshall_simulated_trading_signals
+    self.simulated_trading_signals = Marshal.dump(@simulated_trading_signals_array) if @simulated_trading_signals_array
+  end
+
+  def demarshall_simulated_trading_signals
+    begin
+      @simulated_trading_signals_array = Marshal.load(self.simulated_trading_signals) if self.simulated_trading_signals
+    rescue
+      @simulated_trading_signals_array = []
+    end
+  end
 
   def set
     self.trading_strategy_set

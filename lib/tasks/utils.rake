@@ -27,7 +27,21 @@ namespace :utils do
     end
   end
 
-  desc "Cleanup old stuff"
+  desc "Disable enable range"
+  task :disable_enable_range => :environment do
+    TradingStrategyPopulation.where("id>=146 AND id<=149").all.each do |population|
+      population.active = true
+      population.save
+      puts population
+    end
+    TradingStrategyPopulation.where("id>=162 AND id<=165").all.each do |population|
+      population.active = false
+      population.save
+      puts population
+    end
+  end
+
+    desc "Cleanup old stuff"
   task :cleanup_old_stuff => :environment do
     strategy_set_ids = []
     TradingStrategyPopulation.all.each do |population|
