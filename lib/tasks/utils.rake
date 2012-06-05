@@ -29,9 +29,9 @@ namespace :utils do
 
   desc "Disable enable range"
   task :disable_enable_range => :environment do
-    TradingStrategyPopulation.where("id>=146 AND id<=149 and active=0").order("rand()").all.each do |population|
-      population.reload(:lock=>true)
-      population.active = true
+    TradingStrategyPopulation.where("id>=146 AND id<=150 and active=1").order("rand()").all.each do |population|
+      #population.reload(:lock=>true)
+      population.active = false
       population.save
       puts population
     end
@@ -46,6 +46,7 @@ namespace :utils do
   task :fix_missing_strategies => :environment do
     TradingPosition.where("open=1").all.each do |pos|
       unless pos.trading_strategy
+        puts pos
         pos.trading_strategy = TradingStrategy.order("rand()").first
         pos.save
       end

@@ -130,7 +130,8 @@ class TradingStrategyPopulation < ActiveRecord::Base
         used_trading_strategies = []
         used_trading_strategies << self.best_trading_strategy_set_id
         used_trading_strategies += TradingPosition.all.collect { |p| p.trading_strategy_id }
-        self.trading_strategy_sets.where(["id not in (?)",used_trading_strategies]).destroy_all
+        used_trading_strategies += TradingSignal.all.collect { |p| p.trading_strategy_id }
+        self.trading_strategy_sets.where(["id not in (?)",used_trading_strategies.uniq]).destroy_all
         for setting in settings
           trading_strategy_set = TradingStrategySet.new
           trading_strategy_set.trading_strategy_population_id = self.id
