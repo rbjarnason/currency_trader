@@ -29,9 +29,9 @@ namespace :utils do
 
   desc "Disable enable range"
   task :disable_enable_range => :environment do
-    TradingStrategyPopulation.where("id>=146 AND id<=149").all.each do |population|
+    TradingStrategyPopulation.where("id>=146 AND id<=149 and active=0").order("rand()").all.each do |population|
       population.reload(:lock=>true)
-      population.active = false
+      population.active = true
       population.save
       puts population
     end

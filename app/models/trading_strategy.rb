@@ -279,15 +279,19 @@ class TradingStrategy < ActiveRecord::Base
     Rails.logger.debug("Testing short close: #{@quote_value_then} current: #{@current_quote_value} back in minutes: #{self.close_how_far_back_milliseconds/1000/60}")
     quote_value_change = @current_quote_value-@quote_value_then
     short_timeout = false
+    open_difference = 0.0
+    magnitude = 0.0
     if @trading_position
       Rails.logger.debug("!!!!! Checking trading position #{@trading_position.id} #{@trading_position.created_at+2.hours} #{DateTime.now} #{@current_quote_value}<#{@trading_position.value_open}")
       shorted_at = @trading_position.value_open *  @trading_position.units
       currently_at = @current_quote_value * @trading_position.units
       short_timeout = match_stops(@trading_position.value_open,@trading_position.created_at,DateTime.now,shorted_at,currently_at)
+      open_difference = shorted_at-currently_at
     elsif @last_opened_position_value
       shorted_at = @last_opened_position_value *  DEFAULT_POSITION_UNITS
       currently_at = @current_quote_value * DEFAULT_POSITION_UNITS
       short_timeout = match_stops(@last_opened_position_value,@last_opened_position_datetime,@current_date_time,shorted_at,currently_at)
+      open_difference = shorted_at-currently_at
     end
     if short_timeout
       return true
@@ -300,13 +304,21 @@ class TradingStrategy < ActiveRecord::Base
       return false
     else
       if @trading_position and (@current_quote_value<@trading_position.value_open)
-        Rails.logger.debug(@short_close_reason = "Testing short close: value change #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@close_magnitude_signal_trigger.abs)}")
-        magnitude = quote_value_change.abs/@current_quote_value
+        if open_difference>50.0
+          Rails.logger.debug(@short_close_reason = "Testing short close: value change #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@close_magnitude_signal_trigger.abs)}")
+          magnitude = quote_value_change.abs/@current_quote_value
+        else
+          return false
+        end
       elsif @trading_position
         return false
       elsif @last_opened_position_value and @current_quote_value<@last_opened_position_value
-        Rails.logger.debug(@short_close_reason = "Testing short close: value change #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@close_magnitude_signal_trigger.abs)}")
-        magnitude = quote_value_change.abs/@current_quote_value
+        if open_difference>50.0
+          Rails.logger.debug(@short_close_reason = "Testing short close: value change #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@close_magnitude_signal_trigger.abs)}")
+          magnitude = quote_value_change.abs/@current_quote_value
+        else
+          return false
+        end
       else
         return false
       end
