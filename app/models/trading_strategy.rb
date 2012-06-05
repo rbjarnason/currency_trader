@@ -259,7 +259,7 @@ class TradingStrategy < ActiveRecord::Base
       Rails.logger.debug("8 hour timeout")
       Rails.logger.debug("Closing out with loss forced")
       short_timeout = true
-      @short_close_reason = "Forced at loss with #{open_difference} after 2 hours but value is less at #{@current_quote_value} value open was #{value_open}"
+      @short_close_reason = "Forced with #{open_difference} after 8 hours but value is less at #{@current_quote_value} value open was #{value_open}"
     end
     if open_difference<-500
       Rails.logger.debug("No timeout. Closing out with loss -500")
