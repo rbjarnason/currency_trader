@@ -57,8 +57,8 @@ class EvolutionEngineWorker < BaseDaemonWorker
   end
 
   def poll_for_work
-    50.times { poll_for_trading_strategy_set_work }
-    poll_for_evolution_work
+    poll_for_trading_strategy_set_work
+    poll_for_evolution_work if rand(4)==2
   end
 end
 
