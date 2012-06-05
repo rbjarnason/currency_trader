@@ -122,7 +122,11 @@ class TradingStrategyPopulation < ActiveRecord::Base
     def create_trading_strategy_sets(settings)
       Rails.logger.info("create_trading_strategy_sets")
       TradingStrategySet.transaction do
-        self.trading_strategy_sets.where(["id != ?",self.best_trading_strategy_set_id]).destroy_all
+        #TODO: Find a better way to do this below as over time there will be too many trading positions
+        used_trading_strategies = []
+        used_trading_strategies << self.best_trading_strategy_set_id
+        used_trading_strategies += TradingPosition.all.collect { |p| p.trading_strategy_id }
+        self.trading_strategy_sets.where(["id not in (?)",used_trading_strategies]).destroy_all
         for setting in settings
           trading_strategy_set = TradingStrategySet.new
           trading_strategy_set.trading_strategy_population_id = self.id
