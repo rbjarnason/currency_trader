@@ -89,8 +89,12 @@ class TradingStrategyPopulation < ActiveRecord::Base
     def import_population_fitness
       Rails.logger.info("import_population_fitness")
       for strategy in @population
-        trading_strategy_set = TradingStrategySet.find(strategy.trading_strategy_set_id)
-        strategy.fitness = trading_strategy_set.fitness
+        if TradingStrategySet.exists?(strategy.trading_strategy_set_id)
+          trading_strategy_set = TradingStrategySet.find(strategy.trading_strategy_set_id)
+        else
+          Rails.logger.info("ERROR: Can't find set #{strategy.trading_strategy_set_id}")
+          strategy.fitness = 0.0
+        end
         self.best_fitness = -1000000.0 unless self.best_fitness
         if strategy.fitness > self.best_fitness
           self.best_fitness = strategy.fitness

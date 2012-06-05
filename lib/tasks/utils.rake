@@ -42,6 +42,16 @@ namespace :utils do
     end
   end
 
+  desc "Fix missing strategies"
+  task :fix_missing_strategies => :environment do
+    TradingPosition.where("open=1").all.each do |pos|
+      unless pos.trading_strategy
+        pos.trading_strategy = TradingStrategy.order("rand()").first
+        pos.save
+      end
+    end
+  end
+
     desc "Cleanup old stuff"
   task :cleanup_old_stuff => :environment do
     strategy_set_ids = []
