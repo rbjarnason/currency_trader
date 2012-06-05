@@ -194,12 +194,13 @@ class TradingStrategy < ActiveRecord::Base
       end
     else
       if @trading_operation_id and operation = TradingOperation.where(["id=?",@trading_operation_id]).first
-        position = operation.trading_positions.where("open=1").order("created_at DESC").first
-        if position and (position.created_at+MINUTES_BETWEEN_POS_OPENINGS>DateTime.now)
-          Rails.logger.info("Not putting it on because of short time since #{position.inspect} - #{position.created_at+MINUTES_BETWEEN_POS_OPENINGS}>#{DateTime.now}")
+        signal = operation.trading_signals.where("name='Short Open'").order("created_at DESC").first
+        if signal and (signal.created_at+MINUTES_BETWEEN_POS_OPENINGS>DateTime.now)
+          Rails.logger.info("Not putting it on because of short time since #{signal.inspect} - #{signal.created_at+MINUTES_BETWEEN_POS_OPENINGS}>#{DateTime.now}")
           return
         end
       end
+      return if operation.trading_positions.where("open=1").count>2
       signal = TradingSignal.new
       signal.name = "Short Open"
       signal.trading_operation_id = @trading_operation_id
