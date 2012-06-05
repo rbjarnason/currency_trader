@@ -207,6 +207,7 @@ class TradingStrategy < ActiveRecord::Base
       signal.trading_strategy_id = self.id
       signal.reason = @short_open_reason
       signal.save
+      Rails.logger.info("Opened signal #{signal.inspect}")
     end
   end
 
