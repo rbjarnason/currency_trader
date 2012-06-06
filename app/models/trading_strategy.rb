@@ -167,7 +167,7 @@ class TradingStrategy < ActiveRecord::Base
     if quote_value_change==0.0
       return false
     elsif quote_value_change>=0.0
-      Rails.logger.debug(@short_open_reason = "Testing short open: value change #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@open_magnitude_signal_trigger)}")
+      Rails.logger.debug(@short_open_reason = "Testing short open: value change #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@open_magnitude_signal_trigger.abs)}")
       magnitude = quote_value_change.abs/@current_quote_value
     else
       Rails.logger.debug("Testing short open: Has gone down")

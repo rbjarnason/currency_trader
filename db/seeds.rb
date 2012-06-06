@@ -87,7 +87,7 @@ if false
   pop.quote_target = QuoteTarget.where("symbol='EUR/USD'").first
   pop.in_process = true
   pop.max_generations = 200000000
-  pop.population_size = 200
+  pop.population_size = 125
   pop.simulation_number_of_trading_strategies_per_set = 3
   pop.simulation_days_back = 7
   pop.simulation_min_overall_trading_signals = 2*pop.simulation_days_back
@@ -104,7 +104,7 @@ if false
   pop.quote_target = QuoteTarget.where("symbol='EUR/USD'").first
   pop.in_process = true
   pop.max_generations = 200000000
-  pop.population_size = 200
+  pop.population_size = 125
   pop.simulation_number_of_trading_strategies_per_set = 3
   pop.simulation_days_back = 30
   pop.simulation_end_date = DateTime.parse("26/02/2012 17:59:59")
@@ -122,7 +122,7 @@ if false
   pop.quote_target = QuoteTarget.where("symbol='EUR/USD'").first
   pop.in_process = true
   pop.max_generations = 200000000
-  pop.population_size = 200
+  pop.population_size = 125
   pop.simulation_number_of_trading_strategies_per_set = 3
   pop.simulation_days_back = 4
   pop.simulation_min_overall_trading_signals = 2*pop.simulation_days_back
@@ -139,7 +139,7 @@ if false
   pop.quote_target = QuoteTarget.where("symbol='EUR/USD'").first
   pop.in_process = true
   pop.max_generations = 200000000
-  pop.population_size = 200
+  pop.population_size = 125
   pop.simulation_number_of_trading_strategies_per_set = 3
   pop.simulation_days_back = 45
   pop.simulation_end_date = DateTime.parse("10/04/2012 17:59:59")

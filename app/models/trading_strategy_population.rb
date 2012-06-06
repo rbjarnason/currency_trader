@@ -89,12 +89,8 @@ class TradingStrategyPopulation < ActiveRecord::Base
     def import_population_fitness
       Rails.logger.info("import_population_fitness")
       for strategy in @population
-        if TradingStrategySet.exists?(strategy.trading_strategy_set_id)
-          trading_strategy_set = TradingStrategySet.find(strategy.trading_strategy_set_id)
-        else
-          Rails.logger.info("ERROR: Can't find set #{strategy.trading_strategy_set_id}")
-          strategy.fitness = 0.0
-        end
+        trading_strategy_set = TradingStrategySet.find(strategy.trading_strategy_set_id)
+        strategy.fitness = trading_strategy_set.fitness
         self.best_fitness = -1000000.0 unless self.best_fitness
         if strategy.fitness > self.best_fitness
           self.best_fitness = strategy.fitness
@@ -128,10 +124,12 @@ class TradingStrategyPopulation < ActiveRecord::Base
       TradingStrategySet.transaction do
         #TODO: Find a better way to do this below as over time there will be too many trading positions
         #used_trading_strategies = []
-        #used_trading_strategies << self.best_trading_strategy_set_id
         #used_trading_strategies += TradingPosition.all.collect { |p| p.trading_strategy_id }
         #used_trading_strategies += TradingSignal.all.collect { |p| p.trading_strategy_id }
-        #self.trading_strategy_sets.where(["id not in (?)",used_trading_strategies.uniq]).destroy_all
+        #TradingStrategy.where(["id not in (?)",used_trading_strategies.uniq]).delete_all
+        #used_trading_strategies_sets = []
+        #used_trading_strategies_sets << self.best_trading_strategy_set_id
+        #self.trading_strategy_sets.where(["id not in (?)",used_trading_strategies_sets.uniq]).delete_all
         for setting in settings
           trading_strategy_set = TradingStrategySet.new
           trading_strategy_set.trading_strategy_population_id = self.id
