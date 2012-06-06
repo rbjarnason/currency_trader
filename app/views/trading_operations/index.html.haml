@@ -48,11 +48,10 @@
           = operation.trading_positions.sum("profit_loss")
         %td
           - if total_pl>=0.0
-            = total_pl
+            = "#{operation.trading_positions.where("open=1").count} positions at #{total_pl}"
           - else
             %span{:style=>"color: red"}
-              = total_pl
-
+              = "#{operation.trading_positions.where("open=1").count} positions at #{total_pl}"
         %td
           - todays = operation.trading_positions.select("updated_at, SUM(profit_loss) as PANDL").where(["open=0 AND created_at > ?",(DateTime.now).beginning_of_day]).first.PANDL
           - if todays
