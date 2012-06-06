@@ -18,6 +18,8 @@
       %th
         = "Overall P&L"
       %th
+        = "Outstanding Positions"
+      %th
         = "Todays P&L"
       %th
         ROIC
@@ -28,6 +30,10 @@
       %th
         ROIC per year (20*12 days)
     - @trading_operations.each do |operation|
+      - total_pl = 0
+      - operation.trading_positions.where("open=1").order("created_at DESC").limit(20).each do |position|
+        - pos=(position.value_open*position.units).to_i-(position.units*operation.trading_strategy_population.quote_target.get_quote_value_by_time_stamp.ask).to_i
+        - total_pl+=pos
       %tr
         %td
           = link_to operation.id, :action=>"show_all_for", :id=>operation.id
@@ -41,9 +47,16 @@
         %td
           = operation.trading_positions.sum("profit_loss")
         %td
+          - if total_pl>=0.0
+            = total_pl
+          - else
+            %span{:style=>"color: red"}
+              = total_pl
+
+        %td
           - todays = operation.trading_positions.select("updated_at, SUM(profit_loss) as PANDL").where(["open=0 AND created_at > ?",(DateTime.now).beginning_of_day]).first.PANDL
           - if todays
-            - if todays>0.0
+            - if todays>=0.0
               = todays
             - else
               %span{:style=>"color: red"}
