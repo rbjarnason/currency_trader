@@ -216,55 +216,63 @@ class TradingStrategy < ActiveRecord::Base
     short_timeout = false
     Rails.logger.debug("Checking timeout #{(time_open+2.hour)}<#{current_time}")
     open_difference = shorted_at-currently_at
-    if (time_open+2.hours)<current_time
-      Rails.logger.debug("2 hour timeout")
-      if (@current_quote_value<value_open) and open_difference>100
-        Rails.logger.debug("Closing out in profits")
-        short_timeout = true
-        @short_close_reason = "Forced in profit more than 100 after 2 hours but value is less at #{@current_quote_value} value open was #{value_open}"
-      end
-      if open_difference<-350
-        Rails.logger.debug("Closing out with loss min -350")
-        short_timeout = true
-        @short_close_reason = "Forced at loss with #{open_difference} after 2 hours but value is less at #{@current_quote_value} value open was #{value_open}"
-      end
-    end
-    if (time_open+4.hours)<current_time
-      Rails.logger.debug("4 hour timeout")
-      if (@current_quote_value<value_open) and open_difference>60
-        Rails.logger.debug("Closing out in profits")
-        short_timeout = true
-        @short_close_reason = "Forced in profit more than 60 after 4 hours but value is less at #{@current_quote_value} value open was #{value_open}"
-      end
-      if open_difference<-250
-        Rails.logger.debug("Closing out with loss min -250")
-        short_timeout = true
-        @short_close_reason = "Forced at loss with #{open_difference} after 4 hours but value is less at #{@current_quote_value} value open was #{value_open}"
-      end
-    end
-    if (time_open+6.hours)<current_time
-      Rails.logger.debug("6 hour timeout")
-      if (@current_quote_value<value_open)
-        Rails.logger.debug("Closing out in profits")
-        short_timeout = true
-        @short_close_reason = "Forced in profit more than 0 after 6 hours but value is less at #{@current_quote_value} value open was #{value_open}"
-      end
-      if open_difference<-150
-        Rails.logger.debug("Closing out with loss -150")
-        short_timeout = true
-        @short_close_reason = "Forced at loss with #{open_difference} after 6 hours but value is less at #{@current_quote_value} value open was #{value_open}"
-      end
-    end
-    if (time_open+8.hours)<current_time
-      Rails.logger.debug("8 hour timeout")
-      Rails.logger.debug("Closing out with loss forced")
+#   if (time_open+30.minutes)<current_time
+#      Rails.logger.debug("30 minutes timeout")
+#      if (@current_quote_value<value_open) and open_difference>190 and open_difference<150
+#        Rails.logger.debug("Closing out in profits")
+#        short_timeout = true
+#        @short_close_reason = "Forced in profit more than 100-150 after 30 minutes but value is less at #{@current_quote_value} value open was #{value_open}"
+#      end
+#    end
+#    if (time_open+2.hours)<current_time
+#      Rails.logger.debug("2 hour timeout")
+#      if (@current_quote_value<value_open) and open_difference>100
+#        Rails.logger.debug("Closing out in profits")
+#        short_timeout = true
+#        @short_close_reason = "Forced in profit more than 100 after 2 hours but value is less at #{@current_quote_value} value open was #{value_open}"
+#      end
+#      if open_difference<-350
+#        Rails.logger.debug("Closing out with loss min -350")
+#        short_timeout = true
+#        @short_close_reason = "Forced at loss with #{open_difference} after 2 hours but value is less at #{@current_quote_value} value open was #{value_open}"
+#      end
+#    end
+ #   if (time_open+4.hours)<current_time
+#      Rails.logger.debug("4 hour timeout")
+#      if (@current_quote_value<value_open) and open_difference>60
+#        Rails.logger.debug("Closing out in profits")
+#        short_timeout = true
+#        @short_close_reason = "Forced in profit more than 60 after 4 hours but value is less at #{@current_quote_value} value open was #{value_open}"
+#      end
+#      if open_difference<-250
+#        Rails.logger.debug("Closing out with loss min -250")
+#        short_timeout = true
+#        @short_close_reason = "Forced at loss with #{open_difference} after 4 hours but value is less at #{@current_quote_value} value open was #{value_open}"
+#      end
+#    end
+#    if (time_open+6.hours)<current_time
+#      Rails.logger.debug("6 hour timeout")
+#      if (@current_quote_value<value_open)
+#        Rails.logger.debug("Closing out in profits")
+#        short_timeout = true
+#        @short_close_reason = "Forced in profit more than 0 after 6 hours but value is less at #{@current_quote_value} value open was #{value_open}"
+#      end
+#      if open_difference<-150
+#        Rails.logger.debug("Closing out with loss -150")
+#        short_timeout = true
+#        @short_close_reason = "Forced at loss with #{open_difference} after 6 hours but value is less at #{@current_quote_value} value open was #{value_open}"
+#      end
+#    end
+#    if (time_open+8.hours)<current_time
+#      Rails.logger.debug("8 hour timeout")
+#      Rails.logger.debug("Closing out with loss forced")
+#      short_timeout = true
+#      @short_close_reason = "Forced with #{open_difference} after 8 hours but value is less at #{@current_quote_value} value open was #{value_open}"
+#    end
+    if open_difference<-100
+      Rails.logger.debug("No timeout. Closing out with loss -100")
       short_timeout = true
-      @short_close_reason = "Forced with #{open_difference} after 8 hours but value is less at #{@current_quote_value} value open was #{value_open}"
-    end
-    if open_difference<-500
-      Rails.logger.debug("No timeout. Closing out with loss -500")
-      short_timeout = true
-      @short_close_reason = "Forced at loss with #{open_difference} -500 value is less at #{@current_quote_value} value open was #{value_open}"
+      @short_close_reason = "Forced at loss with #{open_difference} -100 value is less at #{@current_quote_value} value open was #{value_open}"
     end
     short_timeout
   end
@@ -305,7 +313,7 @@ class TradingStrategy < ActiveRecord::Base
       return false
     else
       if @trading_position and (@current_quote_value<@trading_position.value_open)
-        if open_difference>50.0
+        if open_difference>75.0
           Rails.logger.debug(@short_close_reason = "Testing short close: value change #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@close_magnitude_signal_trigger.abs)}")
           magnitude = quote_value_change.abs/@current_quote_value
         else
@@ -314,7 +322,7 @@ class TradingStrategy < ActiveRecord::Base
       elsif @trading_position
         return false
       elsif @last_opened_position_value and @current_quote_value<@last_opened_position_value
-        if open_difference>50.0
+        if open_difference>75.0
           Rails.logger.debug(@short_close_reason = "Testing short close: value change #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@close_magnitude_signal_trigger.abs)}")
           magnitude = quote_value_change.abs/@current_quote_value
         else
