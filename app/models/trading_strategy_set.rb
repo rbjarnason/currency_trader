@@ -13,6 +13,7 @@ class TradingStrategySet < ActiveRecord::Base
 
   def calculate_fitness
     # MISSING SECOND LAYER OF TEST WHERE THE BEST EVOLVED CATEGORIES ARE FITNESS TESTED FOR RANDOM SAMPLE (OUT OF TRAINING DATA) RATE IN SAME CATEGORY
+    # ALSO ADD A BONUS THE MORE UNIFORM THE PROFIT IT OVER THE DAYS, AS IN NOT MAKING ALL THE PROFITS IN SPECIAL CIRCOMSTANCES
     self.accumulated_fitness = 0.0
     how_far_back_minutes_open = []
     how_far_back_minutes_close = []

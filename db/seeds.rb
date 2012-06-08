@@ -60,7 +60,7 @@ if false
   acct = TradingAccount.new
   acct.save
 
-  pop = TradingStrategyPopulation.find(146)
+  pop = TradingStrategyPopulation.find(162)
   operation = TradingOperation.new
   operation.trading_strategy_population = pop
   operation.trading_account = TradingAccount.last
@@ -94,14 +94,32 @@ if false
   pop.simulation_max_overall_trading_signals = 14*pop.simulation_days_back
   pop.simulation_max_daily_trading_signals = 20
   pop.simulation_max_minutes_back = 15
-  pop.description = "Rolling 7 days back"
+  pop.description = "Rolling 7 days back - no limits -100 stop"
   pop.save
   pop.initialize_population
   pop.save
 
+
   pop=TradingStrategyPopulation.new
   pop.active = true
   pop.quote_target = QuoteTarget.where("symbol='EUR/USD'").first
+  pop.in_process = true
+  pop.max_generations = 200000000
+  pop.population_size = 125
+  pop.simulation_number_of_trading_strategies_per_set = 3
+  pop.simulation_days_back = 110
+  pop.simulation_min_overall_trading_signals = 2*pop.simulation_days_back
+  pop.simulation_max_overall_trading_signals = 14*pop.simulation_days_back
+  pop.simulation_max_daily_trading_signals = 20
+  pop.simulation_max_minutes_back = 15
+  pop.description = "Rolling 110 days back - no limits -100 stop"
+  pop.save
+  pop.initialize_population
+  pop.save
+
+  #pop=TradingStrategyPopulation.new
+  #pop.active = true
+  #pop.quote_target = QuoteTarget.where("symbol='EUR/USD'").first
   pop.in_process = true
   pop.max_generations = 200000000
   pop.population_size = 125
@@ -112,7 +130,7 @@ if false
   pop.simulation_max_overall_trading_signals = 14*pop.simulation_days_back
   pop.simulation_max_daily_trading_signals = 20
   pop.simulation_max_minutes_back = 15
-  pop.description = "Volatile but slow up trend"
+  pop.description = "Volatile but slow up trend - no limits -100 stop"
   pop.save
   pop.initialize_population
   pop.save
@@ -129,7 +147,7 @@ if false
   pop.simulation_max_overall_trading_signals = 14*pop.simulation_days_back
   pop.simulation_max_daily_trading_signals = 20
   pop.simulation_max_minutes_back = 15
-  pop.description = "Rolling 4 days back"
+  pop.description = "Rolling 4 days back - no limits -100 stop"
   pop.save
   pop.initialize_population
   pop.save
@@ -147,7 +165,7 @@ if false
   pop.simulation_max_overall_trading_signals = 14*pop.simulation_days_back
   pop.simulation_max_daily_trading_signals = 20
   pop.simulation_max_minutes_back = 15
-  pop.description = "Volatile but down trend"
+  pop.description = "Volatile but down trend feb-apr  - no limits -100 stop"
   pop.save
   pop.initialize_population
   pop.save

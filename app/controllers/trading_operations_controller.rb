@@ -5,7 +5,7 @@ class TradingOperationsController < ApplicationController
   end
 
   def index
-    @trading_operations = TradingOperation.where("active = 1").all
+    @trading_operations = TradingOperation.where("active = 1").order("id DESC").all
   end
 
   def chart
