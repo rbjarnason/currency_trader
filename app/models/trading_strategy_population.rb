@@ -1,6 +1,6 @@
 # Setup for evolution
 NUMBER_OF_BINARY_EVOLUTION_PARAMETERS = 5
-NUMBER_OF_FLOAT_EVOLUTION_PARAMETERS = 5
+NUMBER_OF_FLOAT_EVOLUTION_PARAMETERS = 16
 
 class StrategyBinaryParameters < BitStringGenotype((TradingStrategySet::MAX_NUMBER_OF_TRADING_STRATEGIES+1)*NUMBER_OF_BINARY_EVOLUTION_PARAMETERS)
   use Elitism(TruncationSelection(0.2),1), UniformCrossover, ListMutator(:probability[ p=0.15],:flip)
@@ -12,7 +12,7 @@ end
 
 genotypes = []
 genotypes << [StrategyBinaryParameters,nil]
-genotypes << [StrategyFloatParameters,(-50.0..50.0)]
+genotypes << [StrategyFloatParameters,(-500.0..500.0)]
 
 class TradingStrategySetParameters < ComboGenotype(genotypes)
  attr_reader :trading_strategy_set_id

@@ -35,7 +35,7 @@ class TradingOperation < ActiveRecord::Base
     events << simulated_trading_signal_to_amchart({:name=>"E", :current_date_time=>DateTime.parse("#{@day} #{@to_hour}:00:00"), :background_color=>"#ff6655",
                                                   :description=>"Trading Time Frame Stop"})
     trading_signals.where(["created_at>=? AND created_at<=?",from_date.to_formatted_s(:db),to_date.to_formatted_s(:db)]).all.each do |signal|
-      if signal.name=="Short Open"
+      if signal.name=="Short Open" or signal.name=="Long Open"
 #        events << simulated_trading_signal_to_amchart({:name=>"#{signal.name}",
 #                                                       :type=>"arrowUp",
 #                                                       :current_date_time=>signal.created_at.to_datetime,
@@ -54,7 +54,7 @@ class TradingOperation < ActiveRecord::Base
                                                          :description=>signal.trading_strategy.id})
         end
       end
-      if signal.name=="Short Close"
+      if signal.name=="Short Close" or signal.name=="Long Close"
         events << simulated_trading_signal_to_amchart({:name=>signal.name, :type=>"arrowDown",
                                                        :current_date_time=>signal.created_at.to_datetime,
                                                        :background_color=>"#cccccc",
