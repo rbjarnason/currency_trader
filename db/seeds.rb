@@ -34,6 +34,9 @@ if false
   TradingStrategySet.delete_all
   TradingStrategy.delete_all
   TradingOperation.delete_all
+  TradingSignal.delete_all
+  TradingPosition.delete_all
+
 
   pop=TradingStrategyPopulation.new
   pop.active = true
@@ -177,7 +180,7 @@ if false
   pop.quote_target = QuoteTarget.where("symbol='EUR/USD'").first
   pop.in_process = true
   pop.max_generations = 200000000
-  pop.population_size = 50
+  pop.population_size = 150
   pop.simulation_number_of_trading_strategies_per_set = 3
   pop.simulation_days_back = 8
   pop.simulation_min_overall_trading_signals = 2*pop.simulation_days_back
