@@ -34,6 +34,7 @@ if false
   TradingStrategySet.delete_all
   TradingStrategy.delete_all
   TradingOperation.delete_all
+
   pop=TradingStrategyPopulation.new
   pop.active = true
   pop.quote_target = QuoteTarget.where("symbol='EUR/USD'").first
@@ -176,14 +177,14 @@ if false
   pop.quote_target = QuoteTarget.where("symbol='EUR/USD'").first
   pop.in_process = true
   pop.max_generations = 200000000
-  pop.population_size = 300
+  pop.population_size = 50
   pop.simulation_number_of_trading_strategies_per_set = 3
-  pop.simulation_days_back = 30
+  pop.simulation_days_back = 8
   pop.simulation_min_overall_trading_signals = 2*pop.simulation_days_back
   pop.simulation_max_overall_trading_signals = 32*pop.simulation_days_back
   pop.simulation_max_daily_trading_signals = 32
   pop.simulation_max_minutes_back = 15
-  pop.description = "Rolling 30 days back"
+  pop.description = "Rolling 8 days back"
   pop.save
   pop.initialize_population
   pop.save
