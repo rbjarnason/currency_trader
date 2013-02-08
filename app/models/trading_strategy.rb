@@ -1,6 +1,31 @@
-#TODO Make stop signals evolve
+class TradingStrategy
+  include Mongoid::Document
+  include Mongoid::Timestamps
 
-class TradingStrategy < ActiveRecord::Base
+  belongs_to :trading_strategy_set
+  has_many   :trading_signals
+  has_many   :trading_positions
+
+  field :number_of_evolution_trading_signals, type: Integer
+
+  field :open_how_far_back_milliseconds, type: Integer
+  field :close_how_far_back_milliseconds, type: Integer
+  field :number_of_evolution_trading_signals, type: Integer, default: 5
+
+  field :initial_simulation_capital, type: Float
+  field :current_simulation_capital, type: Float
+  field :simulated_fitness, type: Float
+
+  field :simulated_fitness_failure_reason, type: String
+
+  field :simulated_start_date, type: DateTime
+  field :simulated_end_date, type: DateTime
+
+  field :binary_parameters, type: Array
+  field :float_parameters, type: Array
+
+  field :simulated_trading_signals, type: Array
+
   include ActionView::Helpers::NumberHelper
 
   DEFAULT_START_CAPITAL = 100000000.0
@@ -9,37 +34,18 @@ class TradingStrategy < ActiveRecord::Base
 
   MINUTES_BETWEEN_POS_OPENINGS = 2.minutes
 
-  belongs_to :trading_strategy_template
-  belongs_to :trading_strategy_set
-  has_many   :trading_signals, :dependent => :delete_all
-
   # Parameters
   # 0: Time to look back in ms (10000)
   # 1: Magnitude of change since time in percent (0.01)
   # 2: Type of trading signal (Buy or Sell)
-  serialize :binary_parameters, Array
-  serialize :float_parameters, Array
+#  serialize :binary_parameters, Array
+#  serialize :float_parameters, Array
   #serialize :simulated_trading_signals, Array
-
-  before_save :marshall_simulated_trading_signals
-  after_initialize :demarshall_simulated_trading_signals
 
   attr_reader :strategy_buy_short, :open_magnitude_signal_trigger, :close_magnitude_signal_trigger, :simulated_trading_signals_array
 
   after_initialize :setup_parameters
   after_save :setup_parameters
-
-  def marshall_simulated_trading_signals
-    self.simulated_trading_signals = Marshal.dump(@simulated_trading_signals_array) if @simulated_trading_signals_array
-  end
-
-  def demarshall_simulated_trading_signals
-    begin
-      @simulated_trading_signals_array = Marshal.load(self.simulated_trading_signals) if self.simulated_trading_signals
-    rescue
-      @simulated_trading_signals_array = []
-    end
-  end
 
   def set
     self.trading_strategy_set

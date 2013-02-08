@@ -175,12 +175,29 @@ if false
   pop.initialize_population
   pop.save
 
+
+  TradingStrategyPopulation.delete_all
+  TradingStrategySet.delete_all
+  TradingStrategy.delete_all
+  TradingOperation.delete_all
+  TradingSignal.delete_all
+  TradingPosition.delete_all
+  TradingTimeFrame.delete_all
+
+
+  timeframe = TradingTimeFrame.new
+  timeframe.from_hour = 00
+  timeframe.to_hour = 23
+  timeframe.save
+
+  original_verbosity = $VERBOSE
+  #$VERBOSE = nil
   pop=TradingStrategyPopulation.new
   pop.active = true
   pop.quote_target = QuoteTarget.where("symbol='EUR/USD'").first
   pop.in_process = true
   pop.max_generations = 200000000
-  pop.population_size = 150
+  pop.population_size = 20
   pop.simulation_number_of_trading_strategies_per_set = 3
   pop.simulation_days_back = 8
   pop.simulation_min_overall_trading_signals = 2*pop.simulation_days_back
@@ -190,5 +207,6 @@ if false
   pop.description = "Rolling 8 days back"
   pop.save
   pop.initialize_population
+  #$VERBOSE = original_verbosity
   pop.save
 end

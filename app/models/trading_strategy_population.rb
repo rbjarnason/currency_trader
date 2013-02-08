@@ -7,7 +7,7 @@ class StrategyBinaryParameters < BitStringGenotype((TradingStrategySet::MAX_NUMB
 end
 
 class StrategyFloatParameters <  FloatListGenotype((TradingStrategySet::MAX_NUMBER_OF_TRADING_STRATEGIES+1)*NUMBER_OF_FLOAT_EVOLUTION_PARAMETERS)
- use Elitism(TruncationSelection(0.5),1), UniformCrossover, ListMutator(:probability[ p=0.5 ],:uniform[ max_size=27 ])
+ use Elitism(TruncationSelection(0.5),1), UniformCrossover, ListMutator(:probability[ p=0.4 ],:uniform[ max_size=72 ])
 end
 
 genotypes = []
@@ -32,17 +32,45 @@ class TradingStrategySetParameters < ComboGenotype(genotypes)
  use Elitism(TruncationSelection(0.3),2), ComboCrossover, ComboMutator()
 end
 
-class TradingStrategyPopulation < ActiveRecord::Base
-  has_many :trading_strategy_sets, :dependent => :destroy do
-     def count_not_complete
-       count :all, :conditions=>["complete = ?",0]
-     end
-   end
+class TradingStrategyPopulation
+  include Mongoid::Document
+  include Mongoid::Timestamps
+  include Mongoid::OptimisticLocking
 
-  belongs_to :quote_target
+  field :quote_target_id, type: Integer
+  field :complete, type: Boolean, default: false
+  field :active, type: Boolean, default: false
+  field :in_process, type: Boolean, default: false
+  field :best_fitness, type: Float
+
+  field :last_processing_start_time, type: DateTime
+  field :last_processing_stop_time, type: DateTime
+  field :simulation_end_date, type: DateTime
+
+  field :current_generation, type: Integer, default: 0
+  field :max_generations, type: Integer
+  field :population_size, type: Integer
+  field :best_trading_strategy_set_id, type: String
+  field :current_generation, type: Integer
+  field :simulation_number_of_trading_strategies_per_set, type: Integer
+  field :simulation_days_back, type: Integer
+  field :simulation_min_overall_trading_signals, type: Integer
+  field :simulation_max_daily_trading_signals, type: Integer
+  field :simulation_max_minutes_back, type: Integer
+  field :simulation_max_overall_trading_signals, type: Integer
+
+  field :population_data, type: Array
+  field :description, type: Moped::BSON::Binary
+
+  has_many :trading_strategy_sets
+
   attr_reader :population
   before_save :marshall_population
   after_initialize :demarshall_population
+
+  def quote_target
+    QuoteTarget.where(:id=>self.quote_target_id).first
+  end
 
   def initialize_population
     @population = NetworkedPopulation.new(TradingStrategySetParameters,self.population_size)
@@ -101,12 +129,12 @@ class TradingStrategyPopulation < ActiveRecord::Base
 
     def marshall_population
   #    Rails.logger.info(@population.inspect) if @population
-      self.population_data = Marshal.dump(@population) if @population
+      self.population_data = Marshal.dump(@population).unpack("C*").pack("U*") if @population
     end
 
     def demarshall_population
   #    Rails.logger.debug(self.population_data.inspect)
-      @population = Marshal.load(self.population_data) if self.population_data
+      @population = Marshal.load(self.population_data.unpack("U*").pack("C*")) if self.population_data
 
     end
 
@@ -121,28 +149,27 @@ class TradingStrategyPopulation < ActiveRecord::Base
 
     def create_trading_strategy_sets(settings)
       Rails.logger.info("create_trading_strategy_sets")
-      TradingStrategySet.transaction do
-        #TODO: Find a better way to do this below as over time there will be too many trading positions
-        #used_trading_strategies = []
-        #used_trading_strategies += TradingPosition.all.collect { |p| p.trading_strategy_id }
-        #used_trading_strategies += TradingSignal.all.collect { |p| p.trading_strategy_id }
-        #TradingStrategy.where(["id not in (?)",used_trading_strategies.uniq]).delete_all
-        #used_trading_strategies_sets = []
-        #used_trading_strategies_sets << self.best_trading_strategy_set_id
-        #self.trading_strategy_sets.where(["id not in (?)",used_trading_strategies_sets.uniq]).delete_all
-        for setting in settings
-          trading_strategy_set = TradingStrategySet.new
-          trading_strategy_set.trading_strategy_population_id = self.id
-          trading_strategy_set.trading_time_frame = TradingTimeFrame.last
-          trading_strategy_set.save
-          trading_strategy_set.setup_trading_strategies
-          trading_strategy_set.import_settings_from_population(self,setting)
-          trading_strategy_set.active = true
-          trading_strategy_set.in_population_process = true
-          trading_strategy_set.save
-          setting.trading_strategy_set_id = trading_strategy_set.id
-          Rails.logger.info("create_trading_strategy_sets id: #{trading_strategy_set.id}")
-        end
+      #TODO: Find a better way to do this below as over time there will be too many trading positions
+      #used_trading_strategies = []
+      #used_trading_strategies += TradingPosition.all.collect { |p| p.trading_strategy_id }
+      #used_trading_strategies += TradingSignal.all.collect { |p| p.trading_strategy_id }
+      #TradingStrategy.where(["id not in (?)",used_trading_strategies.uniq]).delete_all
+      #used_trading_strategies_sets = []
+      #used_trading_strategies_sets << self.best_trading_strategy_set_id
+      #self.trading_strategy_sets.where(["id not in (?)",used_trading_strategies_sets.uniq]).delete_all
+      for setting in settings
+        trading_strategy_set = TradingStrategySet.new
+        trading_strategy_set.trading_strategy_population = self
+        trading_strategy_set.trading_time_frame = TradingTimeFrame.last
+        trading_strategy_set.save
+        trading_strategy_set.setup_trading_strategies
+        trading_strategy_set.import_settings_from_population(self,setting)
+        trading_strategy_set.active = true
+        trading_strategy_set.in_population_process = true
+        trading_strategy_set.save
+        setting.trading_strategy_set_id = trading_strategy_set.id
+        Rails.logger.info("create_trading_strategy_sets id: #{trading_strategy_set.id}")
       end
+      Rails.logger.info("After transaction")
     end
   end

@@ -6,6 +6,8 @@ gem 'rails', '3.2.11'
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
 gem 'mysql2'
+gem "mongoid", "~> 3.0.0"
+gem "mongoid_optimistic_locking", :git => "git://github.com/burgalon/mongoid_optimistic_locking.git", :branch=>"mongoid3"
 gem "daemons"
 gem "capistrano"
 gem "sys-filesystem"
@@ -22,7 +24,7 @@ group :assets do
   gem 'coffee-rails', '~> 3.2.1'
   gem 'turbo-sprockets-rails3'
   # See https://github.com/sstephenson/execjs#readme for more supported runtimes
- # gem 'therubyracer', :platform => :ruby
+  gem 'therubyracer', :platform => :ruby
 
   gem 'uglifier', '>= 1.0.3'
 end

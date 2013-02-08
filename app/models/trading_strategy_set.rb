@@ -1,11 +1,36 @@
-class TradingStrategySet < ActiveRecord::Base
+class TradingStrategySet
+  include Mongoid::Document
+  include Mongoid::Timestamps
+  include Mongoid::OptimisticLocking
+
   MAX_NUMBER_OF_TRADING_STRATEGIES = 10
   FORCE_RELEASE_POSITION = true
   PUNISHMENT_FOR_SAME_MINUTES_IN_STRATEGIES = 0.7
 
-  has_many :trading_strategies, :dependent => :destroy
+  has_many :trading_strategies
   belongs_to :trading_strategy_population
   belongs_to :trading_time_frame
+  has_one :trading_time_frame
+
+  field :parameters, type: Moped::BSON::Binary
+
+  field :trading_strategy_population_id, type: Integer
+  field :trading_time_frame_id, type: Integer
+
+  field :processing_time_interval, type: Integer
+
+  field :fitness_score, type: Float
+  field :accumulated_fitness, type: Float
+
+  field :complete, type: Boolean, default: false
+  field :error_flag, type: Boolean, default: false
+  field :active, type: Boolean, default: false
+  field :in_population_process, type: Boolean, default: false
+  field :in_process, type: Boolean, default: false
+
+  field :last_processing_start_time, type: DateTime
+  field :last_processing_stop_time, type: DateTime
+  field :last_work_unit_time, type: DateTime
 
   def population
     self.trading_strategy_population
@@ -47,9 +72,9 @@ class TradingStrategySet < ActiveRecord::Base
   end
 
   def setup_trading_strategies
-    (1..population.simulation_number_of_trading_strategies_per_set.to_i).each do |nr|
+#    population.simulation_number_of_trading_strategies_per_set.times do
+    3.times do
       strategy=TradingStrategy.new
-      strategy.trading_strategy_template=TradingStrategyTemplate.last
       strategy.trading_strategy_set=self
       strategy.save
     end
