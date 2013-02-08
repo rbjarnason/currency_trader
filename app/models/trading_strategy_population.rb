@@ -62,7 +62,11 @@ class TradingStrategyPopulation
   field :population_data, type: Array
   field :description, type: Moped::BSON::Binary
 
-  has_many :trading_strategy_sets
+  has_many :trading_strategy_sets do
+     def where_not_complete
+       where(:complete => true)
+     end
+   end
 
   attr_reader :population
   before_save :marshall_population
