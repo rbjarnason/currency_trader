@@ -10,12 +10,9 @@ class TradingStrategySet
   has_many :trading_strategies
   belongs_to :trading_strategy_population
   belongs_to :trading_time_frame
-  has_one :trading_time_frame
+  #has_one :trading_time_frame
 
   field :parameters, type: Moped::BSON::Binary
-
-  field :trading_strategy_population_id, type: Integer
-  field :trading_time_frame_id, type: Integer
 
   field :processing_time_interval, type: Integer
 

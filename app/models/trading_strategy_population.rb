@@ -48,12 +48,12 @@ class TradingStrategyPopulation
   field :simulation_end_date, type: DateTime
 
   field :current_generation, type: Integer, default: 0
-  field :max_generations, type: Integer
-  field :population_size, type: Integer
+  field :max_generations, type: Integer, default: 0
+  field :population_size, type: Integer, default: 0
   field :best_trading_strategy_set_id, type: String
-  field :current_generation, type: Integer
+  field :current_generation, type: Integer, default: 0
   field :simulation_number_of_trading_strategies_per_set, type: Integer
-  field :simulation_days_back, type: Integer
+  field :simulation_days_back, type: Integer, default: 0
   field :simulation_min_overall_trading_signals, type: Integer
   field :simulation_max_daily_trading_signals, type: Integer
   field :simulation_max_minutes_back, type: Integer
@@ -74,6 +74,10 @@ class TradingStrategyPopulation
 
   def quote_target
     QuoteTarget.where(:id=>self.quote_target_id).first
+  end
+
+  def quote_target=(quote_target)
+    self.quote_target_id = quote_target.id
   end
 
   def initialize_population
@@ -106,7 +110,7 @@ class TradingStrategyPopulation
     end
 
     def is_generation_testing_complete?
-      self.trading_strategy_sets.where("complete = 0 AND error_flag = 0").count == 0
+      self.trading_strategy_sets.where(:complete => false, :error_flag => 0).size == 0
     end
 
     def deactivate_all_trading_strategy_sets_in_process
@@ -164,7 +168,7 @@ class TradingStrategyPopulation
       for setting in settings
         trading_strategy_set = TradingStrategySet.new
         trading_strategy_set.trading_strategy_population = self
-        trading_strategy_set.trading_time_frame = TradingTimeFrame.last
+        trading_strategy_set.trading_time_frame_id = TradingTimeFrame.last.id
         trading_strategy_set.save
         trading_strategy_set.setup_trading_strategies
         trading_strategy_set.import_settings_from_population(self,setting)

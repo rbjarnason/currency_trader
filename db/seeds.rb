@@ -191,13 +191,13 @@ if false
   timeframe.save
 
   original_verbosity = $VERBOSE
-  #$VERBOSE = nil
+  $VERBOSE = nil
   pop=TradingStrategyPopulation.new
   pop.active = true
   pop.quote_target = QuoteTarget.where("symbol='EUR/USD'").first
   pop.in_process = true
   pop.max_generations = 200000000
-  pop.population_size = 4
+  pop.population_size = 500
   pop.simulation_number_of_trading_strategies_per_set = 3
   pop.simulation_days_back = 8
   pop.simulation_min_overall_trading_signals = 2*pop.simulation_days_back
@@ -207,7 +207,7 @@ if false
   pop.description = "Rolling 8 days back"
   pop.save
   pop.initialize_population
-  #$VERBOSE = original_verbosity
-  #pop.save
+  $VERBOSE = original_verbosity
+  pop.save
   pop.trading_strategy_sets.where_not_complete
 end
