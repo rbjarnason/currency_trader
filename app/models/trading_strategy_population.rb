@@ -1,6 +1,6 @@
 # Setup for evolution
 NUMBER_OF_BINARY_EVOLUTION_PARAMETERS = 5
-NUMBER_OF_FLOAT_EVOLUTION_PARAMETERS = 16
+NUMBER_OF_FLOAT_EVOLUTION_PARAMETERS = 18
 
 class StrategyBinaryParameters < BitStringGenotype((TradingStrategySet::MAX_NUMBER_OF_TRADING_STRATEGIES+1)*NUMBER_OF_BINARY_EVOLUTION_PARAMETERS)
   use Elitism(TruncationSelection(0.2),1), UniformCrossover, ListMutator(:probability[ p=0.15],:flip)

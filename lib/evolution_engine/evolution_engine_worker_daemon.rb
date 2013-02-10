@@ -65,9 +65,10 @@ class EvolutionEngineWorker < BaseDaemonWorker
   end
 
   def poll_for_work
-    poll_for_trading_strategy_set_work
-    poll_for_evolution_work if rand(4)==2
-    #sleep
+    if TradingConfiguration.can_evolve?
+      poll_for_trading_strategy_set_work
+      poll_for_evolution_work if rand(4)==2
+    end
   end
 end
 
