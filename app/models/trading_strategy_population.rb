@@ -82,6 +82,7 @@ class TradingStrategyPopulation
 
   def initialize_population
     @population = NetworkedPopulation.new(TradingStrategySetParameters,self.population_size)
+    puts @population
     create_trading_strategy_sets(@population)
   end
 

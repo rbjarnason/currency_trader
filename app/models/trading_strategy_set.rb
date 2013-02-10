@@ -29,6 +29,9 @@ class TradingStrategySet
   field :last_processing_stop_time, type: DateTime
   field :last_work_unit_time, type: DateTime
 
+
+  scope :fittest_20, order_by(:accumulated_fitness => :desc).limit(20)
+
   def population
     self.trading_strategy_population
   end
@@ -69,8 +72,7 @@ class TradingStrategySet
   end
 
   def setup_trading_strategies
-#    population.simulation_number_of_trading_strategies_per_set.times do
-    3.times do
+    population.simulation_number_of_trading_strategies_per_set.times do
       strategy=TradingStrategy.new
       strategy.trading_strategy_set=self
       strategy.save
@@ -79,27 +81,36 @@ class TradingStrategySet
 
   def import_settings_from_population(population,setting)
     setup_trading_strategies if trading_strategies.empty?
-    all_trading_strategies = trading_strategies.all
+    #all_trading_strategies = trading_strategies.all
+    binary_strategy_parameters = []
+    float_strategy_parameters = []
     setting.get_genotypes.each do |genotype|
       if genotype.instance_of?(StrategyBinaryParameters)
         split_attributes = genotype.genes.each_slice(NUMBER_OF_BINARY_EVOLUTION_PARAMETERS).to_a
         Rails.logger.debug("SPLIT binary parameters #{split_attributes}")
         import_binary_parameters(split_attributes[0])
         (0..(population.simulation_number_of_trading_strategies_per_set.to_i)-1).each do |i|
-          all_trading_strategies[i].import_binary_parameters(split_attributes[i+1])
+          binary_strategy_parameters << split_attributes[i+1]
         end
       elsif genotype.instance_of?(StrategyFloatParameters)
         split_attributes = genotype.genes.each_slice(NUMBER_OF_FLOAT_EVOLUTION_PARAMETERS).to_a
         Rails.logger.debug("SPLIT float parameters #{split_attributes}")
         import_float_parameters(split_attributes[0])
         (0..(population.simulation_number_of_trading_strategies_per_set.to_i-1)).each do |i|
-          all_trading_strategies[i].import_float_parameters(split_attributes[i+1])
+          float_strategy_parameters << split_attributes[i+1]
         end
       end
     end
-    all_trading_strategies.each do |strategy|
-      strategy.save
+
+    self.trading_strategies.all.each_with_index do |trading_strategy,i|
+      trading_strategy.import_binary_parameters!(binary_strategy_parameters[i])
+      trading_strategy.import_float_parameters!(float_strategy_parameters[i])
     end
+
+
+    #all_trading_strategies.each do |strategy|
+    #  strategy.save
+    #end
     #Rails.logger.info("Id: #{self.id} Max Epochs: #{self.max_epochs} Desired error: #{self.desired_error} Hidden Neurons: #{@hidden_neurons.inspect} Selected inputs: #{@selected_inputs.inspect} Input scaling: #{@inputs_scaling.inspect}")
   end
 end

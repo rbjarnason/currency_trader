@@ -59,21 +59,23 @@ class TradingStrategy
     trading_strategy_set.trading_strategy_population.quote_target
   end
 
-  def import_binary_parameters(parameters)
+  def import_binary_parameters!(parameters)
     self.binary_parameters = parameters
+    self.save
   end
 
-  def import_float_parameters(parameters)
+  def import_float_parameters!(parameters)
     self.float_parameters = parameters
+    self.save
   end
 
   def setup_parameters
     if population and self.binary_parameters and self.binary_parameters.length>0 and self.float_parameters and self.float_parameters.length>2
       @strategy_buy_short = self.binary_parameters[0]
-      self.open_how_far_back_milliseconds = [1000*60,(self.float_parameters[0]*(1000*60*population.simulation_max_minutes_back)/60).abs].max
-      self.close_how_far_back_milliseconds = [1000*60,(self.float_parameters[1]*(1000*60*population.simulation_max_minutes_back)/60).abs].max
-      @open_magnitude_signal_trigger  = self.float_parameters[2]/1000000.0
-      @close_magnitude_signal_trigger  = self.float_parameters[3]/1000000.0
+      self.open_how_far_back_milliseconds = ([1000*60,(self.float_parameters[0]*(1000*60*population.simulation_max_minutes_back)/60).abs].max)/10
+      self.close_how_far_back_milliseconds = ([1000*60,(self.float_parameters[1]*(1000*60*population.simulation_max_minutes_back)/60).abs].max)/10
+      @open_magnitude_signal_trigger  = self.float_parameters[2]/10000000.0
+      @close_magnitude_signal_trigger  = self.float_parameters[3]/10000000.0
       @stop_01_value  = self.float_parameters[4].abs.to_i
       @stop_02_value  = self.float_parameters[5].abs.to_i
       @stop_03_value  = self.float_parameters[6].abs.to_i
@@ -118,7 +120,7 @@ class TradingStrategy
                                                   :description=>"Trading Time Frame Start"})
     events << simulated_trading_signal_to_amchart({:name=>"E", :current_date_time=>DateTime.parse("#{@day} #{@to_hour}:00:00"), :background_color=>"#ff6655",
                                                   :description=>"Trading Time Frame Stop"})
-    @simulated_trading_signals_array.each do |signal|
+    simulated_trading_signals.each do |signal|
       events << simulated_trading_signal_to_amchart(signal)
       if signal[:name]=="Short Open" or signal[:name]=="Long Open"
         events << simulated_trading_signal_to_amchart({:name=>"F", :type=>"flag", :current_date_time=>signal[:current_date_time]-(self.open_how_far_back_milliseconds/1000/60).minutes, :background_color=>"#aaccff",
@@ -333,7 +335,7 @@ class TradingStrategy
         @current_capital_position-=capital_investment
         self.number_of_evolution_trading_signals+=1
         @daily_signals+=1
-        @simulated_trading_signals_array<<{:name=>"Short Open", :current_date_time=>@current_date_time, :description=>"I shorted #{@current_position_units} units for #{capital_investment} leaving #{@current_capital_position}"}
+        simulated_trading_signals<<{:name=>"Short Open", :current_date_time=>@current_date_time, :description=>"I shorted #{@current_position_units} units for #{capital_investment} leaving #{@current_capital_position}"}
         Rails.logger.debug("    I shorted #{@current_position_units} units for #{capital_investment} leaving #{@current_capital_position}")
       else
         Rails.warn("Out of cash: #{self.inspect}")
@@ -370,7 +372,7 @@ class TradingStrategy
         @current_capital_position-=capital_investment
         self.number_of_evolution_trading_signals+=1
         @daily_signals+=1
-        @simulated_trading_signals_array<<{:name=>"Long Open", :current_date_time=>@current_date_time, :description=>"I bought #{@current_position_units} units for #{capital_investment} leaving #{@current_capital_position}"}
+        simulated_trading_signals<<{:name=>"Long Open", :current_date_time=>@current_date_time, :description=>"I bought #{@current_position_units} units for #{capital_investment} leaving #{@current_capital_position}"}
         Rails.logger.debug("    I bought #{@current_position_units} units for #{capital_investment} leaving #{@current_capital_position}")
       else
         Rails.warn("Out of cash: #{self.inspect}")
@@ -404,7 +406,7 @@ class TradingStrategy
       difference = opened_at-currently_at
       @current_capital_position+=opened_at+difference
       Rails.logger.debug("    opened_at #{opened_at} currently_at #{currently_at} difference #{difference} current #{@current_capital_position}")
-      @simulated_trading_signals_array<<{:name=>"Short Close", :current_date_time=>@current_date_time, :description=>"Short Close #{@close_reason} opened_at #{opened_at} currently_at #{currently_at} difference #{difference} current #{@current_capital_position}"}
+      simulated_trading_signals<<{:name=>"Short Close", :current_date_time=>@current_date_time, :description=>"Short Close #{@close_reason} opened_at #{opened_at} currently_at #{currently_at} difference #{difference} current #{@current_capital_position}"}
       @current_position_units = nil
       self.number_of_evolution_trading_signals+=1
       @daily_signals+=1
@@ -429,7 +431,7 @@ class TradingStrategy
       difference = currently_at-bought_at
       @current_capital_position+=bought_at+difference
       Rails.logger.debug("    Bought_at #{bought_at} currently_at #{currently_at} difference #{difference} current #{@current_capital_position}")
-      @simulated_trading_signals_array<<{:name=>"Long Close", :current_date_time=>@current_date_time, :description=>"Long Close #{@close_reason} opened_at #{bought_at} currently_at #{currently_at} difference #{difference} current #{@current_capital_position}"}
+      simulated_trading_signals<<{:name=>"Long Close", :current_date_time=>@current_date_time, :description=>"Long Close #{@close_reason} opened_at #{bought_at} currently_at #{currently_at} difference #{difference} current #{@current_capital_position}"}
       @current_position_units = nil
       self.number_of_evolution_trading_signals+=1
       @daily_signals+=1
@@ -497,7 +499,7 @@ class TradingStrategy
       @evolution_mode = true
       @current_position_units = nil
       @last_opened_position_value = nil
-      @simulated_trading_signals_array = []
+      simulated_trading_signals = []
       @current_capital_position = @start_capital_position = DEFAULT_START_CAPITAL
       @from_hour = trading_strategy_set.trading_time_frame.from_hour
       @to_hour = trading_strategy_set.trading_time_frame.to_hour
@@ -545,6 +547,6 @@ class TradingStrategy
   end
 
   def generate_trading_signal(signal)
-     TradingSignal.create(:trading_strategy_id=>self.id, :signal=>signal)
+    TradingSignal.create(:trading_strategy_id=>self.id, :signal=>signal)
   end
 end

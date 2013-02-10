@@ -33,6 +33,8 @@ class EvolutionEngineWorker < BaseDaemonWorker
         return
       end
       process_evolution_target
+    else
+      sleep 1
     end
   end
 
@@ -57,12 +59,15 @@ class EvolutionEngineWorker < BaseDaemonWorker
         return
       end
       process_population_target
+    else
+      sleep 1
     end
   end
 
   def poll_for_work
     poll_for_trading_strategy_set_work
     poll_for_evolution_work if rand(4)==2
+    #sleep
   end
 end
 

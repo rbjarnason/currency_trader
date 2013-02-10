@@ -37,7 +37,7 @@
       %td
         = @population.current_generation
       %td
-        = "#{@population.trading_strategy_sets.size} | #{@population.trading_strategy_sets.where(:complete=>false).size} left"
+        = "#{@population.trading_strategy_sets.size} | #{@population.trading_strategy_sets.where(:complete=>false).size} left | #{@population.trading_strategy_sets.where(:complete=>true).size} done"
       %td
         -  if @population.simulation_end_date
           = "#{@population.simulation_end_date.to_date-@population.simulation_days_back-1} <br> #{@population.simulation_end_date.to_date-1}".html_safe
@@ -56,6 +56,6 @@
       = "Best Trading Strategy Set"
     = render :partial=>"set", :locals=>{:set=>TradingStrategySet.find(@population.best_trading_strategy_set_id)}
     %h2
-      = "Strongest Trading Strategy Sets #{@population.trading_strategy_sets.order("accumulated_fitness desc").count}"
-    - @population.trading_strategy_sets.order("accumulated_fitness desc").limit(20).each do |set|
+      = "Strongest Trading Strategy Sets #{@population.trading_strategy_sets.count}"
+    - @population.trading_strategy_sets.fittest_20.each do |set|
       = render :partial=>"set", :locals=>{:set=>set}

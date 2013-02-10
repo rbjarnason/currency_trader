@@ -184,20 +184,19 @@ if false
   TradingPosition.delete_all
   TradingTimeFrame.delete_all
 
-
   timeframe = TradingTimeFrame.new
   timeframe.from_hour = 00
   timeframe.to_hour = 23
   timeframe.save
 
   original_verbosity = $VERBOSE
-  $VERBOSE = nil
+  #$VERBOSE = nil
   pop=TradingStrategyPopulation.new
   pop.active = true
   pop.quote_target = QuoteTarget.where("symbol='EUR/USD'").first
   pop.in_process = true
   pop.max_generations = 200000000
-  pop.population_size = 500
+  pop.population_size = 50
   pop.simulation_number_of_trading_strategies_per_set = 3
   pop.simulation_days_back = 8
   pop.simulation_min_overall_trading_signals = 2*pop.simulation_days_back
@@ -210,4 +209,6 @@ if false
   $VERBOSE = original_verbosity
   pop.save
   pop.trading_strategy_sets.where_not_complete
+
+  TradingStrategy.all.each do |x| puts x.inspect end
 end
