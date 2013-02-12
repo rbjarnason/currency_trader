@@ -36,16 +36,16 @@ ThreePointCrossover = NPointCrossover(3)
 # Uniform crossover, returns two children.
 module UniformCrossover
   def cross(parent1,parent2)
-#     puts "UniformCrossover"
-#    puts parent1
-#    puts parent2
-#    if parent1.to_s==parent2.to_s
-#      puts "CROSSOVER SAMESAMESAME"
-#    else
-#      puts "CROSSOVER DIFFERENTDIFFERENT"    
-#    end
-#    puts "UniformCrossover in genotype1: #{parent1.object_id} #{@genes}"
-#    puts "UniformCrossover in genotype2: #{parent2.object_id} #{@genes}"
+     puts "UniformCrossover"
+    puts parent1
+    puts parent2
+    if parent1.to_s==parent2.to_s
+      puts "CROSSOVER SAMESAMESAME"
+    else
+      puts "CROSSOVER DIFFERENTDIFFERENT"
+    end
+    puts "UniformCrossover in genotype1: #{parent1.object_id} #{@genes}"
+    puts "UniformCrossover in genotype2: #{parent2.object_id} #{@genes}"
     c1 = []; c2=[]
     g1 = parent1.genes;
     g2 = parent2.genes
@@ -57,7 +57,7 @@ module UniformCrossover
       end
     }
     out = [c1,c2].map{|x| from_genes(x) }
-#    puts "UniformCrossover out: #{out.inspect}"
+    puts "UniformCrossover out: #{out.inspect}"
     out
   end
 end
@@ -72,7 +72,7 @@ module ComboCrossover
     parent1_genotypes = parent1.get_genotypes
     parent2_genotypes = parent2.get_genotypes
     inp =  [parent1,parent2]
-#    puts "ComboCrossover inp: #{inp.inspect}"    
+    puts "ComboCrossover inp: #{inp.inspect}"
     for number in 0..parent1_genotypes.length-1
       result = parent1_genotypes[number].class.cross(parent1_genotypes[number], parent2_genotypes[number])
 #      debugger
@@ -82,7 +82,7 @@ module ComboCrossover
     end
 #    out = [parent1,parent2].map{|x| from_genes(x) }
     out = [parent1,parent2]
-#    puts "ComboCrossover out: #{out.inspect}"    
+    puts "ComboCrossover out: #{out.inspect}"
     out
   end
 end

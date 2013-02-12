@@ -3,7 +3,7 @@ class TradingStrategySet
   include Mongoid::Timestamps
   include Mongoid::OptimisticLocking
 
-  MAX_NUMBER_OF_TRADING_STRATEGIES = 10
+  MAX_NUMBER_OF_TRADING_STRATEGIES = 4
   FORCE_RELEASE_POSITION = true
   PUNISHMENT_FOR_SAME_MINUTES_IN_STRATEGIES = 0.7
 
@@ -30,6 +30,8 @@ class TradingStrategySet
   field :last_work_unit_time, type: DateTime
 
 
+  scope :latest_50, order_by(:created_at => :desc).limit(50)
+  scope :latest_500, order_by(:created_at => :desc).limit(500)
   scope :fittest_20, order_by(:accumulated_fitness => :desc).limit(20)
 
   def population
