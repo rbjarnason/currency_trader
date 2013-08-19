@@ -4,7 +4,6 @@ class TradingPosition
 
   belongs_to :trading_strategy
   belongs_to :trading_operation
-  field :trading_operation_id, type: String
 
   field :open, type: Boolean, default: true
 
