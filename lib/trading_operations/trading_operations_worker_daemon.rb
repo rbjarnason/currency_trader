@@ -22,7 +22,7 @@ class TradingOperationsWorker < BaseDaemonWorker
           end
         end
       end
-      info("Before check positions")
+      info("Before check positions #{@operation}")
       @operation.trading_positions.where(:open=>true).each do |position|
         info("Checking position #{position.id}")
         position.trading_strategy.evaluate(@set.population.quote_target,DateTime.now,false,@operation.id,position.id)

@@ -190,7 +190,6 @@ class TradingStrategy
     Rails.logger.info "Current date time #{@current_date_time} quote_value: #{@current_quote_value} units: #{@current_position_units} current: #{@current_capital_position} last_opened: #{@last_opened_position_value}"
     Rails.logger.info("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
     Rails.logger.info("")
-    trigger_long_open_signal #HACK
   end
 
   # MATCH OPEN CLOSE
