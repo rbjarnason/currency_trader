@@ -14,7 +14,7 @@ class TradingOperation
   field :initial_capital_amount, type: Float
   field :current_capital, type: Float
   field :active, type: Boolean
-  field :last_processing_time, type: Datetime
+  field :last_processing_time, type: DateTime
   field :processing_time_interval, type: Integer
 
   def quote_target
