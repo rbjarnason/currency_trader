@@ -87,7 +87,7 @@ class TradingOperationsWorker < BaseDaemonWorker
   end
 
   def poll_for_trading_signals
-    @signal = TradingSignal.where("complete = 0").first
+    @signal = TradingSignal.where(:complete => false).first
     if @signal
       @operation = @signal.trading_operation
       @operation.reload(:lock=>true)

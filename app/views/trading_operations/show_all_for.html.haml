@@ -200,7 +200,7 @@
         = "Close Value"
       %th
         = "Profit/Loss"
-    - @operation.trading_signals.order("created_at DESC").limit(40).each do |signal|
+    - @operation.trading_signals.order_by("created_at DESC").limit(40).each do |signal|
       %tr
         %td
           = signal.created_at
