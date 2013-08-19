@@ -7,7 +7,7 @@ require "#{File.expand_path(File.dirname(__FILE__))}/../daemon_tools/base_daemon
 
 class TradingOperationsWorker < BaseDaemonWorker
   def poll_for_trading_operations
-    @operation = TradingOperation.where("active = 1 AND last_processing_time < NOW() - processing_time_interval").lock(true).order('rand()').first
+    @operation = TradingOperation.where(:active=>true, :last_processing_time.lte=>(DateTime.now.to_i - TradingOperation.first.processing_time_interval)).first
     if @operation
       @operation.last_processing_time = Time.now+1.hour
       @operation.save
@@ -15,7 +15,7 @@ class TradingOperationsWorker < BaseDaemonWorker
       #positions_left_to_open = @operation.trading_strategy_population.simulation_number_of_trading_strategies_per_set-@operation.trading_positions.where("open=1").count
       if @set and not @set.trading_strategies.empty?
         @set.trading_strategies.each do |strategy|
-          unless @operation.trading_positions.where(["open=1 AND trading_strategy_id=?",strategy.id]).first
+          unless @operation.trading_positions.where(:open=>1,:trading_strategy_id=>strategy.id).first
             info("DateTime-1.hour!!! About to evaluate #{strategy.id} #{@set.id} #{@set.population.quote_target.symbol}")
             strategy.evaluate(@set.population.quote_target,DateTime.now,false,@operation.id)
           end
