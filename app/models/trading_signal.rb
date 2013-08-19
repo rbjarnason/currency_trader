@@ -9,7 +9,7 @@ class TradingSignal
   field :close_quote_value, type: Float
   field :profit_loss, type: Float
 
-  field :trading_operation_id, type: Integer
+  field :trading_operation_id, type: String
   field :name, type: String
   field :complete, type: Boolean, default: false
 
