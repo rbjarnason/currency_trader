@@ -42,6 +42,20 @@ class TradingOperationsWorker < BaseDaemonWorker
     @operation.current_capital-=capital_investment
   end
 
+  def process_long_open
+    info("process_long_open")
+    capital_investment = TradingStrategy::DEFAULT_POSITION_UNITS*@signal.open_quote_value
+    #if @operation.capital_position>capital_investment
+    position = TradingPosition.new
+    position.units = TradingStrategy::DEFAULT_POSITION_UNITS
+    position.value_open = @signal.open_quote_value # GET THE REALTIME
+    position.open = true
+    position.trading_operation = @operation
+    position.trading_strategy = @signal.trading_strategy
+    position.save
+    @operation.current_capital-=capital_investment
+  end
+
   def process_short_close
     info("process_short_close")
     position = @signal.trading_position
@@ -57,8 +71,23 @@ class TradingOperationsWorker < BaseDaemonWorker
     @signal.profit_loss = difference
   end
 
+  def process_long_close
+    info("process_long_close")
+    position = @signal.trading_position
+    position.reload(:lock=>true)
+    bought_at = position.value_open * position.units
+    currently_at = @signal.close_quote_value * position.units # GET THIS REALTIME
+    difference = currently_at-bought_at
+    position.value_close = @signal.close_quote_value
+    position.profit_loss = difference
+    position.open = false
+    position.save
+    @operation.current_capital +=currently_at
+    @signal.profit_loss = difference
+  end
+
   def poll_for_trading_signals
-    @signal = TradingSignal.where("complete = 0").lock(true).first
+    @signal = TradingSignal.where("complete = 0").first
     if @signal
       @operation = @signal.trading_operation
       @operation.reload(:lock=>true)
@@ -66,6 +95,10 @@ class TradingOperationsWorker < BaseDaemonWorker
         process_short_open
       elsif @signal.name=="Short Close"
         process_short_close
+      elsif @signal.name=="Long Open"
+          process_long_open
+        elsif @signal.name=="Long Close"
+          process_long_close
       end
       @signal.complete = 1
       @signal.save

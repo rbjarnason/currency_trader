@@ -57,23 +57,23 @@ if false
 end
 
 if false
-  #TradingOperation.delete_all
-  #TradingSignal.delete_all
-  #TradingPosition.delete_all
-  #TradingAccount.delete_all
+  TradingOperation.delete_all
+  TradingSignal.delete_all
+  TradingPosition.delete_all
+  TradingAccount.delete_all
 
   acct = TradingAccount.new
   acct.save
 
-  pop = TradingStrategyPopulation.find(162)
+  pop = TradingStrategyPopulation.first
   operation = TradingOperation.new
-  operation.trading_strategy_population = pop
+  operation.trading_strategy_population_id = pop.id
   operation.trading_account = TradingAccount.last
   operation.initial_capital_amount = 10000000
   operation.current_capital = 10000000
   operation.last_processing_time = DateTime.now-1.hour
   operation.processing_time_interval = 30
-  operation.quote_target = pop.quote_target
+  operation.quote_target_id = pop.quote_target.id
   operation.save
 
 end
