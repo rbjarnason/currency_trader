@@ -90,7 +90,6 @@ class TradingOperationsWorker < BaseDaemonWorker
     @signal = TradingSignal.where(:complete => false).first
     if @signal
       @operation = @signal.trading_operation
-      @operation.reload(:lock=>true)
       if @signal.name=="Short Open"
         process_short_open
       elsif @signal.name=="Short Close"
