@@ -9,7 +9,7 @@ class TradingOperationsWorker < BaseDaemonWorker
   def poll_for_trading_operations
     @operation = TradingOperation.where(:active=>true, :last_processing_time.lte=>(DateTime.now.to_i - 30)).first
     if @operation
-      @operation.last_processing_time = Time.now+1.hour
+      @operation.last_processing_time = Time.now
       @operation.save
       @set = @operation.trading_strategy_population.best_set
       #positions_left_to_open = @operation.trading_strategy_population.simulation_number_of_trading_strategies_per_set-@operation.trading_positions.where("open=1").count
