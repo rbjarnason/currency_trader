@@ -22,7 +22,7 @@ class TradingOperationsWorker < BaseDaemonWorker
           end
         end
       end
-      @operation.trading_positions.where("open=1").each do |position|
+      @operation.trading_positions.where(:open=>true).each do |position|
         info("Checking position #{position.id}")
         position.trading_strategy.evaluate(@set.population.quote_target,DateTime.now,false,@operation.id,position.id)
       end
@@ -98,9 +98,9 @@ class TradingOperationsWorker < BaseDaemonWorker
       elsif @signal.name=="Short Close"
         process_short_close
       elsif @signal.name=="Long Open"
-          process_long_open
-        elsif @signal.name=="Long Close"
-          process_long_close
+        process_long_open
+      elsif @signal.name=="Long Close"
+        process_long_close
       end
       @signal.complete = 1
       @signal.save
