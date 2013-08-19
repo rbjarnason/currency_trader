@@ -7,7 +7,7 @@ require "#{File.expand_path(File.dirname(__FILE__))}/../daemon_tools/base_daemon
 
 class TradingOperationsWorker < BaseDaemonWorker
   def poll_for_trading_operations
-    @operation = TradingOperation.where(:active=>true, :last_processing_time.lte=>(DateTime.now.to_i - 30)).first
+    @operation = TradingOperation.where(:active=>true, :last_processing_time.lte=>(DateTime.now.to_i - 60)).first
     info(@operation.inspect)
     if @operation
       @operation.last_processing_time = Time.now
