@@ -53,7 +53,7 @@
         = "Units"
       %th
         = "Profit Loss"
-    - @operation.trading_positions.where("open=1").order("created_at DESC").limit(20).each do |position|
+    - @operation.trading_positions.where("open=1").order_by("created_at DESC").limit(20).each do |position|
       %tr
         %td{:color=>position.created_at+2.hours<DateTime.now ? "#000" : "#f00"}
           = position.created_at
@@ -172,7 +172,7 @@
         = "Close Value"
       %th
         = "Profit/Loss"
-    - @operation.trading_positions.where("open=0").order("created_at DESC").limit(20).each do |position|
+    - @operation.trading_positions.where("open=0").order_by("created_at DESC").limit(20).each do |position|
       %tr
         %td
           = position.updated_at
