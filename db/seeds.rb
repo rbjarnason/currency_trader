@@ -30,11 +30,11 @@ t.import_parameters({:float=>[20000.0,0.04,0.05], :binary=>[1,0]})
 t.save
 
 if false
-  TradingStrategyPopulation.delete_all
-  TradingStrategySet.delete_all
-  TradingStrategy.delete_all
-  TradingOperation.delete_all
-  TradingSignal.delete_all
+  #TradingStrategyPopulation.delete_all
+  #TradingStrategySet.delete_all
+  #TradingStrategy.delete_all
+  #TradingOperation.delete_all
+  ##TradingSignal.delete_all
   TradingPosition.delete_all
 
 
@@ -74,6 +74,7 @@ if false
   operation.last_processing_time = DateTime.now-1.hour
   operation.processing_time_interval = 30
   operation.quote_target_id = pop.quote_target.id
+  operation.active = true
   operation.save
 
 end
