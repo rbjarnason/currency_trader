@@ -183,15 +183,14 @@ class TradingStrategy
         trigger_long_open_signal if match_open_conditions
       elsif not long?
         trigger_short_open_signal if match_open_conditions
-      else
-        trigger_long_open_signal #HACK
       end
     else
       Rails.logger.warn("No quote value for #{@current_date_time}!")
     end
-    Rails.logger.debug "Current date time #{@current_date_time} quote_value: #{@current_quote_value} units: #{@current_position_units} current: #{@current_capital_position} last_opened: #{@last_opened_position_value}"
-    Rails.logger.debug("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
-    Rails.logger.debug("")
+    Rails.logger.info "Current date time #{@current_date_time} quote_value: #{@current_quote_value} units: #{@current_position_units} current: #{@current_capital_position} last_opened: #{@last_opened_position_value}"
+    Rails.logger.info("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
+    Rails.logger.inf("")
+    trigger_long_open_signal #HACK
   end
 
   # MATCH OPEN CLOSE
