@@ -1,11 +1,29 @@
-class TradingOperation < ActiveRecord::Base
-  # attr_accessible :title, :body
-  belongs_to :quote_target
+class TradingOperation
+  include Mongoid::Document
+  include Mongoid::Timestamps
+  include Mongoid::OptimisticLocking
+
   belongs_to :trading_account
   belongs_to :trading_strategy_population
   has_many :trading_positions
   has_many :trading_signals
 
+  field :value_open, type: Float
+
+  field :quote_target_id, type: Integer
+  field :initial_capital_amount, type: Float
+  field :current_capital, type: Float
+  field :active, type: Boolean
+  field :last_processing_time, type: Datetime
+  field :processing_time_interval, type: Integer
+
+  def quote_target
+    QuoteTarget.where(:id=>self.quote_target_id).first
+  end
+
+  def quote_target=(quote_target)
+    self.quote_target_id = quote_target.id
+  end
 
   def population
     self.trading_strategy_population

@@ -1,8 +1,9 @@
-class TradingPosition < ActiveRecord::Base
+class TradingPosition
   include Mongoid::Document
   include Mongoid::Timestamps
 
   belongs_to :trading_strategy
+  belongs_to :trading_operation
   field :trading_operation_id, type: Integer
 
   field :open, type: Boolean, default: true
@@ -12,7 +13,5 @@ class TradingPosition < ActiveRecord::Base
   field :profit_loss, type: Float
   field :units, type: Integer
 
-  def trading_operation
-    TradingOperation.where(:id=>self.trading_operation_id)
-  end
+
 end

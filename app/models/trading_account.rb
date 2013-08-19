@@ -1,5 +1,9 @@
-class TradingAccount < ActiveRecord::Base
-  # attr_accessible :title, :body
+class TradingAccount
+  include Mongoid::Document
+  include Mongoid::Timestamps
+  include Mongoid::OptimisticLocking
+
   has_many :trading_operations
-  attr_accessible :name
+
+  field :name, type: String
 end
