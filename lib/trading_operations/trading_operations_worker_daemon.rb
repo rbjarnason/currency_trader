@@ -21,7 +21,7 @@ class TradingOperationsWorker < BaseDaemonWorker
           end
         end
       end
-      @operation.trading_positions.where("open=1").order("rand()").each do |position|
+      @operation.trading_positions.where("open=1").each do |position|
         info("Checking position #{position.id}")
         position.trading_strategy.evaluate(@set.population.quote_target,DateTime.now,false,@operation.id,position.id)
       end

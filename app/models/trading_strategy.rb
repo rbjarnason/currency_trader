@@ -355,7 +355,7 @@ class TradingStrategy
         Rails.warn("Out of cash: #{self.inspect}")
       end
     else
-      if @trading_operation_id and operation = TradingOperation.where(["id=?",@trading_operation_id]).first
+      if @trading_operation_id and operation = TradingOperation.where(:id=>@trading_operation_id).first
         signal = operation.trading_signals.where("name='Short Open'").order("created_at DESC").first
         if signal and (signal.created_at+MINUTES_BETWEEN_POS_OPENINGS>DateTime.now)
           Rails.logger.info("Not putting it on because of short time since #{signal.inspect} - #{signal.created_at+MINUTES_BETWEEN_POS_OPENINGS}>#{DateTime.now}")
@@ -392,8 +392,8 @@ class TradingStrategy
         Rails.warn("Out of cash: #{self.inspect}")
       end
     else
-      if @trading_operation_id and operation = TradingOperation.where(["id=?",@trading_operation_id]).first
-        signal = operation.trading_signals.where("name='Long Open'").order("created_at DESC").first
+      if @trading_operation_id and operation = TradingOperation.where(:id=>@trading_operation_id).first
+        signal = operation.trading_signals.where(:name=>'Long Open').order("created_at DESC").first
         if signal and (signal.created_at+MINUTES_BETWEEN_POS_OPENINGS>DateTime.now)
           Rails.logger.info("Not putting it on because of short time since #{signal.inspect} - #{signal.created_at+MINUTES_BETWEEN_POS_OPENINGS}>#{DateTime.now}")
           return
