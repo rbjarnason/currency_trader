@@ -52,7 +52,7 @@ class TradingOperation
                                                   :description=>"Trading Time Frame Start"})
     events << simulated_trading_signal_to_amchart({:name=>"E", :current_date_time=>DateTime.parse("#{@day} #{@to_hour}:00:00"), :background_color=>"#ff6655",
                                                   :description=>"Trading Time Frame Stop"})
-    trading_signals.where(:created_at.gtl => from_date, :created_at.lte=>to_date).all.each do |signal|
+    trading_signals.where(:created_at.gte => from_date, :created_at.lte=>to_date).all.each do |signal|
       if signal.name=="Short Open" or signal.name=="Long Open"
 #        events << simulated_trading_signal_to_amchart({:name=>"#{signal.name}",
 #                                                       :type=>"arrowUp",
