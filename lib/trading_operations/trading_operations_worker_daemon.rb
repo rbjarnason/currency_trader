@@ -16,7 +16,7 @@ class TradingOperationsWorker < BaseDaemonWorker
       if @set and not @set.trading_strategies.empty?
         @set.trading_strategies.each do |strategy|
           unless @operation.trading_positions.where(:open=>1,:trading_strategy_id=>strategy.id).first
-            info("DateTime-1.hour!!! About to evaluate #{strategy.id} #{@set.id} #{@set.population.quote_target.symbol}")
+            info("DateTime-1.hour!!! About to evaluate #{strategy.id} #{@set.id} #{@set.population.quote_target.symbol} #{@operation.id}")
             strategy.evaluate(@set.population.quote_target,DateTime.now,false,@operation.id)
           end
         end

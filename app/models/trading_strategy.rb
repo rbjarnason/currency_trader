@@ -163,6 +163,7 @@ class TradingStrategy
   def evaluate(quote_target, date_time=DateTime.now, last_time_segment=false, trading_operation_id=nil, trading_position_id=nil)
     @quote_target = quote_target
     @trading_operation_id = trading_operation_id
+    Rails.logger.info("Eval: tod #{@trading_operation_id}")
     @trading_position_id = trading_position_id
     @current_date_time = date_time
     @trading_position = TradingPosition.find(@trading_position_id) if @trading_position_id
