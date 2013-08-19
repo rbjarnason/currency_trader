@@ -37,7 +37,7 @@ class TradingOperationsWorker < BaseDaemonWorker
     position.units = TradingStrategy::DEFAULT_POSITION_UNITS
     position.value_open = @signal.open_quote_value # GET THE REALTIME
     position.open = true
-    position.signal = @signal
+    position.trading_signal = @signal
     position.trading_operation_id = @operation.id
     position.trading_strategy = @signal.trading_strategy
     position.save
@@ -52,7 +52,7 @@ class TradingOperationsWorker < BaseDaemonWorker
     position.units = TradingStrategy::DEFAULT_POSITION_UNITS
     position.value_open = @signal.open_quote_value # GET THE REALTIME
     position.open = true
-    position.signal = @signal
+    position.trading_signal = @signal
     position.trading_operation_id = @operation.id
     position.trading_strategy = @signal.trading_strategy
     position.save
