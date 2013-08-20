@@ -1,6 +1,7 @@
 class TradingPosition
   include Mongoid::Document
   include Mongoid::Timestamps
+  index({ open: 1 }, { unique: false, name: "trading_strategy_set_id_index" })
 
   belongs_to :trading_strategy
   belongs_to :trading_operation

@@ -2,6 +2,8 @@ class TradingStrategySet
   include Mongoid::Document
   include Mongoid::Timestamps
   #include Mongoid::OptimisticLocking
+  index({ trading_strategy_population_id: 1 }, { unique: false, name: "trading_strategy_population_id_index" })
+
 
   MAX_NUMBER_OF_TRADING_STRATEGIES = 4
   FORCE_RELEASE_POSITION = true

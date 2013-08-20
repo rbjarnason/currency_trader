@@ -1,6 +1,8 @@
 class TradingStrategy
   include Mongoid::Document
   include Mongoid::Timestamps
+  index({ trading_strategy_set_id: 1 }, { unique: false, name: "trading_strategy_set_id_index" })
+
 
   belongs_to :trading_strategy_set
   has_many   :trading_signals

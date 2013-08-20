@@ -1,1 +1,1 @@
-= render :partial=>"trading_strategies/list", :locals=>{:trading_strategies=>set.trading_strategies}
+= render :partial=>"trading_strategies/list", :locals=>{:trading_strategies=>TradingStrategy.where(:trading_strategy_set_id=>set.id).all}
