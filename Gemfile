@@ -7,6 +7,7 @@ gem 'rails', '3.2.14'
 
 gem 'mysql2'
 gem "mongoid","2.4.12"
+gem 'bson_ext'
 #gem "mongoid_optimistic_locking", :git => "git://github.com/burgalon/mongoid_optimistic_locking.git", :branch=>"mongoid3"
 gem "daemons"
 gem "capistrano"

@@ -40,6 +40,8 @@ GEM
       coderay (>= 1.0.0)
       erubis (>= 2.6.6)
     bson (1.6.4)
+    bson_ext (1.6.4)
+      bson (~> 1.6.4)
     builder (3.0.4)
     capistrano (2.14.2)
       highline
@@ -157,6 +159,7 @@ PLATFORMS
 DEPENDENCIES
   awesome_print
   better_errors
+  bson_ext
   capistrano
   coffee-rails (~> 3.2.1)
   daemons
