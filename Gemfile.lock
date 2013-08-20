@@ -88,6 +88,7 @@ GEM
       activemodel (~> 3.1)
       mongo (<= 1.6.2)
       tzinfo (~> 0.3.22)
+    moped (1.5.1)
     multi_json (1.7.9)
     mysql2 (0.3.11)
     net-scp (1.1.0)
@@ -168,6 +169,7 @@ DEPENDENCIES
   jquery-rails
   meta_search (>= 1.1.0.pre)
   mongoid (= 2.4.12)
+  moped
   mysql2
   rails (= 3.2.14)
   rails-dev-boost
