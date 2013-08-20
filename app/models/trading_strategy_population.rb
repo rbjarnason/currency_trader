@@ -7,7 +7,7 @@ class StrategyBinaryParameters < BitStringGenotype((TradingStrategySet::MAX_NUMB
 end
 
 class StrategyFloatParameters <  FloatListGenotype((TradingStrategySet::MAX_NUMBER_OF_TRADING_STRATEGIES+1)*NUMBER_OF_FLOAT_EVOLUTION_PARAMETERS)
- use Elitism(TruncationSelection(0.5),1), UniformCrossover, ListMutator(:probability[ p=0.5 ],:uniform[ max_size=27 ])
+ use Elitism(TruncationSelection(0.5),1), UniformCrossover, ListMutator(:probability[ p=0.4 ],:uniform[ max_size=72 ])
 end
 
 genotypes = []
