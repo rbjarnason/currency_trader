@@ -79,9 +79,9 @@ GEM
       activesupport (~> 3.1)
       polyamorous (~> 0.5.0)
     mime-types (1.24)
-    mongoid (3.0.23)
-      activemodel (~> 3.1)
-      moped (~> 1.2)
+    mongoid (3.1.4)
+      activemodel (~> 3.2)
+      moped (~> 1.4)
       origin (~> 1.0)
       tzinfo (~> 0.3.22)
     moped (1.5.1)
@@ -164,7 +164,7 @@ DEPENDENCIES
   haml
   jquery-rails
   meta_search (>= 1.1.0.pre)
-  mongoid (~> 3.0.0)
+  mongoid
   mysql2
   rails (= 3.2.14)
   rails-dev-boost
