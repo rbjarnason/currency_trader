@@ -1,4 +1,4 @@
-load 'deploy/assets'
+#load 'deploy/assets'
 
 set :application, "currency_trader"
 set :domain, "fx.decyphermedia.com"
