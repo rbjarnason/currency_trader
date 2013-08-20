@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120603202400) do
+ActiveRecord::Schema.define(:version => 20130820132112) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.string   "resource_id",   :null => false
@@ -130,10 +130,10 @@ ActiveRecord::Schema.define(:version => 20120603202400) do
   add_index "trading_signals", ["trading_strategy_id"], :name => "index_trading_signals_on_trading_strategy_id"
 
   create_table "trading_strategies", :force => true do |t|
-    t.integer  "trading_strategy_template_id",                       :null => false
-    t.integer  "trading_strategy_set_id",                            :null => false
-    t.datetime "created_at",                                         :null => false
-    t.datetime "updated_at",                                         :null => false
+    t.integer  "trading_strategy_template_id",                           :null => false
+    t.integer  "trading_strategy_set_id",                                :null => false
+    t.datetime "created_at",                                             :null => false
+    t.datetime "updated_at",                                             :null => false
     t.float    "initial_simulation_capital"
     t.float    "current_simulation_capital"
     t.integer  "number_of_evolution_trading_signals", :default => 0
@@ -146,8 +146,12 @@ ActiveRecord::Schema.define(:version => 20120603202400) do
     t.integer  "open_how_far_back_milliseconds"
     t.string   "simulated_fitness_failure_reason"
     t.integer  "close_how_far_back_milliseconds",     :default => 5
+    t.integer  "trading_strategy_population_id"
+    t.boolean  "no_delete",                           :default => false
   end
 
+  add_index "trading_strategies", ["no_delete", "trading_strategy_population_id"], :name => "nodel_trad_pop_id"
+  add_index "trading_strategies", ["trading_strategy_population_id"], :name => "index_trading_strategies_on_trading_strategy_population_id"
   add_index "trading_strategies", ["trading_strategy_set_id"], :name => "index_trading_strategies_on_trading_strategy_set_id"
 
   create_table "trading_strategy_populations", :force => true do |t|
@@ -194,9 +198,11 @@ ActiveRecord::Schema.define(:version => 20120603202400) do
     t.datetime "last_work_unit_time"
     t.integer  "processing_time_interval",       :default => 1800
     t.float    "accumulated_fitness"
+    t.boolean  "no_delete",                      :default => false
   end
 
   add_index "trading_strategy_sets", ["accumulated_fitness"], :name => "index_trading_strategy_sets_on_accumulated_fitness"
+  add_index "trading_strategy_sets", ["no_delete", "trading_strategy_population_id"], :name => "nodel_trad_set_pop_id"
   add_index "trading_strategy_sets", ["trading_strategy_population_id"], :name => "index_trading_strategy_sets_on_trading_strategy_population_id"
   add_index "trading_strategy_sets", ["trading_time_frame_id"], :name => "index_trading_strategy_sets_on_trading_time_frame_id"
 
