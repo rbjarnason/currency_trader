@@ -79,9 +79,9 @@ if false
 end
 
 if false
-  #TradingStrategyPopulation.delete_all
-  #TradingStrategySet.delete_all
-  #TradingStrategy.delete_all
+  TradingStrategyPopulation.delete_all
+  TradingStrategySet.delete_all
+  TradingStrategy.delete_all
   timeframe = TradingTimeFrame.new
   timeframe.from_hour = 00
   timeframe.to_hour = 23
@@ -184,8 +184,8 @@ if false
   pop.simulation_number_of_trading_strategies_per_set = 3
   pop.simulation_days_back = 8
   pop.simulation_min_overall_trading_signals = 2*pop.simulation_days_back
-  pop.simulation_max_overall_trading_signals = 32*pop.simulation_days_back
-  pop.simulation_max_daily_trading_signals = 32
+  pop.simulation_max_overall_trading_signals = 22*pop.simulation_days_back
+  pop.simulation_max_daily_trading_signals = 22
   pop.simulation_max_minutes_back = 15
   pop.description = "Rolling 8 days back"
   pop.save

@@ -32,6 +32,7 @@ class TradingOperationsWorker < BaseDaemonWorker
     info("process_short_open")
     capital_investment = TradingStrategy::DEFAULT_POSITION_UNITS*@signal.open_quote_value
     #if @operation.capital_position>capital_investment
+    @signal.trading_strategy.no_delete!
     position = TradingPosition.new
     position.units = TradingStrategy::DEFAULT_POSITION_UNITS
     position.value_open = @signal.open_quote_value # GET THE REALTIME

@@ -29,6 +29,11 @@ class TradingStrategy < ActiveRecord::Base
   after_initialize :setup_parameters
   after_save :setup_parameters
 
+  def no_delete!
+    self.no_delete = true
+    self.save
+  end
+
   def marshall_simulated_trading_signals
     self.simulated_trading_signals = Marshal.dump(@simulated_trading_signals_array) if @simulated_trading_signals_array
   end
@@ -341,6 +346,7 @@ class TradingStrategy < ActiveRecord::Base
         end
       end
       return if operation.trading_positions.where("open=1").count>2
+      self.no_delete!
       signal = TradingSignal.new
       signal.name = "Short Open"
       signal.trading_operation_id = @trading_operation_id
@@ -378,6 +384,7 @@ class TradingStrategy < ActiveRecord::Base
         end
       end
       return if operation.trading_positions.where("open=1").count>2
+      self.no_delete!
       signal = TradingSignal.new
       signal.name = "Long Open"
       signal.trading_operation_id = @trading_operation_id
@@ -403,6 +410,7 @@ class TradingStrategy < ActiveRecord::Base
       self.number_of_evolution_trading_signals+=1
       @daily_signals+=1
     else
+      self.no_delete!
       signal = TradingSignal.new
       signal.name = "Short Close"
       signal.trading_operation_id = @trading_operation_id
@@ -428,6 +436,7 @@ class TradingStrategy < ActiveRecord::Base
       self.number_of_evolution_trading_signals+=1
       @daily_signals+=1
     else
+      self.no_delete!
       signal = TradingSignal.new
       signal.name = "Long Close"
       signal.trading_operation_id = @trading_operation_id

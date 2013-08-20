@@ -51,6 +51,7 @@ class TradingStrategySet < ActiveRecord::Base
       strategy=TradingStrategy.new
       strategy.trading_strategy_template=TradingStrategyTemplate.last
       strategy.trading_strategy_set=self
+      strategy.trading_strategy_population=self.trading_strategy_population
       strategy.save
     end
   end
