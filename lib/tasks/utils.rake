@@ -55,30 +55,13 @@ namespace :utils do
 
     desc "Cleanup old stuff"
   task :cleanup_old_stuff => :environment do
-    strategy_ids = []
     strategy_set_ids = []
     TradingStrategyPopulation.all.each do |population|
       strategy_set_ids << population.best_trading_strategy_set_id if population.best_trading_strategy_set_id
-      population.trading_strategy_sets.order_by(:created_at => :desc).limit(70).each do |set|
-        strategy_set_ids << set.id
-      end
-
-      population.trading_strategy_sets.order_by(:accumulated_fitness => :desc).limit(70).each do |set|
-        strategy_set_ids << set.id
-      end
+      population.active = false
+      population.save
     end
-
-    strategy_set_ids.each do |set_id|
-      TradingStrategySet.find(set_id).trading_strategies.each do |strategy|
-        strategy_ids << strategy.id
-      end
-    end
-
-    puts strategy_ids
-    puts strategy_set_ids
-
-    puts TradingStrategy.not_in(:_id=>strategy_ids.uniq).delete_all
-    puts TradingStrategySet.not_in(:_id=>strategy_set_ids.uniq).delete_all
+    TradingStrategySet.where("id not in (?)",strategy_set_ids).destroy_all
   end
 
   desc "Dump database to tmp"

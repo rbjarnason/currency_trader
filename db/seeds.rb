@@ -30,11 +30,11 @@ t.import_parameters({:float=>[20000.0,0.04,0.05], :binary=>[1,0]})
 t.save
 
 if false
-  #TradingStrategyPopulation.delete_all
-  #TradingStrategySet.delete_all
-  #TradingStrategy.delete_all
-  #TradingOperation.delete_all
-  ##TradingSignal.delete_all
+  TradingStrategyPopulation.delete_all
+  TradingStrategySet.delete_all
+  TradingStrategy.delete_all
+  TradingOperation.delete_all
+  TradingSignal.delete_all
   TradingPosition.delete_all
 
 
@@ -57,24 +57,23 @@ if false
 end
 
 if false
-  TradingOperation.delete_all
-  TradingSignal.delete_all
-  TradingPosition.delete_all
-  TradingAccount.delete_all
+  #TradingOperation.delete_all
+  #TradingSignal.delete_all
+  #TradingPosition.delete_all
+  #TradingAccount.delete_all
 
   acct = TradingAccount.new
   acct.save
 
-  pop = TradingStrategyPopulation.first
+  pop = TradingStrategyPopulation.find(162)
   operation = TradingOperation.new
-  operation.trading_strategy_population_id = pop.id
+  operation.trading_strategy_population = pop
   operation.trading_account = TradingAccount.last
   operation.initial_capital_amount = 10000000
   operation.current_capital = 10000000
   operation.last_processing_time = DateTime.now-1.hour
   operation.processing_time_interval = 30
-  operation.quote_target_id = pop.quote_target.id
-  operation.active = true
+  operation.quote_target = pop.quote_target
   operation.save
 
 end
@@ -176,29 +175,14 @@ if false
   pop.initialize_population
   pop.save
 
-  TradingStrategyPopulation.delete_all
-  TradingStrategySet.delete_all
-  TradingStrategy.delete_all
-  TradingOperation.delete_all
-  TradingSignal.delete_all
-  TradingPosition.delete_all
-  TradingTimeFrame.delete_all
-
-  timeframe = TradingTimeFrame.new
-  timeframe.from_hour = 00
-  timeframe.to_hour = 23
-  timeframe.save
-
-  original_verbosity = $VERBOSE
-  $VERBOSE = nil
   pop=TradingStrategyPopulation.new
   pop.active = true
   pop.quote_target = QuoteTarget.where("symbol='EUR/USD'").first
   pop.in_process = true
   pop.max_generations = 200000000
-  pop.population_size = 10
+  pop.population_size = 150
   pop.simulation_number_of_trading_strategies_per_set = 3
-  pop.simulation_days_back = 11
+  pop.simulation_days_back = 8
   pop.simulation_min_overall_trading_signals = 2*pop.simulation_days_back
   pop.simulation_max_overall_trading_signals = 32*pop.simulation_days_back
   pop.simulation_max_daily_trading_signals = 32
@@ -206,9 +190,5 @@ if false
   pop.description = "Rolling 8 days back"
   pop.save
   pop.initialize_population
-  $VERBOSE = original_verbosity
   pop.save
-  pop.trading_strategy_sets.where_not_complete
-
-  TradingStrategy.all.each do |x| puts x.inspect end
 end

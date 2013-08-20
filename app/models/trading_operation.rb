@@ -1,29 +1,11 @@
-class TradingOperation
-  include Mongoid::Document
-  include Mongoid::Timestamps
-  #include Mongoid::OptimisticLocking
-
+class TradingOperation < ActiveRecord::Base
+  # attr_accessible :title, :body
+  belongs_to :quote_target
   belongs_to :trading_account
   belongs_to :trading_strategy_population
   has_many :trading_positions
   has_many :trading_signals
 
-  field :value_open, type: Float
-
-  field :quote_target_id, type: Integer
-  field :initial_capital_amount, type: Float
-  field :current_capital, type: Float
-  field :active, type: Boolean
-  field :last_processing_time, type: DateTime
-  field :processing_time_interval, type: Integer
-
-  def quote_target
-    QuoteTarget.where(:id=>self.quote_target_id).first
-  end
-
-  def quote_target=(quote_target)
-    self.quote_target_id = quote_target.id
-  end
 
   def population
     self.trading_strategy_population
@@ -52,7 +34,7 @@ class TradingOperation
                                                   :description=>"Trading Time Frame Start"})
     events << simulated_trading_signal_to_amchart({:name=>"E", :current_date_time=>DateTime.parse("#{@day} #{@to_hour}:00:00"), :background_color=>"#ff6655",
                                                   :description=>"Trading Time Frame Stop"})
-    trading_signals.where(:created_at.gte => from_date, :created_at.lte=>to_date).all.each do |signal|
+    trading_signals.where(["created_at>=? AND created_at<=?",from_date.to_formatted_s(:db),to_date.to_formatted_s(:db)]).all.each do |signal|
       if signal.name=="Short Open" or signal.name=="Long Open"
 #        events << simulated_trading_signal_to_amchart({:name=>"#{signal.name}",
 #                                                       :type=>"arrowUp",

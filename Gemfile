@@ -1,15 +1,11 @@
 source 'https://rubygems.org'
 
-gem 'rails', '3.2.14'
+gem 'rails', '3.2.11'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
 gem 'mysql2'
-gem "mongoid"
-#gem 'moped'
-#gem 'bson_ext'
-#gem "mongoid_optimistic_locking", :git => "git://github.com/burgalon/mongoid_optimistic_locking.git", :branch=>"mongoid3"
 gem "daemons"
 gem "capistrano"
 gem "sys-filesystem"
@@ -24,9 +20,9 @@ gem 'awesome_print'
 group :assets do
   gem 'sass-rails',   '~> 3.2.3'
   gem 'coffee-rails', '~> 3.2.1'
-  #gem 'turbo-sprockets-rails3'
+  gem 'turbo-sprockets-rails3'
   # See https://github.com/sstephenson/execjs#readme for more supported runtimes
-  gem 'therubyracer', :platform => :ruby
+ # gem 'therubyracer', :platform => :ruby
 
   gem 'uglifier', '>= 1.0.3'
 end
@@ -34,7 +30,7 @@ end
 group :development do
   gem 'rails-dev-boost'
   gem 'rails_view_annotator', github: "hinrik/rails_view_annotator"
- # gem 'binding_of_caller'
+  gem 'binding_of_caller'
   gem 'better_errors'
 end
 

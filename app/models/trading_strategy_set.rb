@@ -1,40 +1,11 @@
-class TradingStrategySet
-  include Mongoid::Document
-  include Mongoid::Timestamps
-  #include Mongoid::OptimisticLocking
-  index({ trading_strategy_population_id: 1 }, { unique: false, name: "trading_strategy_population_id_index" })
-
-
-  MAX_NUMBER_OF_TRADING_STRATEGIES = 4
+class TradingStrategySet < ActiveRecord::Base
+  MAX_NUMBER_OF_TRADING_STRATEGIES = 10
   FORCE_RELEASE_POSITION = true
   PUNISHMENT_FOR_SAME_MINUTES_IN_STRATEGIES = 0.7
 
-  has_many :trading_strategies
+  has_many :trading_strategies, :dependent => :destroy
   belongs_to :trading_strategy_population
   belongs_to :trading_time_frame
-  #has_one :trading_time_frame
-
-  field :parameters, type: Moped::BSON::Binary
-
-  field :processing_time_interval, type: Integer
-
-  field :fitness_score, type: Float
-  field :accumulated_fitness, type: Float
-
-  field :complete, type: Boolean, default: false
-  field :error_flag, type: Boolean, default: false
-  field :active, type: Boolean, default: false
-  field :in_population_process, type: Boolean, default: false
-  field :in_process, type: Boolean, default: false
-
-  field :last_processing_start_time, type: DateTime
-  field :last_processing_stop_time, type: DateTime
-  field :last_work_unit_time, type: DateTime
-
-
-  scope :latest_50, order_by(:created_at => :desc).limit(50)
-  scope :latest_500, order_by(:created_at => :desc).limit(500)
-  scope :fittest_20, order_by(:accumulated_fitness => :desc).limit(20)
 
   def population
     self.trading_strategy_population
@@ -76,8 +47,9 @@ class TradingStrategySet
   end
 
   def setup_trading_strategies
-    population.simulation_number_of_trading_strategies_per_set.times do
+    (1..population.simulation_number_of_trading_strategies_per_set.to_i).each do |nr|
       strategy=TradingStrategy.new
+      strategy.trading_strategy_template=TradingStrategyTemplate.last
       strategy.trading_strategy_set=self
       strategy.save
     end
@@ -85,36 +57,27 @@ class TradingStrategySet
 
   def import_settings_from_population(population,setting)
     setup_trading_strategies if trading_strategies.empty?
-    #all_trading_strategies = trading_strategies.all
-    binary_strategy_parameters = []
-    float_strategy_parameters = []
+    all_trading_strategies = trading_strategies.all
     setting.get_genotypes.each do |genotype|
       if genotype.instance_of?(StrategyBinaryParameters)
         split_attributes = genotype.genes.each_slice(NUMBER_OF_BINARY_EVOLUTION_PARAMETERS).to_a
         Rails.logger.debug("SPLIT binary parameters #{split_attributes}")
         import_binary_parameters(split_attributes[0])
         (0..(population.simulation_number_of_trading_strategies_per_set.to_i)-1).each do |i|
-          binary_strategy_parameters << split_attributes[i+1]
+          all_trading_strategies[i].import_binary_parameters(split_attributes[i+1])
         end
       elsif genotype.instance_of?(StrategyFloatParameters)
         split_attributes = genotype.genes.each_slice(NUMBER_OF_FLOAT_EVOLUTION_PARAMETERS).to_a
         Rails.logger.debug("SPLIT float parameters #{split_attributes}")
         import_float_parameters(split_attributes[0])
         (0..(population.simulation_number_of_trading_strategies_per_set.to_i-1)).each do |i|
-          float_strategy_parameters << split_attributes[i+1]
+          all_trading_strategies[i].import_float_parameters(split_attributes[i+1])
         end
       end
     end
-
-    self.trading_strategies.all.each_with_index do |trading_strategy,i|
-      trading_strategy.import_binary_parameters!(binary_strategy_parameters[i])
-      trading_strategy.import_float_parameters!(float_strategy_parameters[i])
+    all_trading_strategies.each do |strategy|
+      strategy.save
     end
-
-
-    #all_trading_strategies.each do |strategy|
-    #  strategy.save
-    #end
     #Rails.logger.info("Id: #{self.id} Max Epochs: #{self.max_epochs} Desired error: #{self.desired_error} Hidden Neurons: #{@hidden_neurons.inspect} Selected inputs: #{@selected_inputs.inspect} Input scaling: #{@inputs_scaling.inspect}")
   end
 end

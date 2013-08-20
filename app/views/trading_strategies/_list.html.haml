@@ -1,5 +1,5 @@
 %h3
-  = "Trading Strategy Set #{trading_strategies.first.trading_strategy_set.id} #{trading_strategies.first.trading_strategy_set.trading_strategy_population.quote_target.symbol} Created: #{trading_strategies.first.trading_strategy_set.created_at} Fitness #{trading_strategies.first.trading_strategy_set.fitness}"
+  = "Trading Strategy Set #{trading_strategies.first.trading_strategy_set.id} #{trading_strategies.first.trading_strategy_set.trading_strategy_population.quote_target.symbol} Fitness #{trading_strategies.first.trading_strategy_set.fitness}"
 %table
   %tr
     %th
@@ -18,26 +18,6 @@
       = "Close Magnitude Signal"
     %th
       = "Ave. Trading signals per day"
-    %th
-      = "Stop 1"
-    %th
-      = "Stop 2"
-    %th
-      = "Stop 3"
-    %th
-      = "Stop 4"
-    %th
-      = "Stop 5"
-    %th
-      = "Stop 6"
-    %th
-      = "Stop 7"
-    %th
-      = "Stop 8"
-    %th
-      = "Days bck"
-    %th
-      = "Min difference"
     %th
       = "Fitness"
   - trading_strategies.each do |strategy|
@@ -58,25 +38,5 @@
         = number_with_precision strategy.close_magnitude_signal_trigger.abs, :precision => 7
       %td
         = strategy.number_of_evolution_trading_signals/strategy.trading_strategy_set.trading_strategy_population.simulation_days_back
-      %td
-        = strategy.float_parameters[4].abs.to_i
-      %td
-        = strategy.float_parameters[5].abs.to_i
-      %td
-        = strategy.float_parameters[6].abs.to_i
-      %td
-        = strategy.float_parameters[7].abs.to_i
-      %td
-        = strategy.float_parameters[8].abs.to_i
-      %td
-        = strategy.float_parameters[9].abs.to_i
-      %td
-        = strategy.float_parameters[10].abs.to_i
-      %td
-        = strategy.float_parameters[11].abs.to_i
-      %td
-        = strategy.float_parameters[12].abs.to_i
-      %td
-        = strategy.float_parameters[13].abs.to_i
       %td
         = strategy.simulated_fitness==TradingStrategy::FAILED_FITNESS_VALUE ? "Excluded by #{strategy.simulated_fitness_failure_reason}" : strategy.simulated_fitness

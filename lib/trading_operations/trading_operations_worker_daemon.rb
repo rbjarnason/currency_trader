@@ -7,23 +7,21 @@ require "#{File.expand_path(File.dirname(__FILE__))}/../daemon_tools/base_daemon
 
 class TradingOperationsWorker < BaseDaemonWorker
   def poll_for_trading_operations
-    @operation = TradingOperation.where(:active=>true, :last_processing_time.lte=>(DateTime.now.to_i - 60)).first
-    info(@operation.inspect)
+    @operation = TradingOperation.where("active = 1 AND last_processing_time < NOW() - processing_time_interval").lock(true).order('rand()').first
     if @operation
-      @operation.last_processing_time = Time.now
+      @operation.last_processing_time = Time.now+1.hour
       @operation.save
       @set = @operation.trading_strategy_population.best_set
       #positions_left_to_open = @operation.trading_strategy_population.simulation_number_of_trading_strategies_per_set-@operation.trading_positions.where("open=1").count
       if @set and not @set.trading_strategies.empty?
         @set.trading_strategies.each do |strategy|
-          unless @operation.trading_positions.where(:open=>1,:trading_strategy_id=>strategy.id).first
-            info("DateTime-1.hour!!! About to evaluate #{strategy.id} #{@set.id} #{@set.population.quote_target.symbol} #{@operation.id}")
+          unless @operation.trading_positions.where(["open=1 AND trading_strategy_id=?",strategy.id]).first
+            info("DateTime-1.hour!!! About to evaluate #{strategy.id} #{@set.id} #{@set.population.quote_target.symbol}")
             strategy.evaluate(@set.population.quote_target,DateTime.now,false,@operation.id)
           end
         end
       end
-      info("Before check positions #{@operation}")
-      @operation.trading_positions.where(:open=>true).each do |position|
+      @operation.trading_positions.where("open=1").order("rand()").each do |position|
         info("Checking position #{position.id}")
         position.trading_strategy.evaluate(@set.population.quote_target,DateTime.now,false,@operation.id,position.id)
       end
@@ -38,23 +36,7 @@ class TradingOperationsWorker < BaseDaemonWorker
     position.units = TradingStrategy::DEFAULT_POSITION_UNITS
     position.value_open = @signal.open_quote_value # GET THE REALTIME
     position.open = true
-    position.trading_signal = @signal
-    position.trading_operation_id = @operation.id
-    position.trading_strategy = @signal.trading_strategy
-    position.save
-    @operation.current_capital-=capital_investment
-  end
-
-  def process_long_open
-    info("process_long_open")
-    capital_investment = TradingStrategy::DEFAULT_POSITION_UNITS*@signal.open_quote_value
-    #if @operation.capital_position>capital_investment
-    position = TradingPosition.new
-    position.units = TradingStrategy::DEFAULT_POSITION_UNITS
-    position.value_open = @signal.open_quote_value # GET THE REALTIME
-    position.open = true
-    position.trading_signal = @signal
-    position.trading_operation_id = @operation.id
+    position.trading_operation = @operation
     position.trading_strategy = @signal.trading_strategy
     position.save
     @operation.current_capital-=capital_investment
@@ -75,33 +57,15 @@ class TradingOperationsWorker < BaseDaemonWorker
     @signal.profit_loss = difference
   end
 
-  def process_long_close
-    info("process_long_close")
-    position = @signal.trading_position
-    position.reload(:lock=>true)
-    bought_at = position.value_open * position.units
-    currently_at = @signal.close_quote_value * position.units # GET THIS REALTIME
-    difference = currently_at-bought_at
-    position.value_close = @signal.close_quote_value
-    position.profit_loss = difference
-    position.open = false
-    position.save
-    @operation.current_capital +=currently_at
-    @signal.profit_loss = difference
-  end
-
   def poll_for_trading_signals
-    @signal = TradingSignal.where(:complete => false).first
+    @signal = TradingSignal.where("complete = 0").lock(true).first
     if @signal
-      @operation = @signal.trading_operation.first
+      @operation = @signal.trading_operation
+      @operation.reload(:lock=>true)
       if @signal.name=="Short Open"
         process_short_open
       elsif @signal.name=="Short Close"
         process_short_close
-      elsif @signal.name=="Long Open"
-        process_long_open
-      elsif @signal.name=="Long Close"
-        process_long_close
       end
       @signal.complete = 1
       @signal.save
