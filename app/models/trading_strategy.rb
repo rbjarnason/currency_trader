@@ -76,8 +76,8 @@ class TradingStrategy < ActiveRecord::Base
       @stop_06_value  = self.float_parameters[9].abs.to_i
       @stop_07_value  = self.float_parameters[10].abs.to_i
       @stop_08_value  = self.float_parameters[11].abs.to_i
-      @days_back_long_short = self.float_parameters[12].abs.to_i
-      @min_difference_for_close = self.float_parameters[12].abs.to_i
+      @days_back_long_short = self.float_parameters[12].abs.to_i/10
+      @min_difference_for_close = self.float_parameters[13].abs.to_i
     end
   end
 
