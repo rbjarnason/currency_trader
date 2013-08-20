@@ -1,7 +1,7 @@
 class TradingAccount
   include Mongoid::Document
   include Mongoid::Timestamps
-  include Mongoid::OptimisticLocking
+  #include Mongoid::OptimisticLocking
 
   has_many :trading_operations
 

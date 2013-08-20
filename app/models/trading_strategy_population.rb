@@ -35,7 +35,7 @@ end
 class TradingStrategyPopulation
   include Mongoid::Document
   include Mongoid::Timestamps
-  include Mongoid::OptimisticLocking
+  # include Mongoid::OptimisticLocking
 
   field :quote_target_id, type: Integer
   field :complete, type: Boolean, default: false

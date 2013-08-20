@@ -1,13 +1,13 @@
 source 'https://rubygems.org'
 
-gem 'rails', '3.2.11'
+gem 'rails', '3.2.14'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
 gem 'mysql2'
 gem "mongoid", "~> 3.0.0"
-gem "mongoid_optimistic_locking", :git => "git://github.com/burgalon/mongoid_optimistic_locking.git", :branch=>"mongoid3"
+#gem "mongoid_optimistic_locking", :git => "git://github.com/burgalon/mongoid_optimistic_locking.git", :branch=>"mongoid3"
 gem "daemons"
 gem "capistrano"
 gem "sys-filesystem"
@@ -32,7 +32,7 @@ end
 group :development do
   gem 'rails-dev-boost'
   gem 'rails_view_annotator', github: "hinrik/rails_view_annotator"
-  gem 'binding_of_caller'
+ # gem 'binding_of_caller'
   gem 'better_errors'
 end
 
