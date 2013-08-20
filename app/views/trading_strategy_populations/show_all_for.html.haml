@@ -57,5 +57,5 @@
     = render :partial=>"set", :locals=>{:set=>TradingStrategySet.find(@population.best_trading_strategy_set_id)}
     %h2
       = "Strongest Trading Strategy Sets #{@population.trading_strategy_sets.count}"
-    - TradingStrategySets.where(:trading_strategy_population_id=>@population.id).latest_50.to_a.sort_by{|s| s.accumulated_fitness ? s.accumulated_fitness : 0.0 }.each do |set|
+    - TradingStrategySet.where(:trading_strategy_population_id=>@population.id).latest_50.to_a.sort_by{|s| s.accumulated_fitness ? s.accumulated_fitness : 0.0 }.each do |set|
       = render :partial=>"set", :locals=>{:set=>set}
