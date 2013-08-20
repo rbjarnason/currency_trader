@@ -1,7 +1,7 @@
 class TradingStrategySet
   include Mongoid::Document
   include Mongoid::Timestamps
-  include Mongoid::OptimisticLocking
+  #include Mongoid::OptimisticLocking
 
   MAX_NUMBER_OF_TRADING_STRATEGIES = 4
   FORCE_RELEASE_POSITION = true
