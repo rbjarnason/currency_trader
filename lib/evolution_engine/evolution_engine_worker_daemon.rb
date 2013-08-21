@@ -12,8 +12,9 @@ class EvolutionEngineWorker < BaseDaemonWorker
       Rails.logger.error("Error processing Set! #{ex} #{ex.backtrace}")
       @trading_strategy_set.error_flag = 1
     end
-    @trading_strategy_set.in_process = 0
-    @trading_strategy_set.complete = 1
+    @trading_strategy_set.in_process = false
+    @trading_strategy_set.complete = true
+    @trading_strategy_set.archived = true
     @trading_strategy_set.last_processing_stop_time = Time.now
     @trading_strategy_set.save
     debug("FITNESS FOR SET: #{@trading_strategy_set.fitness}")

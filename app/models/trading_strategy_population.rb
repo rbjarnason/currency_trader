@@ -134,7 +134,7 @@ class TradingStrategyPopulation < ActiveRecord::Base
       #used_trading_strategies_sets = []
       #used_trading_strategies_sets << self.best_trading_strategy_set_id
       #self.trading_strategy_sets.where(["id not in (?)",used_trading_strategies_sets.uniq]).delete_all
-      self.trading_strategy_sets.where(:archived=>false).update_all(:archived => true)
+      #self.trading_strategy_sets.where(:archived=>false).update_all(:archived => true)
       for setting in settings
         trading_strategy_set = TradingStrategySet.new
         trading_strategy_set.trading_strategy_population_id = self.id
