@@ -1,0 +1,64 @@
+%h1 Listing trading_strategy_populations
+%table
+  - @trading_strategy_populations.each do |trading_strategy_population|
+    %tr
+      %th
+        = "Population size"
+      %th
+        = "Units to short/long on each trade"
+      %th
+        = "Maximum minutes to look back for change"
+      %th
+        = "Current generation"
+      %th
+        = "Number of trading strategy sets"
+      %th
+        = "From / To"
+      %th
+        = "Min overall trading signals per strategy"
+      %th
+        = "Max overall trading signals per strategy"
+      %th
+        = "Max daily trading signals per strategy"
+      %th
+        = "Release position EOD"
+      %th
+        = "Action"
+    %tr
+      %td
+        = trading_strategy_population.population_size
+      %td
+        = TradingStrategy::DEFAULT_POSITION_UNITS
+      %td
+        = trading_strategy_population.simulation_max_minutes_back
+      %td
+        = trading_strategy_population.current_generation
+      %td
+        = "#{trading_strategy_population.trading_strategy_sets.count} | #{trading_strategy_population.trading_strategy_sets.where("complete=0").count} left"
+      %td
+        -  if trading_strategy_population.simulation_end_date
+          = "#{trading_strategy_population.simulation_end_date.to_date-trading_strategy_population.simulation_days_back-1} <br> #{trading_strategy_population.simulation_end_date.to_date-1}".html_safe
+        - else
+          = "#{Date.today-trading_strategy_population.simulation_days_back} <br> #{Date.today-1}".html_safe
+      %td
+        = trading_strategy_population.simulation_min_overall_trading_signals
+      %td
+        = trading_strategy_population.simulation_max_overall_trading_signals
+      %td
+        = trading_strategy_population.simulation_max_daily_trading_signals
+      %td
+        = TradingStrategySet::FORCE_RELEASE_POSITION ? "Yes" : "No"
+      %td
+        = link_to 'Show', trading_strategy_population
+        %br/
+        = link_to 'Edit', edit_trading_strategy_population_path(trading_strategy_population)
+        - if trading_strategy_population.active
+          %br/
+          = link_to 'Deactivate', "/trading_strategy_populations/deactivate/#{trading_strategy_population.id}"
+        - else
+          %br/
+          = link_to 'Activate', "/trading_strategy_populations/activate/#{trading_strategy_population.id}"
+        %br/
+        = link_to 'Destroy', trading_strategy_population, confirm: 'Are you sure?', method: :delete
+%br/
+= link_to 'New Trading strategy population', new_trading_strategy_population_path

@@ -59,10 +59,13 @@ class TradingStrategyPopulation < ActiveRecord::Base
 
   def evolve
       demarshall_population unless @population
-      Rails.logger.info("evolve")
+      Rails.logger.info("Evolving #{self.id}")
       unless @population.complete or self.current_generation>=self.max_generations
+        Rails.logger.info("Import fitness #{self.id}")
         import_population_fitness
+        Rails.logger.info("Evolve incremental #{self.id}")
         @population = @population.evolve_incremental_block(self.max_generations,Rails.logger)
+        Rails.logger.info("Create trading strategy sets #{self.id}")
         create_trading_strategy_sets(@population)
         self.current_generation = @population.generation
         Rails.logger.info("Generation: #{self.current_generation}")
@@ -122,29 +125,30 @@ class TradingStrategyPopulation < ActiveRecord::Base
 
     def create_trading_strategy_sets(settings)
       Rails.logger.info("create_trading_strategy_sets")
-      TradingStrategySet.transaction do
-        #TODO: Find a better way to do this below as over time there will be too many trading positions
-        #used_trading_strategies = []
-        #used_trading_strategies += TradingPosition.all.collect { |p| p.trading_strategy_id }
-        #used_trading_strategies += TradingSignal.all.collect { |p| p.trading_strategy_id }
-        TradingStrategy.where(:no_delete => false, :trading_strategy_population_id=>self.id).delete_all
-        TradingStrategySet.where(:no_delete => false, :trading_strategy_population_id=>self.id).delete_all
-        #used_trading_strategies_sets = []
-        #used_trading_strategies_sets << self.best_trading_strategy_set_id
-        #self.trading_strategy_sets.where(["id not in (?)",used_trading_strategies_sets.uniq]).delete_all
-        for setting in settings
-          trading_strategy_set = TradingStrategySet.new
-          trading_strategy_set.trading_strategy_population_id = self.id
-          trading_strategy_set.trading_time_frame = TradingTimeFrame.last
-          trading_strategy_set.save
-          trading_strategy_set.setup_trading_strategies
-          trading_strategy_set.import_settings_from_population(self,setting)
-          trading_strategy_set.active = true
-          trading_strategy_set.in_population_process = true
-          trading_strategy_set.save
-          setting.trading_strategy_set_id = trading_strategy_set.id
-          Rails.logger.info("create_trading_strategy_sets id: #{trading_strategy_set.id}")
-        end
+      #TODO: Find a better way to do this below as over time there will be too many trading positions
+      #used_trading_strategies = []
+      #used_trading_strategies += TradingPosition.all.collect { |p| p.trading_strategy_id }
+      #used_trading_strategies += TradingSignal.all.collect { |p| p.trading_strategy_id }
+      TradingStrategy.where(:no_delete => false, :trading_strategy_population_id=>self.id).delete_all
+      TradingStrategySet.where(:no_delete => false, :trading_strategy_population_id=>self.id).delete_all
+      #used_trading_strategies_sets = []
+      #used_trading_strategies_sets << self.best_trading_strategy_set_id
+      #self.trading_strategy_sets.where(["id not in (?)",used_trading_strategies_sets.uniq]).delete_all
+      for setting in settings
+        trading_strategy_set = TradingStrategySet.new
+        trading_strategy_set.trading_strategy_population_id = self.id
+        trading_strategy_set.trading_time_frame = TradingTimeFrame.last
+        trading_strategy_set.active = false
+        trading_strategy_set.save
+        Rails.logger.info("Setup strategies #{self.id}")
+        trading_strategy_set.setup_trading_strategies
+        Rails.logger.info("Import settings #{self.id}")
+        trading_strategy_set.import_settings_from_population(self,setting)
+        trading_strategy_set.active = true
+        trading_strategy_set.in_population_process = true
+        trading_strategy_set.save
+        setting.trading_strategy_set_id = trading_strategy_set.id
+        Rails.logger.info("create_trading_strategy_sets id: #{trading_strategy_set.id}")
       end
     end
   end

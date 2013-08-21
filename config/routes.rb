@@ -18,6 +18,8 @@ CurrencyTrader::Application.routes.draw do
   resources :trading_strategy_sets
 
   match 'trading_strategy_populations/show_all_for/:id' => 'trading_strategy_populations#show_all_for'
+  match 'trading_strategy_populations/deactivate/:id' => 'trading_strategy_populations#deactivate'
+  match 'trading_strategy_populations/activate/:id' => 'trading_strategy_populations#activate'
 
   match 'trading_operations/show_all_for/:id' => 'trading_operations#show_all_for'
 
