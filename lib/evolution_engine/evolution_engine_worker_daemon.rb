@@ -9,7 +9,7 @@ class EvolutionEngineWorker < BaseDaemonWorker
     begin
       @trading_strategy_set.calculate_fitness
     rescue => ex
-      error("Error processing Set! #{ex} #{ex.backtrace}")
+      Rails.logger.error("Error processing Set! #{ex} #{ex.backtrace}")
       @trading_strategy_set.error_flag = 1
     end
     @trading_strategy_set.in_process = 0
@@ -20,10 +20,10 @@ class EvolutionEngineWorker < BaseDaemonWorker
   end
 
   def poll_for_trading_strategy_set_work
-    debug("poll_for_trading_strategy_set_work")
+    Rails.logger.info("Poll for_trading strategies work")
     @trading_strategy_set = TradingStrategySet.find(:first, :conditions => "active = 1 AND in_process = 0 AND complete = 0 AND error_flag = 0", :order => 'rand()', :lock=>true)
     if @trading_strategy_set and @trading_strategy_set.complete = 0 and @trading_strategy_set.in_process = 0 and @trading_strategy_set.error_flag = 0
-      debug("processing strategy set: #{@trading_strategy_set.id}")
+      Rails.logger.info("Processing strategy set: #{@trading_strategy_set.id}")
       @trading_strategy_set.in_process = 1
       @trading_strategy_set.last_work_unit_time = 0
       @trading_strategy_set.last_processing_start_time = Time.now
@@ -31,11 +31,14 @@ class EvolutionEngineWorker < BaseDaemonWorker
       @trading_strategy_set.reload(:lock => true)
       process_evolution_target
     elsif not @trading_strategy_set
+      Rails.logger.info("Not strategy set!")
       @population = TradingStrategyPopulation.where("active = 1 AND complete = 0 AND in_process = 1").order('rand()').first
       if @population and @population.is_generation_testing_complete?
         poll_for_evolution_work
       else
-        sleep 2
+        sleep_amount = 2
+        Rails.logger.info("Sleeping for #{sleep_amount} seconds")
+        sleep sleep_amount
       end
     end
   end
@@ -48,18 +51,16 @@ class EvolutionEngineWorker < BaseDaemonWorker
   end
 
   def poll_for_evolution_work
-    debug("poll_for_evolution_work")
-    TradingStrategyPopulation.transaction do
-      @population = TradingStrategyPopulation.where("active = 1 AND complete = 0 AND in_process = 1").order('rand()').first
-      if @population and @population.is_generation_testing_complete?
-        @population.reload(:lock=>true)
-        if not @population.complete and @population.active and @population.in_process and @population.is_generation_testing_complete?
-          @population.last_processing_start_time = Time.now
-          @population.in_process = 0
-          @population.save
-          @population.reload(:lock => true)
-          process_population_target
-        end
+    Rails.logger.info("Poll_for_evolution_work")
+    @population = TradingStrategyPopulation.where("active = 1 AND complete = 0 AND in_process = 1").order('rand()').first
+    if @population and @population.is_generation_testing_complete?
+      @population.reload(:lock=>true)
+      if not @population.complete and @population.active and @population.in_process and @population.is_generation_testing_complete?
+        @population.last_processing_start_time = Time.now
+        @population.in_process = 0
+        @population.save
+        @population.reload(:lock => true)
+        process_population_target
       end
     end
   end
