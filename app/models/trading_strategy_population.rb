@@ -129,8 +129,8 @@ class TradingStrategyPopulation < ActiveRecord::Base
       #used_trading_strategies = []
       #used_trading_strategies += TradingPosition.all.collect { |p| p.trading_strategy_id }
       #used_trading_strategies += TradingSignal.all.collect { |p| p.trading_strategy_id }
-      TradingStrategy.where(:no_delete => false, :trading_strategy_population_id=>self.id).delete_all
-      TradingStrategySet.where(:no_delete => false, :trading_strategy_population_id=>self.id).delete_all
+      #TradingStrategy.where(:no_delete => false, :trading_strategy_population_id=>self.id).delete_all
+      #TradingStrategySet.where(:no_delete => false, :trading_strategy_population_id=>self.id).delete_all
       #used_trading_strategies_sets = []
       #used_trading_strategies_sets << self.best_trading_strategy_set_id
       #self.trading_strategy_sets.where(["id not in (?)",used_trading_strategies_sets.uniq]).delete_all
