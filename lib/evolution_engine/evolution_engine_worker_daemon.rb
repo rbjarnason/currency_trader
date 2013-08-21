@@ -30,10 +30,12 @@ class EvolutionEngineWorker < BaseDaemonWorker
       @trading_strategy_set.save
       @trading_strategy_set.reload(:lock => true)
       process_evolution_target
+      Rails.logger.info("Complete: Processing strategy set")
     elsif not @trading_strategy_set
       Rails.logger.info("Not strategy set!")
       @population = TradingStrategyPopulation.where("active = 1 AND complete = 0 AND in_process = 1").order('rand()').first
       if @population and @population.is_generation_testing_complete?
+        Rails.logger.info("Polling from evolution from poll strategy")
         poll_for_evolution_work
       else
         sleep_amount = 2
@@ -61,6 +63,7 @@ class EvolutionEngineWorker < BaseDaemonWorker
         @population.save
         @population.reload(:lock => true)
         process_population_target
+        Rails.logger.info("Complete: Poll_for_evolution_work")
       end
     end
   end

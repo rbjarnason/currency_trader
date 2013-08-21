@@ -49,7 +49,7 @@
       %td
         = TradingStrategySet::FORCE_RELEASE_POSITION ? "Yes" : "No"
       %td
-        = link_to 'Show', trading_strategy_population
+        = link_to 'Show',"/trading_strategy_populations/show_all_for/#{trading_strategy_population.id}"
         %br/
         = link_to 'Edit', edit_trading_strategy_population_path(trading_strategy_population)
         - if trading_strategy_population.active
