@@ -28,6 +28,7 @@ class TradingStrategySet < ActiveRecord::Base
     trading_strategies.each do |strategy|
       Rails.logger.info("Get fitness for strategy #{strategy.id}")
       strategy_fitness = strategy.fitness
+      Rails.logger.info("Fitness for strategy #{strategy.id} ready")
       how_far_back_minutes_open << (strategy.open_how_far_back_milliseconds/1000/60).to_i
       how_far_back_minutes_close << (strategy.close_how_far_back_milliseconds/1000/60).to_i
       self.accumulated_fitness+=strategy_fitness if strategy_fitness>0.0

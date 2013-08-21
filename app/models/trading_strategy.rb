@@ -498,6 +498,7 @@ class TradingStrategy < ActiveRecord::Base
     if out_of_range_attributes?
       self.simulated_fitness = FAILED_FITNESS_VALUE
     else
+      time_start_fitness = Time.now.to_i
       @evolution_mode = true
       @current_position_units = nil
       @last_opened_position_value = nil
@@ -535,6 +536,7 @@ class TradingStrategy < ActiveRecord::Base
       else
         self.simulated_fitness  = @current_capital_position-@start_capital_position
       end
+      Rails.logger.info("Fitness took #{Time.now.to_i-time_start_fitness} for #{self.id}")
     end
     self.save
     self.simulated_fitness
