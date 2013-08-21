@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130820132112) do
+ActiveRecord::Schema.define(:version => 20130821184732) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.string   "resource_id",   :null => false
@@ -199,6 +199,7 @@ ActiveRecord::Schema.define(:version => 20130820132112) do
     t.integer  "processing_time_interval",       :default => 1800
     t.float    "accumulated_fitness"
     t.boolean  "no_delete",                      :default => false
+    t.boolean  "archived",                       :default => false
   end
 
   add_index "trading_strategy_sets", ["accumulated_fitness"], :name => "index_trading_strategy_sets_on_accumulated_fitness"

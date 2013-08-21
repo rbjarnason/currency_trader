@@ -77,7 +77,7 @@ class TradingStrategyPopulation < ActiveRecord::Base
     end
 
     def is_generation_testing_complete?
-      self.trading_strategy_sets.where("complete = 0 AND error_flag = 0").count == 0
+      self.trading_strategy_sets.where("complete = 1 AND error_flag = 0 AND archived = 0").count == self.population_size
     end
 
     def deactivate_all_trading_strategy_sets_in_process
@@ -134,6 +134,7 @@ class TradingStrategyPopulation < ActiveRecord::Base
       #used_trading_strategies_sets = []
       #used_trading_strategies_sets << self.best_trading_strategy_set_id
       #self.trading_strategy_sets.where(["id not in (?)",used_trading_strategies_sets.uniq]).delete_all
+      self.trading_strategy_sets.where(:archived=>false).update_all(:archived => true)
       for setting in settings
         trading_strategy_set = TradingStrategySet.new
         trading_strategy_set.trading_strategy_population_id = self.id
