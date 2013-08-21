@@ -26,7 +26,7 @@ class TradingStrategySet < ActiveRecord::Base
     how_far_back_minutes_open = []
     how_far_back_minutes_close = []
     trading_strategies.each do |strategy|
-      Rails.logger.debug("Get fitness for strategy #{strategy.id}")
+      Rails.logger.info("Get fitness for strategy #{strategy.id}")
       strategy_fitness = strategy.fitness
       how_far_back_minutes_open << (strategy.open_how_far_back_milliseconds/1000/60).to_i
       how_far_back_minutes_close << (strategy.close_how_far_back_milliseconds/1000/60).to_i
