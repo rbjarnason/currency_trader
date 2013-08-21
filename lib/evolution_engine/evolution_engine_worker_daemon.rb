@@ -53,7 +53,7 @@ class EvolutionEngineWorker < BaseDaemonWorker
       @population = TradingStrategyPopulation.where("active = 1 AND complete = 0 AND in_process = 1").order('rand()').first
       if @population and @population.is_generation_testing_complete?
         @population.reload(:lock=>true)
-        if @population.complete == 0 and @population.active == 1 and @population.in_process == 1 and @population.is_generation_testing_complete?
+        if not @population.complete and @population.active and @population.in_process and @population.is_generation_testing_complete?
           @population.last_processing_start_time = Time.now
           @population.in_process = 0
           @population.save
