@@ -97,7 +97,7 @@ class TradingStrategyPopulation < ActiveRecord::Base
           self.best_trading_strategy_set_id = trading_strategy_set.id
         end
       end
-      TradingStrategySet.find(self.best_trading_strategy_set_id).no_delete!
+      TradingStrategySet.find(self.best_trading_strategy_set_id).no_delete! if self.best_trading_strategy_set_id
     end
 
     def marshall_population

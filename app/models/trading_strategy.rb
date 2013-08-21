@@ -11,6 +11,7 @@ class TradingStrategy < ActiveRecord::Base
 
   belongs_to :trading_strategy_template
   belongs_to :trading_strategy_set
+  belongs_to :trading_strategy_population
   has_many   :trading_signals, :dependent => :delete_all
 
   # Parameters
