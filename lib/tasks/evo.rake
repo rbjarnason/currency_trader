@@ -114,7 +114,7 @@ if false
   pop.save
 end
 
-namespace :utils do
+namespace :evo do
   desc "Setup short test"
   task :setup_short_test => :environment do
     pop=TradingStrategyPopulation.new

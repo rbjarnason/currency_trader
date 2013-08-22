@@ -68,7 +68,7 @@ class EvolutionEngineWorker < BaseDaemonWorker
   def poll_for_work
     if @worker_config["only_populations"]
       poll_for_evolution_work
-      sleep 1
+      sleep 2
     else
       poll_for_trading_strategy_set_work
     end
