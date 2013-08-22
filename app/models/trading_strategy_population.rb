@@ -59,7 +59,7 @@ class TradingStrategyPopulation < ActiveRecord::Base
 
   def evolve
       demarshall_population unless @population
-      Rails.logger.info("Evolving #{self.id}")
+      Rails.logger.info("Evolving #{self.id} generation #{self.current_generation}")
       unless @population.complete or self.current_generation>=self.max_generations
         Rails.logger.info("Import fitness #{self.id}")
         import_population_fitness
