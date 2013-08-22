@@ -66,7 +66,7 @@ class EvolutionEngineWorker < BaseDaemonWorker
         end
       end
     end
-    if @population and not @population.complete and @population.active and @population.in_process and @population.is_generation_testing_complete?
+    if @population and not @population.complete and @population.active and not @population.in_process and @population.is_generation_testing_complete?
       process_population_target
       Rails.logger.info("Complete: Poll_for_evolution_work")
     end
