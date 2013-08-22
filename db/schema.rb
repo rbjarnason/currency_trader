@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130821190055) do
+ActiveRecord::Schema.define(:version => 20130822000207) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.string   "resource_id",   :null => false
@@ -200,10 +200,12 @@ ActiveRecord::Schema.define(:version => 20130821190055) do
     t.float    "accumulated_fitness"
     t.boolean  "no_delete",                      :default => false
     t.boolean  "archived",                       :default => false
+    t.integer  "generation",                                        :null => false
   end
 
   add_index "trading_strategy_sets", ["accumulated_fitness"], :name => "index_trading_strategy_sets_on_accumulated_fitness"
   add_index "trading_strategy_sets", ["archived", "trading_strategy_population_id"], :name => "archived_trad_set_pop_id"
+  add_index "trading_strategy_sets", ["generation", "complete", "error_flag"], :name => "generation_trad_set_pop_id"
   add_index "trading_strategy_sets", ["no_delete", "trading_strategy_population_id"], :name => "nodel_trad_set_pop_id"
   add_index "trading_strategy_sets", ["trading_strategy_population_id"], :name => "index_trading_strategy_sets_on_trading_strategy_population_id"
   add_index "trading_strategy_sets", ["trading_time_frame_id"], :name => "index_trading_strategy_sets_on_trading_time_frame_id"

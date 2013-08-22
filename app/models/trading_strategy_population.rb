@@ -66,8 +66,8 @@ class TradingStrategyPopulation < ActiveRecord::Base
         Rails.logger.info("Evolve incremental #{self.id}")
         @population = @population.evolve_incremental_block(self.max_generations,Rails.logger)
         Rails.logger.info("Create trading strategy sets #{self.id}")
-        create_trading_strategy_sets(@population)
         self.current_generation = @population.generation
+        create_trading_strategy_sets(@population)
         Rails.logger.info("Generation: #{self.current_generation}")
       else
         Rails.logger.info("Reached max generations")
@@ -77,7 +77,7 @@ class TradingStrategyPopulation < ActiveRecord::Base
     end
 
     def is_generation_testing_complete?
-      self.trading_strategy_sets.where("complete = 1 AND error_flag = 0 AND archived = 0").count == self.population_size
+      self.trading_strategy_sets.where(["complete = 1 AND error_flag = 0 AND generation = ?",self.current_generation]).count == self.population_size
     end
 
     def deactivate_all_trading_strategy_sets_in_process
@@ -140,6 +140,7 @@ class TradingStrategyPopulation < ActiveRecord::Base
         trading_strategy_set.trading_strategy_population_id = self.id
         trading_strategy_set.trading_time_frame = TradingTimeFrame.last
         trading_strategy_set.active = false
+        trading_strategy_set.generation = self.current_generation
         trading_strategy_set.save
         Rails.logger.info("Setup strategies #{self.id}")
         trading_strategy_set.setup_trading_strategies
