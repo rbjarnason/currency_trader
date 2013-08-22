@@ -20,7 +20,7 @@ gem 'awesome_print'
 group :assets do
   gem 'sass-rails'
   gem 'coffee-rails'
-  gem 'turbo-sprockets-rails3'
+ # gem 'turbo-sprockets-rails3'
   # See https://github.com/sstephenson/execjs#readme for more supported runtimes
   gem 'therubyracer', :platform => :ruby
 
