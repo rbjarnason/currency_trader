@@ -48,6 +48,8 @@
       %th
         = "Date"
       %th
+        = "Signal"
+      %th
         = "Open Value"
       %th
         = "Units"
@@ -58,14 +60,21 @@
         %td{:color=>position.created_at+2.hours<DateTime.now ? "#000" : "#f00"}
           = position.created_at
         %td
+          = position.trading_signal.name
+        %td
           = position.value_open
         %td
           = position.units
         %td
-          - if true
-            = pos=(position.units*@operation.trading_strategy_population.quote_target.get_quote_value_by_time_stamp.ask).to_i-(position.value_open*position.units).to_i
-            - total_pl+=pos
+          - if position.trading_signal.name=="Short Open"
+            - pos=(position.value_open*position.units).to_i-(position.units*@operation.trading_strategy_population.quote_target.get_quote_value_by_time_stamp.ask).to_i
+          - elsif position.trading_signal.name=="Long Open"
+            - pos=(position.units*@operation.trading_strategy_population.quote_target.get_quote_value_by_time_stamp.ask).to_i-(position.value_open*position.units).to_i
+          - total_pl+=pos
+          = pos
     %tr
+      %td
+        = ""
       %td
         = ""
       %td
@@ -75,6 +84,8 @@
       %td
         =total_pl
     %tr
+      %td
+        = ""
       %td
         = ""
       %td

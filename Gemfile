@@ -19,12 +19,11 @@ gem 'awesome_print'
 # in production environments by default.
 group :assets do
   gem 'sass-rails'
+  gem 'uglifier'
   gem 'coffee-rails'
- # gem 'turbo-sprockets-rails3'
-  # See https://github.com/sstephenson/execjs#readme for more supported runtimes
-  gem 'therubyracer', :platform => :ruby
-
-  gem 'uglifier', '>= 1.0.3'
+  gem 'jquery-ui-rails','2.0.2'
+  gem 'execjs'
+  gem 'turbo-sprockets-rails3'
 end
 
 group :development do
@@ -32,6 +31,8 @@ group :development do
   gem 'rails_view_annotator', github: "hinrik/rails_view_annotator"
   gem 'binding_of_caller'
   gem 'better_errors'
+  gem 'therubyracer'
+
  # gem 'therubyracer'
 end
 
