@@ -40,6 +40,10 @@
       = "Min difference"
     %th
       = "Fitness"
+    %th
+      = "Float sum"
+    %th
+      = "Binary sum"
   - trading_strategies.each do |strategy|
     %tr
       %td
@@ -47,7 +51,7 @@
       %td
         = "#{strategy.trading_strategy_set.trading_time_frame.from_hour}:00 - #{strategy.trading_strategy_set.trading_time_frame.to_hour}:00"
       %td
-        = "Short"
+        = #strategy.long? ? "Long" : "Short"
       %td
         = (strategy.open_how_far_back_milliseconds/1000/60).to_i
       %td
@@ -80,3 +84,7 @@
         = strategy.float_parameters[13].abs.to_i
       %td
         = strategy.simulated_fitness==TradingStrategy::FAILED_FITNESS_VALUE ? "Excluded by #{strategy.simulated_fitness_failure_reason}" : strategy.simulated_fitness
+      %td
+        = number_with_precision strategy.float_parameters.sum, :precision => 3
+      %td
+        = strategy.binary_parameters.sum

@@ -3,7 +3,7 @@
 # The population class represents an array of genotypes.
 # Create an instance of this, and call one of the evolve functions to run the genetic algorithm.
 class Population < Array
-  DEFAULT_MAX_GENS = 100
+  DEFAULT_MAX_GENS = 1000
   DEFAULT_POP_SIZE = 20
   attr_reader :genotype_class
 

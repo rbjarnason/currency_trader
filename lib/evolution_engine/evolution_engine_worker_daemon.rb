@@ -33,16 +33,9 @@ class EvolutionEngineWorker < BaseDaemonWorker
       process_evolution_target
       Rails.logger.info("Complete: Processing strategy set")
     elsif not @trading_strategy_set
-      Rails.logger.info("Not strategy set!")
-      @population = TradingStrategyPopulation.where("active = 1 AND complete = 0 AND in_process = 1").order('rand()').first
-      if @population and @population.is_generation_testing_complete?
-        Rails.logger.info("Polling from evolution from poll strategy")
-        poll_for_evolution_work
-      else
-        sleep_amount = 2
-        Rails.logger.info("Sleeping for #{sleep_amount} seconds")
-        sleep sleep_amount
-      end
+      sleep_amount = 2
+      Rails.logger.info("Sleeping for #{sleep_amount} seconds")
+      sleep sleep_amount
     end
   end
 
@@ -73,8 +66,12 @@ class EvolutionEngineWorker < BaseDaemonWorker
   end
 
   def poll_for_work
-    poll_for_trading_strategy_set_work
-    poll_for_evolution_work if rand(7)==2
+    if @worker_config["only_populations"]
+      poll_for_evolution_work
+      sleep 1
+    else
+      poll_for_trading_strategy_set_work
+    end
   end
 end
 
