@@ -316,7 +316,7 @@ class TradingStrategy < ActiveRecord::Base
        Rails.logger.info("12 hour timeout")
        Rails.logger.info("Closing out with loss forced")
        open_timeout = true
-       @close_reason = "Forced with #{open_difference} after 8 hours but value is less at #{@current_quote_value} value open was #{value_open}"
+       @close_reason = "Forced with #{open_difference} after 12 hours but value is less at #{@current_quote_value} value open was #{value_open}"
     end
     open_timeout
   end

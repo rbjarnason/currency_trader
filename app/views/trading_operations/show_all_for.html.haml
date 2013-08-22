@@ -62,8 +62,9 @@
         %td
           = position.units
         %td
-          = pos=(position.value_open*position.units).to_i-(position.units*@operation.trading_strategy_population.quote_target.get_quote_value_by_time_stamp.ask).to_i
-          - total_pl+=pos
+          - if true
+            = pos=(position.units*@operation.trading_strategy_population.quote_target.get_quote_value_by_time_stamp.ask).to_i-(position.value_open*position.units).to_i
+            - total_pl+=pos
     %tr
       %td
         = ""
