@@ -9,7 +9,7 @@ class TradingOperationsWorker < BaseDaemonWorker
   def poll_for_trading_operations
     @operation = TradingOperation.where("active = 1 AND last_processing_time < NOW() - processing_time_interval").lock(true).order('rand()').first
     if @operation
-      @operation.last_processing_time = Time.now+1.hour
+      @operation.last_processing_time = Time.now
       @operation.save
       @set = @operation.trading_strategy_population.best_set
       #positions_left_to_open = @operation.trading_strategy_population.simulation_number_of_trading_strategies_per_set-@operation.trading_positions.where("open=1").count
@@ -111,7 +111,7 @@ class TradingOperationsWorker < BaseDaemonWorker
   def poll_for_work
     debug("poll_for_work")
     poll_for_trading_operations
-    50.times { poll_for_trading_signals }
+    5.times { poll_for_trading_signals }
     sleep 2
   end
 end
