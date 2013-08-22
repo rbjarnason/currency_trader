@@ -158,9 +158,9 @@ class TradingStrategy < ActiveRecord::Base
     if @current_quote
       @current_quote_value = @current_quote.ask
       Rails.logger.info("Evaluate #{long? ? "Long" : "Short"}")
-      if (@trading_position and @trading_position.signal=="Long Open") or (@current_position_units and @long_open)
+      if (@trading_position and @trading_position.trading_signal=="Long Open") or (@current_position_units and @long_open)
         trigger_long_close_signal if match_close_conditions or last_time_segment
-      elsif (@trading_position and @trading_position.signal=="Short Open") or (@current_position_units and @short_open)
+      elsif (@trading_position and @trading_position.trading_signal=="Short Open") or (@current_position_units and @short_open)
         trigger_short_close_signal if match_close_conditions or last_time_segment
       elsif long?
         trigger_long_open_signal if match_open_conditions
