@@ -55,7 +55,13 @@
     %h2
       = "Best Trading Strategy Set"
     = render :partial=>"set", :locals=>{:set=>TradingStrategySet.find(@population.best_trading_strategy_set_id)}
+    - if Rails.env.development?
+      - how_many = 5
+    - else
+      - how_many = 200
     %h2
       = "Strongest Trading Strategy Sets #{@population.trading_strategy_sets.order("accumulated_fitness desc").count}"
-    - @population.trading_strategy_sets.order("accumulated_fitness desc").limit(3).each do |set|
+    - TradingStrategySet.where(["complete = 1 AND accumulated_fitness IS NOT NULL AND accumulated_fitness !=0.0 AND trading_strategy_population_id = ?",
+                              @population.id]).limit(how_many).order("created_at desc").to_a.sort_by{|s| -s.accumulated_fitness}.each_with_index do |set,i|
+      - next if i>20
       = render :partial=>"set", :locals=>{:set=>set}
