@@ -1,6 +1,16 @@
 require 'csv'
 
 namespace :utils do
+  desc "Set positions amounts"
+  task :set_positions_amounts => :environment do
+    TradingPosition.all.each do |pos|
+      pos.bought_amount=pos.value_open*pos.units
+      if pos.value_close
+        pos.sold_amount=pos.value_close*pos.units
+      end
+    end
+  end
+
   desc "Import quote data and destroy old"
   task :import_quote_data_and_destroy_old => :environment do
     symbol = ENV['symbol']

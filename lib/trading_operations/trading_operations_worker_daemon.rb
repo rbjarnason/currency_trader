@@ -36,6 +36,7 @@ class TradingOperationsWorker < BaseDaemonWorker
     position = TradingPosition.new
     position.units = TradingStrategy::DEFAULT_POSITION_UNITS
     position.value_open = @signal.open_quote_value # GET THE REALTIME
+    position.bought_amount = position.value_open*position.units
     position.open = true
     position.trading_signal = @signal
     position.trading_operation = @operation
@@ -52,6 +53,7 @@ class TradingOperationsWorker < BaseDaemonWorker
     currently_at = @signal.close_quote_value * position.units # GET THIS REALTIME
     difference = shorted_at-currently_at
     position.value_close = @signal.close_quote_value
+    position.sold_amount = position.value_close*position.units
     position.profit_loss = difference
     position.open = false
     position.save
@@ -66,6 +68,7 @@ class TradingOperationsWorker < BaseDaemonWorker
     position = TradingPosition.new
     position.units = TradingStrategy::DEFAULT_POSITION_UNITS
     position.value_open = @signal.open_quote_value # GET THE REALTIME
+    position.bought_amount = position.value_open*position.units
     position.open = true
     position.trading_signal = @signal
     position.trading_operation_id = @operation.id
@@ -82,6 +85,7 @@ class TradingOperationsWorker < BaseDaemonWorker
     currently_at = @signal.close_quote_value * position.units # GET THIS REALTIME
     difference = currently_at-bought_at
     position.value_close = @signal.close_quote_value
+    position.sold_amount = position.value_close*position.units
     position.profit_loss = difference
     position.open = false
     position.save

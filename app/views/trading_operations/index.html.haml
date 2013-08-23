@@ -66,10 +66,10 @@
           - else
             = 0.0
         %td
-          = number_to_percentage((operation.trading_positions.sum("profit_loss")/operation.initial_capital_amount)*100.0, :precision => 1)
+          = number_to_percentage((operation.trading_positions.sum("profit_loss")/50000)*100.0, :precision => 1)
         %td
-          = number_to_percentage(((operation.trading_positions.sum("profit_loss")/operation.initial_capital_amount)*100.0)/(operation.created_at.to_date..Date.today).to_a.length, :precision => 1)
+          = number_to_percentage(((operation.trading_positions.sum("profit_loss")/50000)*100.0)/(operation.created_at.to_date..Date.today).to_a.length, :precision => 1)
         %td
-          = number_to_percentage((((operation.trading_positions.sum("profit_loss")/operation.initial_capital_amount)*100.0)/(operation.created_at.to_date..Date.today).to_a.length)*20, :precision => 0)
+          = number_to_percentage((((operation.trading_positions.sum("profit_loss")/50000)*100.0)/(operation.created_at.to_date..Date.today).to_a.length)*20, :precision => 0)
         %td
-          = number_to_percentage((((operation.trading_positions.sum("profit_loss")/operation.initial_capital_amount)*100.0)/(operation.created_at.to_date..Date.today).to_a.length)*20*12, :precision => 0)
+          = number_to_percentage((((operation.trading_positions.sum("profit_loss")/50000)*100.0)/(operation.created_at.to_date..Date.today).to_a.length)*20*12, :precision => 0)
