@@ -66,10 +66,13 @@
           - else
             = 0.0
         %td
-          = number_to_percentage((operation.trading_positions.sum("profit_loss")/50000)*100.0, :precision => 1)
+          = number_to_percentage((operation.trading_positions.sum("profit_loss")/operation.trading_positions.sum("bought_amount"))*100.0, :precision => 3)
         %td
-          = number_to_percentage(((operation.trading_positions.sum("profit_loss")/50000)*100.0)/(operation.created_at.to_date..Date.today).to_a.length, :precision => 1)
+          = number_to_percentage(((operation.trading_positions.sum("profit_loss")/operation.trading_positions.sum("bought_amount"))*100.0)/(operation.created_at.to_date..Date.today).to_a.length, :precision => 3)
         %td
-          = number_to_percentage((((operation.trading_positions.sum("profit_loss")/50000)*100.0)/(operation.created_at.to_date..Date.today).to_a.length)*20, :precision => 0)
+          = number_to_percentage((((operation.trading_positions.sum("profit_loss")/operation.trading_positions.sum("bought_amount"))*100.0)/(operation.created_at.to_date..Date.today).to_a.length)*20, :precision => 2)
         %td
-          = number_to_percentage((((operation.trading_positions.sum("profit_loss")/50000)*100.0)/(operation.created_at.to_date..Date.today).to_a.length)*20*12, :precision => 0)
+          = number_to_percentage((((operation.trading_positions.sum("profit_loss")/operation.trading_positions.sum("bought_amount"))*100.0)/(operation.created_at.to_date..Date.today).to_a.length)*20*12, :precision => 1)
+
+%p{:style=>"padding-left:25px;"}
+  = link_to "Show Trading Strategy Populations", :controller=>"trading_strategy_populations"

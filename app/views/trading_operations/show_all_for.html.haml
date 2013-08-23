@@ -3,6 +3,8 @@
     = "Currency Trader - Version 0.3"
   %hr
   %br
+  %p
+    = link_to "Back", :controller=>:trading_operations
   %h2
     = "Trading Operation #{@operation.id}"
   %table
@@ -33,13 +35,13 @@
       %td
         = @operation.trading_positions.sum("profit_loss")
       %td
-        = number_to_percentage((@operation.trading_positions.sum("profit_loss")/@operation.initial_capital_amount)*100.0, :precision => 1)
+        = number_to_percentage((@operation.trading_positions.sum("profit_loss")/@operation.trading_positions.sum("bought_amount"))*100.0, :precision => 3)
       %td
-        = number_to_percentage(((@operation.trading_positions.sum("profit_loss")/@operation.initial_capital_amount)*100.0)/(@operation.created_at.to_date..Date.today).to_a.length, :precision => 1)
+        = number_to_percentage(((@operation.trading_positions.sum("profit_loss")/@operation.trading_positions.sum("bought_amount"))*100.0)/(@operation.created_at.to_date..Date.today).to_a.length, :precision => 3)
       %td
-        = number_to_percentage((((@operation.trading_positions.sum("profit_loss")/@operation.initial_capital_amount)*100.0)/(@operation.created_at.to_date..Date.today).to_a.length)*20, :precision => 0)
+        = number_to_percentage((((@operation.trading_positions.sum("profit_loss")/@operation.trading_positions.sum("bought_amount"))*100.0)/(@operation.created_at.to_date..Date.today).to_a.length)*20, :precision => 2)
       %td
-        = number_to_percentage((((@operation.trading_positions.sum("profit_loss")/@operation.initial_capital_amount)*100.0)/(@operation.created_at.to_date..Date.today).to_a.length)*20*12, :precision => 0)
+        = number_to_percentage((((@operation.trading_positions.sum("profit_loss")/@operation.trading_positions.sum("bought_amount"))*100.0)/(@operation.created_at.to_date..Date.today).to_a.length)*20*12, :precision => 1)
   %h2
     = "Open Positions"
   - total_pl = 0
@@ -118,7 +120,7 @@
       ROIC per month (20 days)
     %th
       ROIC per year (20*12 days)
-    - @operation.trading_positions.select("updated_at, SUM(profit_loss) as PANDL").where("open=0").group("DAY(updated_at),MONTH(updated_at)").each do |position|
+    - @operation.trading_positions.select("updated_at, bought_amount, SUM(profit_loss) as PANDL, SUM(bought_amount) as BAMOUNT").where("open=0").group("DAY(updated_at),MONTH(updated_at)").each do |position|
       %tr
         %td
           - day = position.updated_at.to_date
@@ -127,11 +129,11 @@
         %td
           = pandl
         %td
-          = number_to_percentage((pandl/@operation.initial_capital_amount)*100.0, :precision => 1)
+          = number_to_percentage((pandl/position.BAMOUNT)*100.0, :precision => 3)
         %td
-          = number_to_percentage((((pandl/@operation.initial_capital_amount)*100.0))*20, :precision => 0)
+          = number_to_percentage((((pandl/position.BAMOUNT)*100.0))*20, :precision => 2)
         %td
-          = number_to_percentage((((pandl/@operation.initial_capital_amount)*100.0))*20*12, :precision => 0)
+          = number_to_percentage((((pandl/position.BAMOUNT)*100.0))*20*12, :precision => 1)
 
   %h2
     Open Magnitude

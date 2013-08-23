@@ -59,6 +59,6 @@
           %br/
           = link_to 'Activate', "/trading_strategy_populations/activate/#{trading_strategy_population.id}"
         %br/
-        = link_to 'Destroy', trading_strategy_population, confirm: 'Are you sure?', method: :delete
-%br/
-= link_to 'New Trading strategy population', new_trading_strategy_population_path
+        = link_to 'Destroy', trading_strategy_population, :confirm=>'Are you sure?', :method=> :delete
+%p{:style=>"padding-left:25px;"}
+  = link_to "Show Trading Operations", :controller=>"trading_operations"
