@@ -8,6 +8,7 @@ namespace :utils do
       if pos.value_close
         pos.sold_amount=pos.value_close*pos.units
       end
+      pos.save
     end
   end
 
