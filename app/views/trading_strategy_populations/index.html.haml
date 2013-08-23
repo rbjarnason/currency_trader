@@ -1,29 +1,28 @@
 %h1 Listing trading_strategy_populations
 %table
+  %th
+    = "Population size"
+  %th
+    = "Units to short/long on each trade"
+  %th
+    = "Maximum minutes to look back for change"
+  %th
+    = "Current generation"
+  %th
+    = "Number of trading strategy sets"
+  %th
+    = "From / To"
+  %th
+    = "Min overall trading signals per strategy"
+  %th
+    = "Max overall trading signals per strategy"
+  %th
+    = "Max daily trading signals per strategy"
+  %th
+    = "Release position EOD"
+  %th
+    = "Action"
   - @trading_strategy_populations.each do |trading_strategy_population|
-    %tr
-      %th
-        = "Population size"
-      %th
-        = "Units to short/long on each trade"
-      %th
-        = "Maximum minutes to look back for change"
-      %th
-        = "Current generation"
-      %th
-        = "Number of trading strategy sets"
-      %th
-        = "From / To"
-      %th
-        = "Min overall trading signals per strategy"
-      %th
-        = "Max overall trading signals per strategy"
-      %th
-        = "Max daily trading signals per strategy"
-      %th
-        = "Release position EOD"
-      %th
-        = "Action"
     %tr
       %td
         = trading_strategy_population.population_size
