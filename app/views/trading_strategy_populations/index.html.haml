@@ -24,6 +24,10 @@
     = "Action"
   - @trading_strategy_populations.each do |trading_strategy_population|
     %tr
+      %td{:colspan=>11}
+        %h2
+          = trading_strategy_population.description
+    %tr
       %td
         = trading_strategy_population.population_size
       %td
@@ -59,5 +63,8 @@
           = link_to 'Activate', "/trading_strategy_populations/activate/#{trading_strategy_population.id}"
         %br/
         = link_to 'Destroy', trading_strategy_population, :confirm=>'Are you sure?', :method=> :delete
+    %tr
+      %td{:colspan=>12}
+        = render :partial=>"set", :locals=>{:set=>TradingStrategySet.find(trading_strategy_population.best_trading_strategy_set_id)}
 %p{:style=>"padding-left:25px;"}
   = link_to "Show Trading Operations", :controller=>"trading_operations"
