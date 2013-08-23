@@ -22,7 +22,6 @@ group :assets do
   gem 'sass-rails'
   gem 'uglifier'
   gem 'coffee-rails'
-  gem 'jquery-ui-rails','2.0.2'
   gem 'execjs'
   gem 'turbo-sprockets-rails3'
 end
