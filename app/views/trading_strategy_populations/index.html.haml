@@ -65,6 +65,6 @@
         = link_to 'Destroy', trading_strategy_population, :confirm=>'Are you sure?', :method=> :delete
     %tr
       %td{:colspan=>12}
-        = render :partial=>"set", :locals=>{:set=>TradingStrategySet.find(trading_strategy_population.best_trading_strategy_set_id)}
+        = render :partial=>"set", :locals=>{:set=>TradingStrategySet.find(trading_strategy_population.best_trading_strategy_set_id)} if trading_strategy_population.best_trading_strategy_set_id
 %p{:style=>"padding-left:25px;"}
   = link_to "Show Trading Operations", :controller=>"trading_operations"
