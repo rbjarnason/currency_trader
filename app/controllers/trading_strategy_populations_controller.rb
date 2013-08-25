@@ -4,7 +4,7 @@ class TradingStrategyPopulationsController < ApplicationController
   end
 
   def index
-    @trading_strategy_populations = TradingStrategyPopulation.all
+    @trading_strategy_populations = TradingStrategyPopulation.order("active desc").all
   end
 
   def deactivate
