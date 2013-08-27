@@ -242,7 +242,7 @@ class TradingStrategy < ActiveRecord::Base
       log_if("Checking trading position #{@trading_position.id} #{@trading_position.created_at+2.hours} #{DateTime.now} #{@current_quote_value}<#{@trading_position.value_open}")
       currently_at = @current_quote_value * @trading_position.units
       opened_at = @trading_position.value_open * @trading_position.units
-      if @trading_position.name=="Long Open"
+      if @trading_position.trading_signal.name=="Long Open"
         @long_open = true
         @short_open = nil
       else
