@@ -145,11 +145,11 @@ namespace :evo do
     pop.max_generations = 200000000
     pop.population_size = 720
     pop.simulation_number_of_trading_strategies_per_set = 3
-    pop.simulation_days_back = 8
+    pop.simulation_days_back = 60
     pop.simulation_min_overall_trading_signals = 2*pop.simulation_days_back
-    pop.simulation_max_overall_trading_signals = 22*pop.simulation_days_back
+    pop.simulation_max_overall_trading_signals = 14*pop.simulation_days_back
     pop.simulation_max_daily_trading_signals = 14
-    pop.simulation_max_minutes_back = 59
+    pop.simulation_max_minutes_back = 42
     pop.description = "Rolling 60 days back"
     pop.stop_loss_enabled = true
     pop.save
