@@ -199,6 +199,8 @@ class TradingStrategy < ActiveRecord::Base
           trigger_short_close_signal
           @short_open = nil
         end
+      elsif @trading_position
+        Rails.logger.error("@trading_position strange #{@trading_position} #{@trading_position.trading_signal}")
       elsif long?
         trigger_long_open_signal if match_open_conditions
       elsif not long?
