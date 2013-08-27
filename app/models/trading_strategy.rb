@@ -124,7 +124,7 @@ class TradingStrategy < ActiveRecord::Base
         false
       end
     else
-      Rails.logger.error("Can't find quote_value for (#{@current_date_time}-(#{@days_back_long_short}).days")
+      Rails.logger.error("Can't find quote_value for (#{@current_date_time}-(#{@days_back_long_short}).days #{self.float_parameters}")
     end
   end
 
