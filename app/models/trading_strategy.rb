@@ -115,6 +115,7 @@ class TradingStrategy < ActiveRecord::Base
 
   def long?
     quote_value = @quote_target.get_quote_value_by_time_stamp(@current_date_time-(@days_back_long_short).days)
+    quote_value.ask
     if quote_value
       value_then = quote_value.ask
       if value_then<=@current_quote_value
