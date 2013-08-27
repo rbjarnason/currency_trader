@@ -8,11 +8,11 @@ class TradingStrategySet < ActiveRecord::Base
   belongs_to :trading_time_frame
 
   def no_delete!
-    self.no_delete = true
-    self.save
-    self.trading_strategies.each do |strategy|
-      strategy.no_delete!
-    end
+    #self.no_delete = true
+    #self.save
+    #self.trading_strategies.each do |strategy|
+    #  strategy.no_delete!
+    #end
   end
 
   def population

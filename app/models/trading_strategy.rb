@@ -55,8 +55,8 @@ class TradingStrategy < ActiveRecord::Base
   end
 
   def no_delete!
-    self.no_delete = true
-    self.save
+    #self.no_delete = true
+    #self.save
   end
 
   def marshall_simulated_trading_signals
@@ -596,7 +596,7 @@ class TradingStrategy < ActiveRecord::Base
       else
         self.simulated_fitness  = @current_capital_position-@start_capital_position
       end
-      log_if("Fitness took #{Time.now.to_i-time_start_fitness} for #{self.id}")
+      Rails.logger.info("Fitness #{self.simulated_fitness} took #{Time.now.to_i-time_start_fitness} for #{self.id} (#{@daily_signals}) (#{@simulated_trading_signals_array.count})")
     end
     self.save
     self.simulated_fitness
