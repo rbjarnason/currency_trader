@@ -114,8 +114,8 @@ class TradingStrategy < ActiveRecord::Base
   end
 
   def long?
+    setup_parameters
     quote_value = @quote_target.get_quote_value_by_time_stamp(@current_date_time-(@days_back_long_short).days)
-    quote_value.ask
     if quote_value
       value_then = quote_value.ask
       if value_then<=@current_quote_value
@@ -199,8 +199,6 @@ class TradingStrategy < ActiveRecord::Base
           trigger_short_close_signal
           @short_open = nil
         end
-      elsif @trading_position
-        Rails.logger.error("@trading_position strange #{@trading_position} #{@trading_position.trading_signal}")
       elsif long?
         trigger_long_open_signal if match_open_conditions
       elsif not long?
