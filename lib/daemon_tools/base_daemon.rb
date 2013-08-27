@@ -156,7 +156,7 @@ class BaseDaemonWorker
               error(ex.backtrace)
             end
           end
-          info("Sleeping for #{SLEEP_WAITING_BETWEEN_RUNS} sec")
+          #info("Sleeping for #{SLEEP_WAITING_BETWEEN_RUNS} sec")
           sleep(SLEEP_WAITING_BETWEEN_RUNS)
         else
           info("No more space on disk - sleeping for #{SLEEP_WAITING_FOR_FREE_SPACE_TIME} sec")
