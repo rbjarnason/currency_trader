@@ -35,7 +35,7 @@ class TradingStrategy < ActiveRecord::Base
       self.last_stop_loss_until = nil
       self.save
     end
-    if self.last_stop_loss_until and self.last_stop_loss_until.to_date!=Date.today
+    if self.last_stop_loss_until
       p_and_l = TradingPosition.where(["created_at > ?",self.last_stop_loss_until]).sum("profit_loss")
     else
       p_and_l = TradingPosition.where(["DATE(created_at) = ?",Date.today]).sum("profit_loss")
