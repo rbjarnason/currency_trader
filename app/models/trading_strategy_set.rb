@@ -1,6 +1,6 @@
 class TradingStrategySet < ActiveRecord::Base
   MAX_NUMBER_OF_TRADING_STRATEGIES = 3
-  FORCE_RELEASE_POSITION = true
+  FORCE_RELEASE_POSITION = false
   PUNISHMENT_FOR_SAME_MINUTES_IN_STRATEGIES = 0.7
 
   has_many :trading_strategies, :dependent => :destroy

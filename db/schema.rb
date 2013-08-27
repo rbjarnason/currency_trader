@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130823095834) do
+ActiveRecord::Schema.define(:version => 20130827012741) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.string   "resource_id",   :null => false
@@ -151,6 +151,8 @@ ActiveRecord::Schema.define(:version => 20130823095834) do
     t.integer  "close_how_far_back_milliseconds",     :default => 5
     t.integer  "trading_strategy_population_id"
     t.boolean  "no_delete",                           :default => false
+    t.datetime "current_stop_loss_until"
+    t.datetime "last_stop_loss_until"
   end
 
   add_index "trading_strategies", ["no_delete", "trading_strategy_population_id"], :name => "nodel_trad_pop_id"
@@ -180,6 +182,7 @@ ActiveRecord::Schema.define(:version => 20130823095834) do
     t.integer  "simulation_max_minutes_back"
     t.integer  "simulation_max_overall_trading_signals"
     t.text     "description"
+    t.boolean  "stop_loss_enabled",                                                     :default => false
   end
 
   add_index "trading_strategy_populations", ["quote_target_id"], :name => "index_trading_strategy_populations_on_quote_target_id"
