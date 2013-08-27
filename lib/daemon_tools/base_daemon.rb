@@ -139,8 +139,8 @@ class BaseDaemonWorker
         email_progress_report(freeGB) unless ENV['RAILS_ENV']=="development"
         @last_report_time = Time.now.to_i
       end
-      info("Free space in GB #{freeGB} - Run count: #{@counter}")
-      info("Load Average #{load_avg[0]}, #{load_avg[1]}, #{load_avg[2]}")      
+      #info("Free space in GB #{freeGB} - Run count: #{@counter}")
+      #info("Load Average #{load_avg[0]}, #{load_avg[1]}, #{load_avg[2]}")
       if true #load_avg[0] < @worker_config["max_load_average"]
         if freeGB > MIN_FREE_SPACE_GB
           if 1==2 and ENV['RAILS_ENV'] == 'development' && @counter > MASTER_TEST_MAX_COUNTER
