@@ -183,7 +183,6 @@ class TradingStrategy < ActiveRecord::Base
     end
     if @current_quote
       @current_quote_value = @current_quote.ask
-      log_if("Evaluate #{long? ? "Long" : "Short"}")
       if (@trading_position and @trading_position.trading_signal.name=="Long Open") or (@current_position_units and @long_open)
         if match_close_conditions or last_time_segment
           trigger_long_close_signal
