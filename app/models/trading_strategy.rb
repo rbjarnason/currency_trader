@@ -25,10 +25,34 @@ class TradingStrategy < ActiveRecord::Base
   before_save :marshall_simulated_trading_signals
   after_initialize :demarshall_simulated_trading_signals
 
-  attr_reader :strategy_buy_short, :open_magnitude_signal_trigger, :close_magnitude_signal_trigger, :simulated_trading_signals_array
+  attr_reader :strategy_buy_short, :open_magnitude_signal_trigger, :close_magnitude_signal_trigger, :simulated_trading_signals_array, :stop_loss_pause_minutes, :stop_loss_value
 
   after_initialize :setup_parameters
   after_save :setup_parameters
+
+  def check_stop_loss?
+    if self.last_stop_loss_until and self.last_stop_loss_until.to_date!=Date.today
+      self.last_stop_loss_until = nil
+      self.save
+    end
+    if self.last_stop_loss_until and self.last_stop_loss_until.to_date!=Date.today
+      p_and_l = TradingPosition.where(["created_at > ?",self.last_stop_loss_until]).sum("profit_loss")
+    else
+      p_and_l = TradingPosition.where(["DATE(created_at) = ?",Date.today]).sum("profit_loss")
+    end
+    if p_and_l<-(@stop_loss_value)
+      self.current_stop_loss_until = DateTime.now+(@stop_loss_pause_minutes).minutes
+      self.save
+      signal = TradingSignal.new
+      signal.name = "Stop Loss Open"
+      signal.trading_operation_id = operation.id
+      signal.open_quote_value = @current_quote_value
+      signal.trading_strategy_id = self.id
+      signal.reason = "Stop Loss Open after loss of #{@stop_loss_value} for #{@stop_loss_pause_minutes} minutes"
+      signal.save
+      log_if("Opened Stop Loss Open signal #{signal.inspect}")
+    end
+  end
 
   def no_delete!
     self.no_delete = true
@@ -84,6 +108,8 @@ class TradingStrategy < ActiveRecord::Base
       @stop_08_value  = self.float_parameters[11].abs.to_i
       @days_back_long_short = self.float_parameters[12].abs.to_i/10
       @min_difference_for_close = self.float_parameters[13].abs.to_i
+      @stop_loss_value  = self.float_parameters[14].abs.to_i
+      @stop_loss_pause_minutes  = self.float_parameters[15].abs.to_i
     end
   end
 
@@ -410,6 +436,7 @@ class TradingStrategy < ActiveRecord::Base
       @current_position_units = nil
       self.number_of_evolution_trading_signals+=1
       @daily_signals+=1
+      @daily_p_and_l+=difference
     else
       self.no_delete!
       signal = TradingSignal.new
@@ -436,6 +463,7 @@ class TradingStrategy < ActiveRecord::Base
       @current_position_units = nil
       self.number_of_evolution_trading_signals+=1
       @daily_signals+=1
+      @daily_p_and_l+=difference
     else
       self.no_delete!
       signal = TradingSignal.new
@@ -508,17 +536,31 @@ class TradingStrategy < ActiveRecord::Base
       @to_hour = trading_strategy_set.trading_time_frame.to_hour
       @daily_signals = number_of_evolution_trading_signals = 0
       last_minute = false
+      @stop_loss_paused_until = nil
       (self.simulated_start_date.to_date..self.simulated_end_date.to_date).each do |day|
         (@from_hour..@to_hour).each do |hour|
           (0..59).step(5).each do |minute|
+            current_simulation_time = DateTime.parse("#{day} #{hour}:#{minute}:00")
             last_minute = (hour==@to_hour and minute==55 and TradingStrategySet::FORCE_RELEASE_POSITION)
-            evaluate(@quote_target,DateTime.parse("#{day} #{hour}:#{minute}:00"), last_minute)
+            if population.stop_loss_enabled and @stop_loss_paused_until and @stop_loss_paused_until>current_simulation_time
+              next
+            elsif population.stop_loss_enabled and @stop_loss_paused_until
+              @simulated_trading_signals_array<<{:name=>"Stop Loss Close", :current_date_time=>@current_date_time, :description=>"Stop Loss Closed after #{@stop_loss_pause_minutes} minutes"}
+              @stop_loss_paused_until = nil
+              @daily_p_and_l = 0.0
+            end
+            evaluate(@quote_target,current_simulation_time,last_minute)
+            if population.stop_loss_enabled and @daily_p_and_l<-(@stop_loss_value) and not @current_position_units
+              @stop_loss_paused_until = current_simulation_time+(@stop_loss_pause_minutes).minutes
+              @simulated_trading_signals_array<<{:name=>"Stop Loss Open", :current_date_time=>@current_date_time, :description=>"Stop Loss Open after loss of #{@stop_loss_value} for #{@stop_loss_pause_minutes} minutes"}
+            end
             break if last_minute or @daily_signals>population.simulation_max_daily_trading_signals
           end
           break if @daily_signals>population.simulation_max_daily_trading_signals
         end
         break if @daily_signals>population.simulation_max_daily_trading_signals
-        @daily_signals=0
+        @daily_signals = 0
+        @daily_p_and_l = 0.0
       end
       log_if("Number of trading signals: #{self.number_of_evolution_trading_signals}")
       if self.number_of_evolution_trading_signals<population.simulation_min_overall_trading_signals

@@ -16,8 +16,25 @@ class TradingOperationsWorker < BaseDaemonWorker
       if @set and not @set.trading_strategies.empty?
         @set.trading_strategies.each do |strategy|
           unless @operation.trading_positions.where(["open=1 AND trading_strategy_id=?",strategy.id]).first
-            info("DateTime-1.hour!!! About to evaluate #{strategy.id} #{@set.id} #{@set.population.quote_target.symbol}")
-            strategy.evaluate(@set.population.quote_target,DateTime.now,false,@operation.id)
+            if @operation.stop_loss_enabled and strategy.current_stop_loss_until and strategy.current_stop_loss_until>DateTime.now
+              # DO NOTHING
+            elsif @operation.stop_loss_enabled and strategy.current_stop_loss_until
+              strategy.last_stop_loss_until = strategy.current_stop_loss_until
+              strategy.current_stop_loss_until = nil
+              strategy.save
+              signal = TradingSignal.new
+              signal.name = "Stop Loss Close"
+              signal.trading_operation_id = @operation.id
+              signal.open_quote_value = nil
+              signal.trading_strategy_id = strategy.id
+              signal.reason = "Stop Loss Close after loss of #{strategy.stop_loss_value} for #{strategy.stop_loss_pause_minutes} minutes"
+              signal.save
+            elsif @operation.stop_loss_enabled and strategy.check_stop_loss?
+              # DO NOTHING
+            else
+              info("Evaluating #{strategy.id} #{@set.id} #{@set.population.quote_target.symbol}")
+              strategy.evaluate(@set.population.quote_target,DateTime.now,false,@operation.id)
+            end
           end
         end
       end

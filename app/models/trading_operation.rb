@@ -36,11 +36,6 @@ class TradingOperation < ActiveRecord::Base
                                                   :description=>"Trading Time Frame Stop"})
     trading_signals.where(["created_at>=? AND created_at<=?",from_date.to_formatted_s(:db),to_date.to_formatted_s(:db)]).all.each do |signal|
       if signal.name=="Short Open" or signal.name=="Long Open"
-#        events << simulated_trading_signal_to_amchart({:name=>"#{signal.name}",
-#                                                       :type=>"arrowUp",
-#                                                       :current_date_time=>signal.created_at.to_datetime,
-#                                                       :background_color=>"#cccccc",
-#                                                       :description=>"#{signal.open_quote_value} #{signal.reason}"})
         events << simulated_trading_signal_to_amchart({:name=>"O",
                                                        :type=>"sign",
                                                        :current_date_time=>signal.created_at.to_datetime,
@@ -72,6 +67,21 @@ class TradingOperation < ActiveRecord::Base
                                                        :background_color=> signal.profit_loss>=0.0 ? "#44ff33" : "#ff3366",
                                                        :description=>"P/L #{signal.profit_loss} #{signal.reason}"})
       end
+      if signal.name=="Stop Loss Open"
+        events << simulated_trading_signal_to_amchart({:name=>"SL",
+                                                       :type=>"arrowUp",
+                                                       :current_date_time=>signal.created_at.to_datetime,
+                                                       :background_color=>"#caccff",
+                                                       :description=>"#{signal.open_quote_value} #{signal.reason}"})
+      end
+      if signal.name=="Stop Loss Close"
+        events << simulated_trading_signal_to_amchart({:name=>"SL",
+                                                       :type=>"arrowDown",
+                                                       :current_date_time=>signal.created_at.to_datetime,
+                                                       :background_color=>"#ffccac",
+                                                       :description=>"#{signal.open_quote_value} #{signal.reason}"})
+      end
+
     end
     events.join(",")
   end
