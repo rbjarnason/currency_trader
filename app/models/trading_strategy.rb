@@ -185,9 +185,15 @@ class TradingStrategy < ActiveRecord::Base
       @current_quote_value = @current_quote.ask
       log_if("Evaluate #{long? ? "Long" : "Short"}")
       if (@trading_position and @trading_position.trading_signal.name=="Long Open") or (@current_position_units and @long_open)
-        trigger_long_close_signal if match_close_conditions or last_time_segment
+        if match_close_conditions or last_time_segment
+          trigger_long_close_signal
+          @long_open = nil
+        end
       elsif (@trading_position and @trading_position.trading_signal.name=="Short Open") or (@current_position_units and @short_open)
-        trigger_short_close_signal if match_close_conditions or last_time_segment
+        if match_close_conditions or last_time_segment
+          trigger_short_close_signal
+          @short_open = nil
+        end
       elsif long?
         trigger_long_open_signal if match_open_conditions
       elsif not long?
@@ -542,9 +548,9 @@ class TradingStrategy < ActiveRecord::Base
         (@from_hour..@to_hour).each do |hour|
           (0..59).step(5).each do |minute|
             @current_simulation_time = DateTime.parse("#{day} #{hour}:#{minute}:00")
-            if population.stop_loss_enabled and @stop_loss_paused_until and @stop_loss_paused_until>@current_simulation_time
+            if population.stop_loss_enabled and @stop_loss_paused_until and @stop_loss_paused_until < @current_simulation_time and not @current_position_units
               next
-            elsif population.stop_loss_enabled and @stop_loss_paused_until
+            elsif population.stop_loss_enabled and @stop_loss_paused_until and not @current_position_units
               @simulated_trading_signals_array<<{:name=>"Stop Loss Close", :current_date_time=>@current_date_time, :description=>"Stop Loss Closed after #{@stop_loss_pause_minutes} minutes"}
               @stop_loss_paused_until = nil
               @daily_p_and_l = 0.0
