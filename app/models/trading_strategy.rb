@@ -242,6 +242,13 @@ class TradingStrategy < ActiveRecord::Base
       log_if("Checking trading position #{@trading_position.id} #{@trading_position.created_at+2.hours} #{DateTime.now} #{@current_quote_value}<#{@trading_position.value_open}")
       currently_at = @current_quote_value * @trading_position.units
       opened_at = @trading_position.value_open * @trading_position.units
+      if @trading_position.name=="Long Open"
+        @long_open = true
+        @short_open = nil
+      else
+        @short_open = true
+        @long_open = nil
+      end
       open_timeout = match_stops(@trading_position.value_open,@trading_position.created_at,DateTime.now,opened_at,currently_at)
     elsif @last_opened_position_value
       currently_at = @current_quote_value * DEFAULT_POSITION_UNITS
@@ -253,14 +260,14 @@ class TradingStrategy < ActiveRecord::Base
       return true
     elsif quote_value_change==0.0
       return false
-    elsif quote_value_change>0.0 and not long?
+    elsif quote_value_change>0.0 and @short_open
       log_if("close_conditions: Has gone up")
       return false
-    elsif quote_value_change<0.0 and long?
+    elsif quote_value_change<0.0 and @long_open
       log_if("close_conditions: Has gone down")
       return false
     else
-      if @trading_position and ((not long? and @current_quote_value<@trading_position.value_open) or (long? and @current_quote_value>@trading_position.value_open))
+      if @trading_position and ((not @long_open and @current_quote_value<@trading_position.value_open) or (@long_open and @current_quote_value>@trading_position.value_open))
         if open_difference>@min_difference_for_close
           log_if(@close_reason = "Testing close: change #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@close_magnitude_signal_trigger.abs)}")
           magnitude = quote_value_change.abs/@current_quote_value
@@ -269,7 +276,7 @@ class TradingStrategy < ActiveRecord::Base
         end
       elsif @trading_position
         return false
-      elsif @last_opened_position_value and ((not long? and @current_quote_value<@last_opened_position_value) or (long? and @current_quote_value>@last_opened_position_value))
+      elsif @last_opened_position_value and ((not @long_open and @current_quote_value<@last_opened_position_value) or (@long_open and @current_quote_value>@last_opened_position_value))
         if open_difference>@min_difference_for_close
           log_if(@close_reason = "Testing close: change #{with_precision(quote_value_change.abs)} magnitude: #{with_precision(quote_value_change.abs/@current_quote_value)} > test magnitude: #{with_precision(@close_magnitude_signal_trigger.abs)}")
           magnitude = quote_value_change.abs/@current_quote_value
@@ -288,7 +295,7 @@ class TradingStrategy < ActiveRecord::Base
   def match_stops(value_open,time_open,current_time,opened_at,currently_at)
     open_timeout = false
     log_if("Checking timeout #{(time_open+2.hour)}<#{current_time}")
-    if long?
+    if @long_open
       @profit = @current_quote_value>value_open
       open_difference = currently_at-opened_at
     else
@@ -387,6 +394,7 @@ class TradingStrategy < ActiveRecord::Base
       signal.trading_strategy_id = self.id
       signal.reason = @open_reason
       signal.save
+      @short_open = true
       log_if("Opened signal #{signal.inspect}")
     end
   end
@@ -426,6 +434,7 @@ class TradingStrategy < ActiveRecord::Base
       signal.reason = @open_reason
       signal.save
       log_if("Opened signal #{signal.inspect}")
+      @long_open = true
     end
   end
 
@@ -548,7 +557,7 @@ class TradingStrategy < ActiveRecord::Base
         (@from_hour..@to_hour).each do |hour|
           (0..59).step(5).each do |minute|
             @current_simulation_time = DateTime.parse("#{day} #{hour}:#{minute}:00")
-            if population.stop_loss_enabled and @stop_loss_paused_until and @stop_loss_paused_until < @current_simulation_time and not @current_position_units
+            if population.stop_loss_enabled and @stop_loss_paused_until and @stop_loss_paused_until > @current_simulation_time and not @current_position_units
               next
             elsif population.stop_loss_enabled and @stop_loss_paused_until and not @current_position_units
               @simulated_trading_signals_array<<{:name=>"Stop Loss Close", :current_date_time=>@current_date_time, :description=>"Stop Loss Closed after #{@stop_loss_pause_minutes} minutes"}
