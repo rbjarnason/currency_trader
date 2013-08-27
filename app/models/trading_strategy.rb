@@ -114,11 +114,16 @@ class TradingStrategy < ActiveRecord::Base
   end
 
   def long?
-    value_then = @quote_target.get_quote_value_by_time_stamp(@current_date_time-(@days_back_long_short).days).ask
-    if value_then<=@current_quote_value
-      true
+    quote_value = @quote_target.get_quote_value_by_time_stamp(@current_date_time-(@days_back_long_short).days)
+    if quote_value
+      value_then = quote_value.ask
+      if value_then<=@current_quote_value
+        true
+      else
+        false
+      end
     else
-      false
+      Rails.logger.error("Can't find quote_value for (#{@current_date_time}-(#{@days_back_long_short}).days")
     end
   end
 
