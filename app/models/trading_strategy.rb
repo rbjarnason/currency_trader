@@ -535,6 +535,7 @@ class TradingStrategy < ActiveRecord::Base
       @from_hour = trading_strategy_set.trading_time_frame.from_hour
       @to_hour = trading_strategy_set.trading_time_frame.to_hour
       @daily_signals = number_of_evolution_trading_signals = 0
+      @daily_p_and_l = 0.0
       @stop_loss_paused_until = nil
       @current_simulation_time = nil
       (self.simulated_start_date.to_date..self.simulated_end_date.to_date).each do |day|
