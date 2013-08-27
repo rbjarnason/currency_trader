@@ -596,7 +596,7 @@ class TradingStrategy < ActiveRecord::Base
       else
         self.simulated_fitness  = @current_capital_position-@start_capital_position
       end
-      Rails.logger.info("Fitness #{self.simulated_fitness} took #{Time.now.to_i-time_start_fitness} for #{self.id} (#{@daily_signals}) (#{@simulated_trading_signals_array.count})")
+      Rails.logger.info("Fitness #{self.simulated_fitness} took #{Time.now.to_i-time_start_fitness} for #{self.id} (#{self.number_of_evolution_trading_signals}) (#{@simulated_trading_signals_array.count})")
     end
     self.save
     self.simulated_fitness
