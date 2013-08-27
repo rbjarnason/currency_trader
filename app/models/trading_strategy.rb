@@ -560,7 +560,7 @@ class TradingStrategy < ActiveRecord::Base
             if population.stop_loss_enabled and @stop_loss_paused_until and @stop_loss_paused_until > @current_simulation_time and not @current_position_units
               next
             elsif population.stop_loss_enabled and @stop_loss_paused_until and not @current_position_units
-              @simulated_trading_signals_array<<{:name=>"Stop Loss Close", :current_date_time=>@current_date_time, :description=>"Stop Loss Closed after #{@stop_loss_pause_minutes} minutes"}
+              @simulated_trading_signals_array<<{:name=>"Stop Loss Close", :current_date_time=>@current_simulation_time, :description=>"Stop Loss Closed after #{@stop_loss_pause_minutes} minutes"}
               @stop_loss_paused_until = nil
               @daily_p_and_l = 0.0
             end
@@ -569,7 +569,7 @@ class TradingStrategy < ActiveRecord::Base
 
             if population.stop_loss_enabled and @daily_p_and_l<-(@stop_loss_value) and not @current_position_units
               @stop_loss_paused_until = @current_simulation_time+(@stop_loss_pause_minutes).minutes
-              @simulated_trading_signals_array<<{:name=>"Stop Loss Open", :current_date_time=>@current_date_time, :description=>"Stop Loss Open after loss of #{@stop_loss_value} for #{@stop_loss_pause_minutes} minutes"}
+              @simulated_trading_signals_array<<{:name=>"Stop Loss Open", :current_date_time=>@current_simulation_time, :description=>"Stop Loss Open after loss of #{@stop_loss_value} for #{@stop_loss_pause_minutes} minutes"}
             end
             break if @daily_signals>population.simulation_max_daily_trading_signals
           end
