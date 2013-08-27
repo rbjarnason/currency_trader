@@ -39,6 +39,10 @@
     %th
       = "Min close diff"
     %th
+      = "Stop Loss Value"
+    %th
+      = "Stop Loss Minutes"
+    %th
       = "Fitness"
     %th
       = "Float sum"
@@ -82,6 +86,10 @@
         = strategy.float_parameters[12].abs.to_i
       %td
         = strategy.float_parameters[13].abs.to_i
+      %td
+        = strategy.float_parameters[14].abs.to_i
+      %td
+        = strategy.float_parameters[15].abs.to_i
       %td
         = strategy.simulated_fitness==TradingStrategy::FAILED_FITNESS_VALUE ? "Excluded by #{strategy.simulated_fitness_failure_reason}" : strategy.simulated_fitness
       %td
