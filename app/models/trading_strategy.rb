@@ -51,7 +51,9 @@ class TradingStrategy < ActiveRecord::Base
       signal.reason = "Stop Loss Open after loss of #{@stop_loss_value} for #{@stop_loss_pause_minutes} minutes"
       signal.save
       log_if("Opened Stop Loss Open signal #{signal.inspect}")
+      return true
     end
+    return false
   end
 
   def no_delete!
