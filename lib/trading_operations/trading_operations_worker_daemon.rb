@@ -30,7 +30,7 @@ class TradingOperationsWorker < BaseDaemonWorker
               signal.reason = "Stop Loss Close after loss of #{strategy.stop_loss_value} for #{strategy.stop_loss_pause_minutes} minutes"
               signal.save
               Rails.logger.info("Stop Loss Close signal")
-            elsif @operation.trading_strategy_population.stop_loss_enabled and strategy.check_stop_loss?
+            elsif @operation.trading_strategy_population.stop_loss_enabled and strategy.check_stop_loss?(@operation)
               # DO NOTHING
             else
               info("Evaluating #{strategy.id} #{@set.id} #{@set.population.quote_target.symbol}")

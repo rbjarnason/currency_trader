@@ -30,7 +30,7 @@ class TradingStrategy < ActiveRecord::Base
   after_initialize :setup_parameters
   after_save :setup_parameters
 
-  def check_stop_loss?
+  def check_stop_loss?(operation)
     if self.last_stop_loss_until and self.last_stop_loss_until.to_date!=Date.today
       self.last_stop_loss_until = nil
       self.save
