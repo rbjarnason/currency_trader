@@ -1,9 +1,15 @@
 %h3
   = "Trading Strategy Set #{trading_strategies.first.trading_strategy_set.id} #{trading_strategies.first.trading_strategy_set.trading_strategy_population.quote_target.symbol} Created: #{trading_strategies.first.trading_strategy_set.created_at} Fitness #{trading_strategies.first.trading_strategy_set.fitness}"
+  %b
+    = "ROI YR: #{number_to_percentage((((trading_strategies.first.trading_strategy_set.fitness/150000.0)*100.0)/(trading_strategies.first.trading_strategy_set.population.simulation_days_back)*20*12), :precision => 1)}"
 %table
   %tr
     %th
       = "Id"
+    %th
+      = "ROI YR"
+    %th
+      = "Fitness"
     %th
       = "Trading time frame"
     %th
@@ -43,8 +49,6 @@
     %th
       = "Stop Loss Minutes"
     %th
-      = "Fitness"
-    %th
       = "Float sum"
     %th
       = "Binary sum"
@@ -52,6 +56,11 @@
     %tr
       %td
         = link_to strategy.id, :controller=>"trading_strategies", :action=>"chart", :id=>strategy.id, :day_offset=>0
+      %td
+        - unless strategy.simulated_fitness==TradingStrategy::FAILED_FITNESS_VALUE
+          = number_to_percentage((((strategy.simulated_fitness/50000.0)*100.0)/(strategy.trading_strategy_set.population.simulation_days_back)*20*12), :precision => 1)
+      %td
+        = strategy.simulated_fitness==TradingStrategy::FAILED_FITNESS_VALUE ? "Excluded by #{strategy.simulated_fitness_failure_reason}" : strategy.simulated_fitness
       %td
         = "#{strategy.trading_strategy_set.trading_time_frame.from_hour}:00 - #{strategy.trading_strategy_set.trading_time_frame.to_hour}:00"
       %td
@@ -90,8 +99,6 @@
         = strategy.float_parameters[14].abs.to_i
       %td
         = strategy.float_parameters[15].abs.to_i
-      %td
-        = strategy.simulated_fitness==TradingStrategy::FAILED_FITNESS_VALUE ? "Excluded by #{strategy.simulated_fitness_failure_reason}" : strategy.simulated_fitness
       %td
         = number_with_precision strategy.float_parameters.sum, :precision => 3
       %td
