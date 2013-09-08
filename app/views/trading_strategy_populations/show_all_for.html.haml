@@ -58,7 +58,7 @@
     - if Rails.env.development?
       - how_many = 5
     - else
-      - how_many = 200
+      - how_many = 100
     %h2
       = "Strongest Trading Strategy Sets #{@population.trading_strategy_sets.order("accumulated_fitness desc").count}"
     - TradingStrategySet.where(["complete = 1 AND accumulated_fitness IS NOT NULL AND accumulated_fitness !=0.0 AND trading_strategy_population_id = ?",
