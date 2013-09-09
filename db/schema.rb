@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130827012741) do
+ActiveRecord::Schema.define(:version => 20130908232859) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.string   "resource_id",   :null => false
@@ -96,6 +96,7 @@ ActiveRecord::Schema.define(:version => 20130827012741) do
     t.datetime "last_processing_time"
     t.integer  "trading_strategy_population_id"
     t.integer  "processing_time_interval"
+    t.string   "workflow_state"
   end
 
   add_index "trading_operations", ["quote_target_id"], :name => "index_trading_operations_on_quote_target_id"

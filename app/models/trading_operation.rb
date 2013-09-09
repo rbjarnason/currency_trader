@@ -7,6 +7,73 @@ class TradingOperation < ActiveRecord::Base
   has_many :trading_signals
 
 
+  include Workflow
+
+  workflow do
+    state :automatic do
+      event :pause, :transitions_to => :paused
+      event :short, :transitions_to => :short
+      event :long, :transitions_to => :long
+    end
+    state :long do
+      event :pause, :transitions_to => :paused
+      event :short, :transitions_to => :short
+      event :automatic, :transitions_to => :automatic
+    end
+    state :short do
+      event :pause, :transitions_to => :paused
+      event :long, :transitions_to => :long
+      event :automatic, :transitions_to => :automatic
+    end
+    state :paused do
+      event :automatic, :transitions_to => :automatic
+      event :short, :transitions_to => :short
+      event :long, :transitions_to => :long
+    end
+  end
+
+  def pause
+    sell_everything!
+  end
+
+  def long
+    #sell_everything!
+  end
+
+  def short
+    #sell_everything!
+  end
+
+  def automatic
+    #sell_everything!
+  end
+
+  def sell_everything!
+    self.trading_positions.where(:open=>true).each do |position|
+      puts position.id
+      if position.trading_signal.name=="Short Open"
+        close_signal_name = "Short Close"
+      elsif position.trading_signal.name=="Long Open"
+        close_signal_name = "Long Close"
+      else
+        close_signal_name = nil
+      end
+      if close_signal_name
+        signal = TradingSignal.new
+        signal.name = close_signal_name
+        signal.trading_operation_id = self.id
+        signal.trading_position_id = position.id
+        signal.close_quote_value = self.quote_target.get_quote_value_by_time_stamp.ask
+        signal.trading_strategy_id = self.id
+        signal.reason = "Closed by setting state to paused"
+        Rails.logger.debug signal.inspect
+        signal.save
+      else
+        Rails.logger.error("Can't find open signal name")
+      end
+    end
+  end
+
   def population
     self.trading_strategy_population
   end

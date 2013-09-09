@@ -7,7 +7,7 @@ require "#{File.expand_path(File.dirname(__FILE__))}/../daemon_tools/base_daemon
 
 class TradingOperationsWorker < BaseDaemonWorker
   def poll_for_trading_operations
-    @operation = TradingOperation.where("active = 1 AND last_processing_time < NOW() - processing_time_interval").lock(true).order('rand()').first
+    @operation = TradingOperation.where("active = 1 AND last_processing_time < NOW() - processing_time_interval AND workflow_state!='paused'").lock(true).order('rand()').first
     if @operation
       @operation.last_processing_time = Time.now
       @operation.save

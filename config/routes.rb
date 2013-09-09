@@ -22,6 +22,7 @@ CurrencyTrader::Application.routes.draw do
   match 'trading_strategy_populations/activate/:id' => 'trading_strategy_populations#activate'
 
   match 'trading_operations/show_all_for/:id' => 'trading_operations#show_all_for'
+  match 'trading_operations/set_state/:id/:state' => 'trading_operations#set_state'
 
   match 'trading_strategies/chart/:id' => 'trading_strategies#chart'
 

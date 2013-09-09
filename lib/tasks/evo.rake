@@ -116,6 +116,19 @@ end
 
 namespace :evo do
   desc "Setup short test"
+  task :cleanup_stalled => :environment do
+    pop_id = ENV['pop_id']
+    TradingStrategySet.where(:trading_strategy_population_id=>pop_id,:complete=>0, :in_population_process=>1).each do |set|
+      set.in_process = false
+      set.in_population_process=false
+      set.complete = true
+      set.accumulated_fitness=-9999
+      set.save
+    end
+  end
+
+  end
+  desc "Setup short test"
   task :t1 => :environment do
     pop=TradingStrategyPopulation.new
     pop.active = true

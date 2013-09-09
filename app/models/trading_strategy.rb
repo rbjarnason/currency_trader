@@ -181,6 +181,7 @@ class TradingStrategy < ActiveRecord::Base
   def evaluate(quote_target, date_time=DateTime.now, last_time_segment=false, trading_operation_id=nil, trading_position_id=nil)
     @quote_target = quote_target
     @trading_operation_id = trading_operation_id
+    @operation = TradingOperation.find(trading_operation_id) if @trading_operation_id
     @trading_position_id = trading_position_id
     @current_date_time = date_time
     @trading_position = TradingPosition.find(@trading_position_id) if @trading_position_id
@@ -201,9 +202,9 @@ class TradingStrategy < ActiveRecord::Base
           trigger_short_close_signal
           @short_open = nil
         end
-      elsif long?
+      elsif (@operation and @operation.long?) or (@operation and @operation.automatic? and long?) or (not @operation and long?)
         trigger_long_open_signal if match_open_conditions
-      elsif not long?
+      elsif (@operation and @operation.short?) or (@operation and @operation.automatic? and not long?) or (not @operation and not long?)
         trigger_short_open_signal if match_open_conditions
       end
     else

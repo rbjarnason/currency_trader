@@ -13,8 +13,6 @@
     %th
       = "Trading time frame"
     %th
-      = "Short/Long"
-    %th
       = "Open How far back in min"
     %th
       = "Close How far back in min"
@@ -63,8 +61,6 @@
         = strategy.simulated_fitness==TradingStrategy::FAILED_FITNESS_VALUE ? "Excluded by #{strategy.simulated_fitness_failure_reason}" : strategy.simulated_fitness
       %td
         = "#{strategy.trading_strategy_set.trading_time_frame.from_hour}:00 - #{strategy.trading_strategy_set.trading_time_frame.to_hour}:00"
-      %td
-        = #strategy.long? ? "Long" : "Short"
       %td
         = (strategy.open_how_far_back_milliseconds/1000/60).to_i
       %td

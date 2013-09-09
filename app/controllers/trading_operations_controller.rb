@@ -17,4 +17,19 @@ class TradingOperationsController < ApplicationController
     end
   end
 
+  def set_state
+    @operation = TradingOperation.find(params[:id])
+    state = params[:state]
+    if state=="pause" and not @operation.paused?
+      @operation.pause!
+    elsif state=="long" and not @operation.long?
+      @operation.long!
+    elsif state=="short" and not @operation.short?
+      @operation.short!
+    elsif state=="automatic" and not @operation.automatic?
+      @operation.automatic!
+    end
+    redirect_to :back
+  end
+
 end

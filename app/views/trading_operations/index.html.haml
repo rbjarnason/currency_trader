@@ -10,6 +10,8 @@
       %th
         = "Trading Operation"
       %th
+        = "State"
+      %th
         = "Symbol"
       %th
         = "Days running"
@@ -40,6 +42,14 @@
       %tr
         %td
           = link_to operation.id, :action=>"show_all_for", :id=>operation.id
+        %td
+          - actions=["paused","long","short","automatic"].reject{|x| x==operation.current_state.to_s}
+          %b
+            = "#{operation.current_state}".upcase
+          %br
+          - actions.each do |action|
+            - action = "pause" if action=="paused"
+            = link_to action,"/trading_operations/set_state/#{operation.id}/#{action}"
         %td
           = "#{operation.quote_target.symbol} at #{operation.trading_strategy_population.quote_target.get_quote_value_by_time_stamp.ask}"
         %td
