@@ -120,6 +120,7 @@ class TradingStrategy < ActiveRecord::Base
     quote_value = @quote_target.get_quote_value_by_time_stamp(@current_date_time-(@days_back_long_short).days)
     if quote_value
       value_then = quote_value.ask
+      log_if("Checking for long/short #{@current_date_time}-#{(@days_back_long_short).days} at #{@current_date_time-(@days_back_long_short).days} value now #{@current_quote_value} value then #{value_then}")
       if value_then<=@current_quote_value
         true
       else
