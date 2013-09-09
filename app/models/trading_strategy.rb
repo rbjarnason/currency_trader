@@ -615,7 +615,7 @@ class TradingStrategy < ActiveRecord::Base
   private
 
   def log_if(string)
-    if @trading_position
+    if @trading_position or @operation
       Rails.logger.info(string)
     end
   end
