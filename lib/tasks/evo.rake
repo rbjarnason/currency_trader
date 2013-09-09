@@ -127,7 +127,6 @@ namespace :evo do
     end
   end
 
-  end
   desc "Setup short test"
   task :t1 => :environment do
     pop=TradingStrategyPopulation.new
