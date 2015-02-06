@@ -28,7 +28,7 @@ end
 
 group :development do
  # gem 'rails-dev-boost'
-  gem 'rails_view_annotator', github: "hinrik/rails_view_annotator"
+#  gem 'rails_view_annotator', github: "hinrik/rails_view_annotator"
   gem 'binding_of_caller'
   gem 'better_errors'
   gem 'therubyracer'

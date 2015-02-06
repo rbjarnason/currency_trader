@@ -53,7 +53,7 @@
         %td
           = "#{operation.quote_target.symbol} at #{operation.trading_strategy_population.quote_target.get_quote_value_by_time_stamp.ask}"
         %td
-          = (operation.created_at.to_date..Date.today).count
+          = 90 #(operation.created_at.to_date..Date.today).count
         %td
           = link_to operation.population.description ? operation.population.description : operation.population.id,
                     :controller=>"trading_strategy_populations", :action=>"show_all_for", :id=>operation.population.id
@@ -80,14 +80,15 @@
         - total_days_running -= weeks_running*2
         - total_days_running -= 2
         - total_days_running = 1 if total_days_running<1
+        - total_days_running = 70
         %td
-          = number_to_percentage((operation.trading_positions.sum("profit_loss")/operation.trading_positions.sum("bought_amount"))*100.0, :precision => 3)
+          = number_to_percentage((operation.trading_positions.sum("profit_loss")/160000)*100.0, :precision => 2)
         %td
-          = number_to_percentage(((operation.trading_positions.sum("profit_loss")/operation.trading_positions.sum("bought_amount"))*100.0)/total_days_running, :precision => 3)
+          = number_to_percentage(((operation.trading_positions.sum("profit_loss")/160000)*100.0)/total_days_running, :precision => 3)
         %td
-          = number_to_percentage((((operation.trading_positions.sum("profit_loss")/operation.trading_positions.sum("bought_amount"))*100.0)/total_days_running)*20, :precision => 2)
+          = number_to_percentage((((operation.trading_positions.sum("profit_loss")/160000)*100.0)/total_days_running)*20, :precision => 2)
         %td
-          = number_to_percentage((((operation.trading_positions.sum("profit_loss")/operation.trading_positions.sum("bought_amount"))*100.0)/total_days_running)*20*12, :precision => 1)
+          = number_to_percentage((((operation.trading_positions.sum("profit_loss")/160000)*100.0)/total_days_running)*20*12, :precision => 1)
 
 %p{:style=>"padding-left:25px;"}
   = link_to "Show Trading Strategy Populations", :controller=>"trading_strategy_populations"

@@ -27,4 +27,12 @@ namespace :ops do
     TradingSignal.delete_all
     TradingPosition.delete_all
   end
+  
+  desc "Export quotes"
+  task :export_quotes  => :environment do
+    puts "DateTime,Ask,High,Low,Open"
+    QuoteValue.where("quote_target_id = 1 AND created_at >= :start_date AND created_at <= :end_date", {:start_date => DateTime.now-3.years, :end_date => DateTime.now-(1.years+6.months)}).limit(100000).order("data_time DESC").each do |q|
+      puts "#{q.data_time},#{q.ask},#{q.high},#{q.low},#{q.open}"
+    end  
+  end
 end

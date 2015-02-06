@@ -1,9 +1,3 @@
-GIT
-  remote: git://github.com/hinrik/rails_view_annotator.git
-  revision: 28ebcbffffd1b8fce88efffbc7fc7e97fb52f93c
-  specs:
-    rails_view_annotator (0.0.7)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -167,7 +161,6 @@ DEPENDENCIES
   meta_search (>= 1.1.0.pre)
   mysql2
   rails (= 3.2.14)
-  rails_view_annotator!
   sass-rails
   sys-filesystem
   therubyracer

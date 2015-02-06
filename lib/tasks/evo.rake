@@ -169,7 +169,6 @@ namespace :evo do
     pop.save
   end
 
-
   desc "Reset"
   task :reset => :environment do
     TradingStrategyPopulation.delete_all
