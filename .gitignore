@@ -11,7 +11,6 @@ log/*
 tmp/**/*
 tmp/restart.txt
 public/pictures/**/*
-config/*.pem
 config/contacts.yml
 config/database.yml
 config/facebooker.yml
