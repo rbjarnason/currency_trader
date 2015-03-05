@@ -78,8 +78,28 @@
         stockLegend1.markerType = "none";
         stockPanel1.stockLegend = stockLegend1;
 
+
+        // second stock panel
+        var stockPanel2 = new AmCharts.StockPanel();
+        stockPanel2.title = "Volume";
+        stockPanel2.percentHeight = 30;
+        stockPanel2.panEventsEnabled = true;
+        var graph2 = new AmCharts.StockGraph();
+        graph2.valueField = "volume";
+        graph2.type = "column";
+        graph2.cornerRadiusTop = 4;
+        graph2.fillAlphas = 1;
+        stockPanel2.addStockGraph(graph2);
+
+        // create stock legend
+        var stockLegend2 = new AmCharts.StockLegend();
+        stockLegend2.valueTextRegular = " ";
+        stockLegend2.markerType = "none";
+        stockPanel2.stockLegend = stockLegend2;
+
         // set panels to the chart
-        chart.panels = [stockPanel1];
+        chart.panels = [stockPanel1, stockPanel2];
+
 
         // OTHER SETTINGS ////////////////////////////////////
         var scrollbarSettings = new AmCharts.ChartScrollbarSettings();
