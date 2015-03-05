@@ -32,7 +32,8 @@ namespace :utils do
     puts "Delete complete"
     count = 0
     client = Elasticsearch::Client.new host: ES_HOST, log: false
-    Dir.glob('/home/robert/work/quote_data/*') do |item|
+    #client.indices.delete index: 'quotes-1'
+    Dir.glob('/home/ubuntu/quote_data/*') do |item|
       puts item
       QuoteValue.transaction do
         CSV.open(item).each do |quote|
