@@ -7,7 +7,7 @@ class QuoteTarget < ActiveRecord::Base
   ::MEMORY_STORE = ActiveSupport::Cache::MemoryStore.new(:size=>256.megabytes)
 
   def quote_values_by_range(from,to,size=10000)
-    client = Elasticsearch::Client.new host: ES_HOST, log: false
+    client = Elasticsearch::Client.new host: ES_HOST, log: true
     results = client.search(
         :index => "quotes-*",
         :search_type => "query_then_fetch",
@@ -44,7 +44,7 @@ class QuoteTarget < ActiveRecord::Base
           quote_value
         end
       else
-        quote_values_by_range(DateTime.now-1.minutes,DateTime.now-1.minutes,1).first["_source"]
+        quote_values_by_range(DateTime.now-5.years,DateTime.now-1.minutes,1).first["_source"]
       end
     end
   end

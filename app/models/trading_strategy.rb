@@ -149,8 +149,10 @@ class TradingStrategy < ActiveRecord::Base
     current_day = current_day ? current_day : Date.today
     from_date = current_day.to_datetime.beginning_of_day
     to_date = current_day.to_datetime.end_of_day
-    quote_target.quote_values_by_range(from_date,to_date).each do |quote_value|
-      quote_values<<"{date: new Date(#{quote_value["data_time"].year},#{quote_value["data_time"].month-1},#{quote_value["data_time"].day},#{quote_value["data_time"].hour},#{quote_value["data_time"].minute},0,0), value: #{quote_value["ask"]}, volume: #{0}}"
+    quote_target.quote_values_by_range(from_date,to_date).each do |quote_value_source|
+      quote_value = quote_value_source["_source"]
+      datetime = DateTime.parse(quote_value["data_time"])
+      quote_values<<"{date: new Date(#{datetime.year},#{datetime.month-1},#{datetime.day},#{datetime.hour},#{datetime.minute},0,0), value: #{quote_value["ask"]}, volume: #{0}}"
     end
     quote_values.join(",")
   end
