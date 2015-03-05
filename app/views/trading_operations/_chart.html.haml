@@ -20,11 +20,23 @@
         var dataSet = new AmCharts.DataSet();
         dataSet.color = "#b0de09";
         dataSet.fieldMappings = [{
-            fromField: "value",
-            toField: "value"
+            fromField: "open",
+            toField: "open"
+        }, {
+            fromField: "close",
+            toField: "close"
+        }, {
+            fromField: "high",
+            toField: "high"
+        }, {
+            fromField: "low",
+            toField: "low"
         }, {
             fromField: "volume",
             toField: "volume"
+        }, {
+            fromField: "value",
+            toField: "value"
         }];
         dataSet.dataProvider = chartData;
         dataSet.categoryField = "date";
@@ -42,9 +54,22 @@
 
         // graph of first stock panel
         var graph1 = new AmCharts.StockGraph();
-        graph1.valueField = "value";
-        graph1.type = "smoothedLine";
-        graph1.lineThickness = 2;
+        graph1.type = "candlestick";
+        graph1.openField = "open";
+        graph1.closeField = "close";
+        graph1.highField = "high";
+        graph1.lowField = "low";
+        graph1.valueField = "close";
+        graph1.lineColor = "#4BCF46";
+        graph1.fillColors = "#4BCF46";
+        graph1.negativeLineColor = "#FA4B4B";
+        graph1.negativeFillColors = "#FA4B4B";
+        graph1.proCandlesticks = true;
+        graph1.fillAlphas = 1;
+        graph1.useDataSetColors = false;
+        graph1.comparable = true;
+        graph1.compareField = "value";
+        graph1.showBalloon = true;
         stockPanel1.addStockGraph(graph1);
 
         // create stock legend
@@ -53,28 +78,8 @@
         stockLegend1.markerType = "none";
         stockPanel1.stockLegend = stockLegend1;
 
-
-        // second stock panel
-        var stockPanel2 = new AmCharts.StockPanel();
-        stockPanel2.title = "Volume";
-        stockPanel2.percentHeight = 30;
-        stockPanel2.panEventsEnabled = true;
-        var graph2 = new AmCharts.StockGraph();
-        graph2.valueField = "volume";
-        graph2.type = "column";
-        graph2.cornerRadiusTop = 4;
-        graph2.fillAlphas = 1;
-        stockPanel2.addStockGraph(graph2);
-
-        // create stock legend
-        var stockLegend2 = new AmCharts.StockLegend();
-        stockLegend2.valueTextRegular = " ";
-        stockLegend2.markerType = "none";
-        stockPanel2.stockLegend = stockLegend2;
-
         // set panels to the chart
-        chart.panels = [stockPanel1, stockPanel2];
-
+        chart.panels = [stockPanel1];
 
         // OTHER SETTINGS ////////////////////////////////////
         var scrollbarSettings = new AmCharts.ChartScrollbarSettings();

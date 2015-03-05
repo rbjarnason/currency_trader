@@ -86,7 +86,7 @@ class TradingOperation < ActiveRecord::Base
     quote_target.quote_values_by_range(from_date,to_date).each do |quote_value_source|
       quote_value = quote_value_source["_source"]
       datetime = DateTime.parse(quote_value["data_time"])
-      quote_values<<"{date: new Date(#{datetime.year},#{datetime.month-1},#{datetime.day},#{datetime.hour},#{datetime.minute},0,0), value: #{quote_value["ask"]}, volume: #{0}}"
+      quote_values<<"{date: new Date(#{datetime.year},#{datetime.month-1},#{datetime.day},#{datetime.hour},#{datetime.minute},0,0), value: #{quote_value["close"]}, close: #{quote_value["close"]}, open: #{quote_value["open"]}, high: #{quote_value["high"]}, low: #{quote_value["low"]}, volume: #{0}}"
     end
     quote_values.join(",")
   end

@@ -14,6 +14,7 @@ class QuoteTarget < ActiveRecord::Base
         :size => size,
         :type  => "quote",
         :body  => {
+            sort: "data_time",
             query: {
                 :filtered => {
                     :filter => {
