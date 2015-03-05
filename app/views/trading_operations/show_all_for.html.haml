@@ -27,7 +27,7 @@
         ROIC per year (20*12 days)
     %tr
       %td
-        = "#{@operation.quote_target.symbol} at #{@operation.trading_strategy_population.quote_target.get_quote_value_by_time_stamp.ask}"
+        = "#{@operation.quote_target.symbol} at #{@operation.trading_strategy_population.quote_target.get_quote_value_by_time_stamp["ask"]}"
       %td
         = "170000" #@operation.initial_capital_amount
       %td
@@ -71,9 +71,9 @@
           = position.units
         %td
           - if position.trading_signal.name=="Short Open"
-            - pos=(position.value_open*position.units).to_i-(position.units*@operation.trading_strategy_population.quote_target.get_quote_value_by_time_stamp.ask).to_i
+            - pos=(position.value_open*position.units).to_i-(position.units*@operation.trading_strategy_population.quote_target.get_quote_value_by_time_stamp["ask"]).to_i
           - elsif position.trading_signal.name=="Long Open"
-            - pos=(position.units*@operation.trading_strategy_population.quote_target.get_quote_value_by_time_stamp.ask).to_i-(position.value_open*position.units).to_i
+            - pos=(position.units*@operation.trading_strategy_population.quote_target.get_quote_value_by_time_stamp["ask"]).to_i-(position.value_open*position.units).to_i
           - total_pl+=pos
           = pos
     %tr
@@ -146,7 +146,7 @@
     %tr
       - @operation.trading_strategy_population.best_set.trading_strategies.each do |strategy|
         - quote_value = @operation.trading_strategy_population.quote_target.get_quote_value_by_time_stamp
-        - quote_value_ask = quote_value ? quote_value.ask : 1.0
+        - quote_value_ask = quote_value ? quote_value["ask"] : 1.0
         - start_price = quote_value_ask
         - end_price = number_with_precision quote_value_ask+(quote_value_ask*strategy.open_magnitude_signal_trigger).abs, :precision => 5
         - number_of_minutes = (strategy.open_how_far_back_milliseconds/1000/60).to_i
@@ -164,7 +164,7 @@
     %tr
       - @operation.trading_strategy_population.best_set.trading_strategies.each do |strategy|
         - quote_value = @operation.trading_strategy_population.quote_target.get_quote_value_by_time_stamp
-        - quote_value_ask = quote_value ? quote_value.ask : 1.0
+        - quote_value_ask = quote_value ? quote_value["ask"] : 1.0
         - start_price = quote_value_ask
         - end_price = number_with_precision quote_value_ask-(quote_value_ask*strategy.close_magnitude_signal_trigger).abs, :precision => 5
         - number_of_minutes = (strategy.close_how_far_back_milliseconds/1000/60).to_i

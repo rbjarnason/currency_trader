@@ -38,7 +38,7 @@ class CrawlerWorker < BaseDaemonWorker
       quote_value.data_time = DateTime.now
       quote_value.import_csv_data(quote)
       quote_value.save
-      Rails.logger.info "#{quote_target.symbol} - #{quote_value.ask}"
+      Rails.logger.info "#{quote_target.symbol} - #{quote_value["ask"]}"
     end
   end
 

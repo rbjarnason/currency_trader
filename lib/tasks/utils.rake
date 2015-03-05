@@ -31,7 +31,7 @@ namespace :utils do
     symbol = "EURUSD"
     puts "Delete complete"
     count = 0
-    client = Elasticsearch::Client.new host: '54.221.233.192:9200', log: false
+    client = Elasticsearch::Client.new host: ES_HOST, log: false
     Dir.glob('/home/robert/work/quote_data/*') do |item|
       puts item
       QuoteValue.transaction do

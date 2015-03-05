@@ -132,7 +132,7 @@ class TradingStrategy < ActiveRecord::Base
     setup_parameters
     quote_value = @quote_target.get_quote_value_by_time_stamp(@current_date_time-(@days_back_long_short).days)
     if quote_value
-      value_then = quote_value.ask
+      value_then = quote_value["ask"]
       log_if("Checking for #{@days_back_long_short} days back long/short at #{@current_date_time-(@days_back_long_short).days} value now #{@current_quote_value} value then #{value_then}")
       if value_then<=@current_quote_value
         true
@@ -149,10 +149,8 @@ class TradingStrategy < ActiveRecord::Base
     current_day = current_day ? current_day : Date.today
     from_date = current_day.to_datetime.beginning_of_day
     to_date = current_day.to_datetime.end_of_day
-    quote_target.quote_values.select("ask, data_time, MINUTE(data_time) as CTMINUTE, MIN(ask) AS MINASK, MAX(ask) AS MAXASK").
-                              where(["data_time>=? AND data_time<=?",from_date.to_formatted_s(:db),to_date.to_formatted_s(:db)]).
-                              group("MINUTE(data_time), HOUR(data_time)").each do |quote_value|
-      quote_values<<"{date: new Date(#{quote_value.data_time.year},#{quote_value.data_time.month-1},#{quote_value.data_time.day},#{quote_value.data_time.hour},#{quote_value.CTMINUTE},0,0), value: #{quote_value.ask}, volume: #{0}}"
+    quote_target.quote_values_by_range(from_date,to_date).each do |quote_value|
+      quote_values<<"{date: new Date(#{quote_value["data_time"].year},#{quote_value["data_time"].month-1},#{quote_value["data_time"].day},#{quote_value["data_time"].hour},#{quote_value["data_time"].minute},0,0), value: #{quote_value["ask"]}, volume: #{0}}"
     end
     quote_values.join(",")
   end
@@ -205,7 +203,7 @@ class TradingStrategy < ActiveRecord::Base
       @current_quote = @quote_target.get_quote_value_by_time_stamp
     end
     if @current_quote
-      @current_quote_value = @current_quote.ask
+      @current_quote_value = @current_quote["ask"]
       if (@trading_position and @trading_position.trading_signal.name=="Long Open") or (@current_position_units and @long_open)
         if match_close_conditions or last_time_segment
           trigger_long_close_signal
@@ -232,7 +230,7 @@ class TradingStrategy < ActiveRecord::Base
   # MATCH OPEN CLOSE
 
   def match_open_conditions
-    @quote_value_then = @quote_target.get_quote_value_by_time_stamp(@current_date_time-(self.open_how_far_back_milliseconds/1000.0).seconds).ask
+    @quote_value_then = @quote_target.get_quote_value_by_time_stamp(@current_date_time-(self.open_how_far_back_milliseconds/1000.0).seconds)["ask"]
     log_if("Testing open: #{@quote_value_then} current: #{@current_quote_value} back in minutes: #{self.open_how_far_back_milliseconds/1000/60}")
     quote_value_change = @current_quote_value-@quote_value_then
     if quote_value_change==0.0
@@ -253,7 +251,7 @@ class TradingStrategy < ActiveRecord::Base
   def match_close_conditions
     log_if("--- Match Close Conditions")
     if quote_value_then = @quote_target.get_quote_value_by_time_stamp(@current_date_time-(self.close_how_far_back_milliseconds/1000.0).seconds)
-      @quote_value_then = quote_value_then.ask
+      @quote_value_then = quote_value_then["ask"]
     else
       Rails.logger.error("Can't find ask for #{@current_date_time-(self.close_how_far_back_milliseconds/1000.0).seconds}")
       return false

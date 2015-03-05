@@ -6,44 +6,25 @@ class QuoteTarget < ActiveRecord::Base
 
   ::MEMORY_STORE = ActiveSupport::Cache::MemoryStore.new(:size=>256.megabytes)
 
-  has_many :quote_values, :order => "data_time ASC" do
-    def get_one_by_time(time_stamp)
-      find :first, :conditions=>["data_time >= ?",time_stamp]
-    end
-  end
-
-  def get_quote_value_by_time_stamp_2(time_stamp=nil)
-    time_stamp_key = time_stamp ? time_stamp.strftime("%Y_%m_%d_%H:%M") : nil
-    if time_stamp_key and @@quote_value_cache[time_stamp_key]
-      return_this = @@quote_value_cache[time_stamp_key] unless @@quote_value_cache[time_stamp_key] == "no_quote"
-      if @@quote_value_cache_timer<Time.now
-        Rails.logger.debug("CLEARING QUOTE VALUE CACHE")
-        @@quote_value_cache.clear
-        @@quote_value_cache_timer = Time.now+100000000.minutes
-      end
-      if @@quote_value_cache[time_stamp_key] != "no_quote"
-        return_this
-      else
-        nil
-      end
-    else
-      if time_stamp
-        if quote_value = quote_values.where(["data_time >= ?",time_stamp]).first
-          @@quote_value_cache[time_stamp_key] = quote_value
-        else
-          @@quote_value_cache[time_stamp_key] = "no_quote"
-          nil
-        end
-      else
-        quote_values.last
-      end
-    end
-  end
-
-  def get_quote_values_from_to(from,to)
-    key = "#{time_stamp.strftime("from_%Y_%m_%d_%H:%M")}_#{self.id}
-    from_key = "#{time_stamp.strftime("from_%Y_%m_%d_%H:%M")}_#{self.id}
-
+  def quote_values_by_range(from,to,size=10000)
+    client = Elasticsearch::Client.new host: ES_HOST, log: false
+    results = client.search(
+        :index => "quotes-*",
+        :search_type => "query_then_fetch",
+        :size => size,
+        :type  => "quote",
+        :body  => {
+            query: {
+                :filtered => {
+                    :filter => {
+                        :range => {
+                            :data_time => { gte: from, lte: to }
+                        }
+                    }
+                }
+            }
+        })
+    return results["hits"]["hits"]
   end
 
   def get_quote_value_by_time_stamp(time_stamp=nil)
@@ -58,12 +39,12 @@ class QuoteTarget < ActiveRecord::Base
       end
     else
       if time_stamp
-        if quote_value = quote_values.where(["data_time >= ?",time_stamp]).first
+        if quote_value = quote_values_by_range(time_stamp,time_stamp+1.minutes,1).first["_source"]
           MEMORY_STORE.write(time_stamp_key,quote_value) if quote_value
           quote_value
         end
       else
-        quote_values.last
+        quote_values_by_range(DateTime.now-1.minutes,DateTime.now-1.minutes,1).first["_source"]
       end
     end
   end
