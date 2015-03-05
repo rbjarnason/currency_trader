@@ -3,6 +3,7 @@ source 'https://rubygems.org'
 ruby '2.2.1'
 gem 'rails', '3.2.21'
 gem 'unicorn'
+gem 'kgio', '2.9.3'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
