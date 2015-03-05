@@ -3,11 +3,11 @@ NUMBER_OF_BINARY_EVOLUTION_PARAMETERS = 5
 NUMBER_OF_FLOAT_EVOLUTION_PARAMETERS = 16
 
 class StrategyBinaryParameters < BitStringGenotype((TradingStrategySet::MAX_NUMBER_OF_TRADING_STRATEGIES+1)*NUMBER_OF_BINARY_EVOLUTION_PARAMETERS)
-  use Elitism(TruncationSelection(0.2),1), UniformCrossover, ListMutator(:probability[ p=0.15],:flip)
+  use Elitism(TruncationSelection(0.2),1), UniformCrossover, ListMutator(:probability[ p=0.15], :flip)
 end
 
 class StrategyFloatParameters <  FloatListGenotype((TradingStrategySet::MAX_NUMBER_OF_TRADING_STRATEGIES+1)*NUMBER_OF_FLOAT_EVOLUTION_PARAMETERS)
- use Elitism(TruncationSelection(0.3),1), UniformCrossover, ListMutator(:probability[ p=0.20 ],:uniform[ max_size=25 ])
+ use Elitism(TruncationSelection(0.3),1), UniformCrossover, ListMutator(:probability[ p=0.33 ], :uniform[ max_size=100 ])
 end
 
 genotypes = []
@@ -59,15 +59,20 @@ class TradingStrategyPopulation < ActiveRecord::Base
 
   def evolve
       demarshall_population unless @population
+
       Rails.logger.info("Evolving #{self.id} generation #{self.current_generation}")
+
       unless @population.complete or self.current_generation>=self.max_generations
         Rails.logger.info("Import fitness #{self.id}")
         import_population_fitness
+
         Rails.logger.info("Evolve incremental #{self.id}")
         @population = @population.evolve_incremental_block(self.max_generations,Rails.logger)
+
         Rails.logger.info("Create trading strategy sets #{self.id}")
         self.current_generation = @population.generation
         create_trading_strategy_sets(@population)
+
         Rails.logger.info("Generation: #{self.current_generation}")
       else
         Rails.logger.info("Reached max generations")

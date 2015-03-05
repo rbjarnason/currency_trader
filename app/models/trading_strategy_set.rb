@@ -1,8 +1,9 @@
 class TradingStrategySet < ActiveRecord::Base
   MAX_NUMBER_OF_TRADING_STRATEGIES = 3
   FORCE_RELEASE_POSITION = false
-  PUNISHMENT_FOR_SAME_MINUTES_IN_STRATEGIES = 0.7
-
+  PENALTY_FOR_SAME_MINUTES_IN_STRATEGIES = 0.7
+  USE_SELF_SIMILARITY_PENALTY = false
+  
   has_many :trading_strategies, :dependent => :destroy
   belongs_to :trading_strategy_population
   belongs_to :trading_time_frame
@@ -25,6 +26,7 @@ class TradingStrategySet < ActiveRecord::Base
     self.accumulated_fitness = 0.0
     how_far_back_minutes_open = []
     how_far_back_minutes_close = []
+
     trading_strategies.each do |strategy|
       Rails.logger.info("Get fitness for strategy #{strategy.id}")
       strategy_fitness = strategy.fitness
@@ -34,13 +36,16 @@ class TradingStrategySet < ActiveRecord::Base
       self.accumulated_fitness+=strategy_fitness if strategy_fitness>0.0
       Rails.logger.debug(self.accumulated_fitness)
     end
-    if how_far_back_minutes_open.uniq.length!=trading_strategies.count
-      self.accumulated_fitness=self.accumulated_fitness*PUNISHMENT_FOR_SAME_MINUTES_IN_STRATEGIES
-      Rails.logger.info("#{how_far_back_minutes_open} To Similar Open Minutes Punish")
-    end
-    if how_far_back_minutes_close.uniq.length!=trading_strategies.count
-      self.accumulated_fitness=self.accumulated_fitness*PUNISHMENT_FOR_SAME_MINUTES_IN_STRATEGIES
-      Rails.logger.info("#{how_far_back_minutes_close} To Similar Close Minutes Punish")
+
+    if USE_SELF_SIMILARITY_PENALTY
+      if how_far_back_minutes_open.uniq.length!=trading_strategies.count
+        self.accumulated_fitness=self.accumulated_fitness*PENALTY_FOR_SAME_MINUTES_IN_STRATEGIES
+        Rails.logger.info("#{how_far_back_minutes_open} To Similar Open Minutes Punish")
+      end
+      if how_far_back_minutes_close.uniq.length!=trading_strategies.count
+        self.accumulated_fitness=self.accumulated_fitness*PENALTY_FOR_SAME_MINUTES_IN_STRATEGIES
+        Rails.logger.info("#{how_far_back_minutes_close} To Similar Close Minutes Punish")
+      end
     end
     self.accumulated_fitness
   end

@@ -1,6 +1,20 @@
 require 'csv'
 
 namespace :utils do
+  desc "Cleanup signals"
+  task :cleanup_signals => :environment do
+    puts TradingSignal.count
+    count = 0
+    TradingSignal.all.each do |s|
+      tp = TradingPosition.unscoped.where(:id=>s.trading_position_id).first
+      unless tp or s.trading_position_id==nil
+        count += 1
+        puts "remove #{s.id} #{s.trading_position_id}"
+      end
+    end
+    puts count
+  end
+
   desc "Set positions amounts"
   task :set_positions_amounts => :environment do
     TradingPosition.all.each do |pos|
@@ -9,6 +23,40 @@ namespace :utils do
         pos.sold_amount=pos.value_close*pos.units
       end
       pos.save
+    end
+  end
+
+  desc "Import quote data"
+  task :import_quotes => :environment do
+    symbol = "EURUSD"
+    puts "Delete complete"
+    count = 0
+    client = Elasticsearch::Client.new host: '54.221.233.192:9200', log: false
+    Dir.glob('/home/robert/work/quote_data/*') do |item|
+      puts item
+      QuoteValue.transaction do
+        CSV.open(item).each do |quote|
+          next if quote[0]=="Time"
+          client.create index: 'quotes-1',
+                        type: 'quote',
+                        body: {
+                            symbol: symbol,
+                            data_time: DateTime.parse(quote[0]),
+                            timestamp_ms:  DateTime.parse(quote[0]).to_i,
+                            open: quote[1].to_f,
+                            high: quote[2].to_f,
+                            low: quote[3].to_f,
+                            close: quote[4].to_f,
+                            ask: quote[1].to_f
+                        }
+          if count>3600
+            puts "3600"
+            count=0
+          else
+            count+=1
+          end
+        end
+      end
     end
   end
 

@@ -1,11 +1,12 @@
 source 'https://rubygems.org'
 
-ruby '2.1.5'
+ruby '2.2.1'
 gem 'rails', '3.2.21'
 gem 'unicorn'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
+gem 'elasticsearch', git: 'git://github.com/elasticsearch/elasticsearch-ruby.git'
 gem 'workflow'
 gem 'mysql2'
 gem "daemons"

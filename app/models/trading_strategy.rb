@@ -95,11 +95,22 @@ class TradingStrategy < ActiveRecord::Base
 
   def setup_parameters
     if population and self.binary_parameters and self.binary_parameters.length>0 and self.float_parameters and self.float_parameters.length>2
-      @strategy_buy_short = self.binary_parameters[0]
+      # Open
       self.open_how_far_back_milliseconds = [1000*60,(self.float_parameters[0]*(1000*60*population.simulation_max_minutes_back)/60).abs].max
-      self.close_how_far_back_milliseconds = [1000*60,(self.float_parameters[1]*(1000*60*population.simulation_max_minutes_back)/60).abs].max
       @open_magnitude_signal_trigger  = self.float_parameters[2]/1000000.0
+      @open_floor_trend_volatility_past_5m_limit =  self.float_parameters[2]/1000000.0
+      @open_floor_trend_volatility_past_15m_limit =  self.float_parameters[2]/1000000.0
+      @open_floor_trend_volatility_past_30m_limit =  self.float_parameters[2]/1000000.0
+      @open_floor_trend_volatility_past_1h_limit =  self.float_parameters[2]/1000000.0
+      @open_floor_trend_volatility_past_2h_limit =  self.float_parameters[2]/1000000.0
+      @open_floor_trend_volatility_past_6h_limit =  self.float_parameters[2]/1000000.0
+
+      # Close
+      self.close_how_far_back_milliseconds = [1000*60,(self.float_parameters[1]*(1000*60*population.simulation_max_minutes_back)/60).abs].max
       @close_magnitude_signal_trigger  = self.float_parameters[3]/1000000.0
+      @min_difference_for_close = self.float_parameters[13].abs.to_i
+
+      # Stops
       @stop_01_value  = self.float_parameters[4].abs.to_i
       @stop_02_value  = self.float_parameters[5].abs.to_i
       @stop_03_value  = self.float_parameters[6].abs.to_i
@@ -108,10 +119,12 @@ class TradingStrategy < ActiveRecord::Base
       @stop_06_value  = self.float_parameters[9].abs.to_i
       @stop_07_value  = self.float_parameters[10].abs.to_i
       @stop_08_value  = self.float_parameters[11].abs.to_i
-      @days_back_long_short = self.float_parameters[12].abs.to_i/10
-      @min_difference_for_close = self.float_parameters[13].abs.to_i
+
       @stop_loss_value  = self.float_parameters[14].abs.to_i
       @stop_loss_pause_minutes  = self.float_parameters[15].abs.to_i
+
+      # Long / Short auto calculations
+      @days_back_long_short = self.float_parameters[12].abs.to_i/10
     end
   end
 
@@ -342,7 +355,7 @@ class TradingStrategy < ActiveRecord::Base
          @close_reason = "Forced in profit more than #{@stop_05_value} #{open_difference} after 4 hours but value is less at #{@current_quote_value} value open was #{value_open}"
        end
        if open_difference<-((@stop_06_value))
-         log_if("Closing out with loss min -250")
+         log_if("Closing out with loss min  #{@stop_06_value}")
          open_timeout = true
          @close_reason = "Forced at loss with more than #{@stop_06_value} #{open_difference} after 4 hours but value is less at #{@current_quote_value} value open was #{value_open}"
        end
@@ -355,7 +368,7 @@ class TradingStrategy < ActiveRecord::Base
          @close_reason = "Forced in profit more than #{@stop_07_value} #{open_difference} after 6 hours but value is less at #{@current_quote_value} value open was #{value_open}"
        end
        if open_difference<-(@stop_08_value)
-         log_if("Closing out with loss -150")
+         log_if("Closing out with loss #{@stop_08_value}")
          open_timeout = true
          @close_reason = "Forced at loss with more than #{@stop_08_value} #{open_difference} after 6 hours but value is less at #{@current_quote_value} value open was #{value_open}"
        end
