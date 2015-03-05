@@ -31,8 +31,9 @@ namespace :utils do
     symbol = "EURUSD"
     puts "Delete complete"
     count = 0
-    client = Elasticsearch::Client.new host: '54.221.233.192:9200', log: false
-    Dir.glob('/home/robert/work/quote_data/*') do |item|
+    client = Elasticsearch::Client.new host: 'localhost:9200', log: false
+    client.indices.delete index: 'quotes-1'
+    Dir.glob('/home/ubuntu/quote_data/*') do |item|
       puts item
       QuoteValue.transaction do
         CSV.open(item).each do |quote|
