@@ -12,5 +12,7 @@
 //
 //= require jquery
 //= require jquery_ujs
+//= require amcharts
 //= require amstock
+//= require serial
 //= require_self
